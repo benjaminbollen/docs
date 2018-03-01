@@ -2,8 +2,12 @@
 
 \usepackage[english]{babel}
 \usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary{calc,positioning,shadows.blur,decorations.pathreplacing}
+\usepackage{etoolbox}
 
-\title{{\sc OST: An Overlay Protocol for Scheduling Multiprocess Decentralised Computation}}
+
+\title{{\sc OST: Heterogeneous Composition of Blockchains for Multiprocess Decentralised Computation}}
 \author{OpenST Foundation Ltd.}
 \date{December 29, 2017, v0.9}
 
@@ -18,13 +22,38 @@ Both Bitcoin and Ethereum implement a limit for the useful computational expendi
 
 [TBC]
 
+\section{Heterogeneous composition}
+
+Consider a Byzantine fault tolerant (BFT) blockchain $E$. Let $\Sigma$ be an open group of sealers defined on the BFT blockchain $E$.  Each sealer $\sigma$ has put forward a stake on the BFT blockchain $V$. Consider votes on a couple $(t_i, e_j)$ where $t_i$ is a transaction that consumes the preceding transaction $t_{i-1}$ and $e_j$ is the blockhash of $V$ at height $j$.
+
+\subsection{ostBLOCKS}
+
+carrying forward gas model;
+gaslimit paid upfront; 
+
 \section{Cores}
 
 Let a \emph{core} $d$ be a deterministic, finite state machine with a merklelized state root after each state transition upon which one can implement the OST protocol presented. For efficiency reasons we assume that the core groups state transitions into blocks and we will consider in this paper all cores to be a blockchain network.  A blockchain network additionally has a consensus engine with rules $r_d$ to reach consensus on a linear sequence of blocks.
 
 Consider two cores $d_1$ and $d_2$ that each produce blocks according to their consensus rules.  The cores can produce blocks independently. Assume a node that fully verifies both cores.  The node can report the block header of $d_1$ to $d_2$ and reversely $d_2$ to $d_1$.
 
+------
+Let $v$ be a Byzantine Fault Tolerant blockchain. We denote the state space of $v$ as the direct sum of state spaces $c_0$ and $c_i$ with $i \in {1, N}$, where we consider $c_0$ as the canonical state space per construction. 
+\begin{align}
+	v \doteq \oplus \ c_i	
+\end{align}
+
+
+% tokens invariant per chain;
+% OST does not transfer messages; OST is slow and spans across blocks on both chains
 \section{Transposing Tokens}
+
+%two-phased commit directional $c$, and $\bar{c}$;
+
+
+% Hashlock
+
+\subsection{Hashlock}
 
 \section{Account Sessions}
 
@@ -66,5 +95,130 @@ with the device key held in the wallet activating the session.
 Within an active session the session key can sign transactions to spend
 from the account if it presents the next pre-image secret for the session
 and within the spending limits of the secret and the session.
+
+\onecolumn
+\section{Diagrams}
+
+
+\tikzset{%
+        brace/.style = { decorate, decoration={brace, amplitude=5pt} },
+       mbrace/.style = { decorate, decoration={brace, amplitude=5pt, mirror} },
+        label/.style = { black, midway, scale=0.5, align=center },
+     toplabel/.style = { label, above=.5em, anchor=south },
+    leftlabel/.style = { label,rotate=-90,left=.5em,anchor=north },   
+  bottomlabel/.style = { label, below=.5em, anchor=north },
+        force/.style = { rotate=-90,scale=0.4 },
+        round/.style = { rounded corners=2mm },
+       legend/.style = { right,scale=0.4 },
+        nosep/.style = { inner sep=0pt },
+   generation/.style = { anchor=base }
+}
+
+\newcommand\particle[7][white]{%
+  \begin{tikzpicture}[x=1cm, y=1cm]
+    \path[fill=#1,blur shadow={shadow blur steps=5}] (0.1,0) -- (0.9,0)
+        arc (90:0:1mm) -- (1.0,-0.9) arc (0:-90:1mm) -- (0.1,-1.0)
+        arc (-90:-180:1mm) -- (0,-0.1) arc(180:90:1mm) -- cycle;
+    \ifstrempty{#7}{}{\path[fill=purple!50!white]
+        (0.6,0) --(0.7,0) -- (1.0,-0.3) -- (1.0,-0.4);}
+    \ifstrempty{#6}{}{\path[fill=green!50!black!50] (0.7,0) -- (0.9,0)
+        arc (90:0:1mm) -- (1.0,-0.3);}
+    \ifstrempty{#5}{}{\path[fill=orange!50!white] (1.0,-0.7) -- (1.0,-0.9)
+        arc (0:-90:1mm) -- (0.7,-1.0);}
+    \draw[\ifstrempty{#2}{dashed}{black}] (0.1,0) -- (0.9,0)
+        arc (90:0:1mm) -- (1.0,-0.9) arc (0:-90:1mm) -- (0.1,-1.0)
+        arc (-90:-180:1mm) -- (0,-0.1) arc(180:90:1mm) -- cycle;
+    \ifstrempty{#7}{}{\node at(0.825,-0.175) [rotate=-45,scale=0.2] {#7};}
+    \ifstrempty{#6}{}{\node at(0.9,-0.1)  [nosep,scale=0.17] {#6};}
+    \ifstrempty{#5}{}{\node at(0.9,-0.9)  [nosep,scale=0.2] {#5};}
+    \ifstrempty{#4}{}{\node at(0.1,-0.1)  [nosep,anchor=west,scale=0.25]{#4};}
+    \ifstrempty{#3}{}{\node at(0.1,-0.85) [nosep,anchor=west,scale=0.3] {#3};}
+    \ifstrempty{#2}{}{\node at(0.1,-0.5)  [nosep,anchor=west,scale=1.5] {#2};}
+  \end{tikzpicture}
+}
+
+
+Sed ut perspiciatis, unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam eaque ipsa, quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt, explicabo. Nemo enim ipsam voluptatem, quia voluptas sit, aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos, qui ratione voluptatem sequi nesciunt, neque porro quisquam est, qui dolorem ipsum, quia dolor sit amet consectetur adipisci[ng] velit, sed quia non-numquam [do] eius modi tempora inci[di]dunt, ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit, qui in ea voluptate velit esse, quam nihil molestiae consequatur, vel illum, qui dolorem eum fugiat, quo voluptas nulla pariatur?
+
+\begin{tikzpicture}[x=1.2cm, y=1.2cm]
+  \draw[round] (-0.5,0.5) rectangle (4.4,-1.5);
+  \draw[round] (-0.6,0.6) rectangle (5.0,-2.5);
+  \draw[round] (-0.7,0.7) rectangle (5.6,-3.5);
+\end{tikzpicture}
+
+\begin{tikzpicture}[x=1.2cm, y=1.2cm]
+  \draw[round] (-0.5,0.5) rectangle (4.4,-1.5);
+  \draw[round] (-0.6,0.6) rectangle (5.0,-2.5);
+  \draw[round] (-0.7,0.7) rectangle (5.6,-3.5);
+
+  \node at(0, 0)   {\particle[gray!20!white]
+                   {$u$}        {up}       {$2.3$ MeV}{1/2}{$2/3$}{R/G/B}};
+  \node at(0,-1)   {\particle[gray!20!white]
+                   {$d$}        {down}    {$4.8$ MeV}{1/2}{$-1/3$}{R/G/B}};
+  \node at(0,-2)   {\particle[gray!20!white]
+                   {$e$}        {electron}       {$511$ keV}{1/2}{$-1$}{}};
+  \node at(0,-3)   {\particle[gray!20!white]
+                   {$\nu_e$}    {$e$ neutrino}         {$<2$ eV}{1/2}{}{}};
+  \node at(1, 0)   {\particle
+                   {$c$}        {charm}   {$1.28$ GeV}{1/2}{$2/3$}{R/G/B}};
+  \node at(1,-1)   {\particle 
+                   {$s$}        {strange}  {$95$ MeV}{1/2}{$-1/3$}{R/G/B}};
+  \node at(1,-2)   {\particle
+                   {$\mu$}      {muon}         {$105.7$ MeV}{1/2}{$-1$}{}};
+  \node at(1,-3)   {\particle
+                   {$\nu_\mu$}  {$\mu$ neutrino}    {$<190$ keV}{1/2}{}{}};
+  \node at(2, 0)   {\particle
+                   {$t$}        {top}    {$173.2$ GeV}{1/2}{$2/3$}{R/G/B}};
+  \node at(2,-1)   {\particle
+                   {$b$}        {bottom}  {$4.7$ GeV}{1/2}{$-1/3$}{R/G/B}};
+  \node at(2,-2)   {\particle
+                   {$\tau$}     {tau}          {$1.777$ GeV}{1/2}{$-1$}{}};
+  \node at(2,-3)   {\particle
+                   {$\nu_\tau$} {$\tau$ neutrino}  {$<18.2$ MeV}{1/2}{}{}};
+  \node at(3,-3)   {\particle[orange!20!white]
+                   {$W^{\hspace{-.3ex}\scalebox{.5}{$\pm$}}$}
+                                {}              {$80.4$ GeV}{1}{$\pm1$}{}};
+  \node at(4,-3)   {\particle[orange!20!white]
+                   {$Z$}        {}                    {$91.2$ GeV}{1}{}{}};
+  \node at(3.5,-2) {\particle[green!50!black!20]
+                   {$\gamma$}   {photon}                        {}{1}{}{}};
+  \node at(3.5,-1) {\particle[purple!20!white]
+                   {$g$}        {gluon}                    {}{1}{}{color}};
+  \node at(5,0)    {\particle[gray!50!white]
+                   {$H$}        {Higgs}              {$125.1$ GeV}{0}{}{}};
+  \node at(6.1,-3) {\particle
+                   {}           {graviton}                       {}{}{}{}};
+
+  \node at(4.25,-0.5) [force]      {strong nuclear force (color)};
+  \node at(4.85,-1.5) [force]    {electromagnetic force (charge)};
+  \node at(5.45,-2.4) [force] {weak nuclear force (weak isospin)};
+  \node at(6.75,-2.5) [force]        {gravitational force (mass)};
+
+  \draw [<-] (2.5,0.3)   -- (2.7,0.3)          node [legend] {charge};
+  \draw [<-] (2.5,0.15)  -- (2.7,0.15)         node [legend] {colors};
+  \draw [<-] (2.05,0.25) -- (2.3,0) -- (2.7,0) node [legend]   {mass};
+  \draw [<-] (2.5,-0.3)  -- (2.7,-0.3)         node [legend]   {spin};
+
+  \draw [mbrace] (-0.8,0.5)  -- (-0.8,-1.5)
+                 node[leftlabel] {6 quarks\\(+6 anti-quarks)};
+  \draw [mbrace] (-0.8,-1.5) -- (-0.8,-3.5)
+                 node[leftlabel] {6 leptons\\(+6 anti-leptons)};
+  \draw [mbrace] (-0.5,-3.6) -- (2.5,-3.6)
+                 node[bottomlabel]
+                 {12 fermions\\(+12 anti-fermions)\\increasing mass $\to$};
+  \draw [mbrace] (2.5,-3.6) -- (5.5,-3.6)
+                 node[bottomlabel] {5 bosons\\(+1 opposite charge $W$)};
+
+  \draw [brace] (-0.5,.8) -- (0.5,.8) node[toplabel]         {standard matter};
+  \draw [brace] (0.5,.8)  -- (2.5,.8) node[toplabel]         {unstable matter};
+  \draw [brace] (2.5,.8)  -- (4.5,.8) node[toplabel]          {force carriers};
+  \draw [brace] (4.5,.8)  -- (5.5,.8) node[toplabel]       {Goldstone\\bosons};
+  \draw [brace] (5.5,.8)  -- (7,.8)   node[toplabel] {outside\\standard model};
+
+  \node at (0,1.2)   [generation] {1\tiny st};
+  \node at (1,1.2)   [generation] {2\tiny nd};
+  \node at (2,1.2)   [generation] {3\tiny rd};
+  \node at (2.8,1.2) [generation] {\tiny generation};
+\end{tikzpicture}
 
 \end{document}
