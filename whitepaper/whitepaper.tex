@@ -3,6 +3,8 @@
 \usepackage[english]{babel}
 \usepackage{amsmath}
 \usepackage{hyperref}
+\usepackage{float}
+
 
 
 \title{{\sc OpenST Protocol White Paper}}
@@ -121,6 +123,22 @@ If the waiting period expires without progressing the light client contract to a
 When the staking contract is unlocked a reduced claim process can take place.  At the height at which the utility chain has been deprecated all Merkle-proofs for ownership of branded token are considered valid - there is no need to return the branded token to the minting contract as there is only the value chain left. \par
 Note that in order to allow for recovery-addresses to be presented a time-window is inserted to present the recovery-receipts users may have to the value chain, before the stake can be effectively claimed on the value chain. \par
 Further note that the validators will have had to stake Simple Token Prime on the utility chain in order to be a validator.  At the point where the utility chain is deprecated all validators lose this stake, as it is excluded from the recovery process and these OST remain locked in the staking contract on Ethereum mainnet. \par
+
+\subsection{Playing in Simple Token}
+To recapitulate OpenST protocol we run over an explicit example at the highest level detailing the two-phased commit and use it to illustrate how a Partner Company could go about accepting Simple Token from users for services directly or to receive branded tokens.\par
+As an explicit example we use Pepo\footnote{ \href{https://pepo.com/}{Pepo.com} is a local expertise mainstream consumer application that is engaged with Simple Token to integrate OpenST early on into Pepo.} as a Founding Partner Company.  For Milestone 1 (see Roadmap) we want Pepo to stake 10.000 Simple Token on Ethereum mainnet As an explicit example we use Pepo as a Founding Partner Company.  For Milestone 1 (see Roadmap) we want Pepo to stake 10.000 Simple Token on Ethereum mainnet to mint the first PepoCoin [“PC”].  PepoCoin is set here at a 100 PC for every ST.\par
+Step 1: Pepo starts out with 10.000 OST, a staking contract for PepoCoin on Ethereum that has no OST, and a minting contract on the utility chain; and no PC exist on the utility chain.\par
+\begin{table}[H]
+\centering
+\label{Step-1}
+\begin{tabular}{lll}
+    & Ethereum    &   Utility   \\
+Pepo        & 10.000 OST & 0 PC \\
+Esc.Stake   & 0 OST      &      \\
+PC Stake    & 0 OST      &      \\
+PC Esc.Mint &            & 0 PC
+\end{tabular}
+\end{table}
 
 
 
