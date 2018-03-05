@@ -4,16 +4,19 @@
 \usepackage{amsmath}
 \usepackage{hyperref}
 \usepackage{float}
-
-
+\usepackage{makeidx}
+\usepackage[utf8]{inputenc}
 
 \title{{\sc OpenST Protocol White Paper}}
 \author{Benjamin Bollen, Nishith Shah, Lionello Lunesu, Sunil Khedar, Antoine Cote,\\ Jason Banks, Jason Goldberg, Matt Chwierut, Brian Lio}
 \date{Draft published for peer review\footnote{for review contact review@simpletoken.org}\, v0.8.3, last updated 5 November 2017}
 
 \begin{document}
+\onecolumn
 \maketitle
-
+\tableofcontents
+\newpage
+\twocolumn
 \section{Introduction}
 Ethereum introduced to the blockchain toolset stateful accounts. The storage space associated with these accounts is write-protected by code, and we refer to these accounts as smart contracts\footnote{We use smart contract interchangeably for the code associated with an account, or the stateful instantiation of that code; the meaning should be clear from the context.} This general purpose capability of Ethereum has spurred a vast wave of innovations and a leading use-case of Ethereum has been the ability to create a token on top of Ethereum. For tokens on Ethereum, ERC20\footnote{See \href{https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md}{EIP20 (formerly ERC20)}} has recently been adopted as the standard interface for a smart contract defining such a token.  However in order to engineer utility into a token to incent greater uptake, several more challenges become apparent.  Some of these challenges include latency, transaction fees, scale and privacy; for these challenges we attempt to contribute towards solutions in this technical whitepaper.  Other challenges come from legal requirements and economic modeling to support a token economy; confronting these forms an integral part of the Simple Token project\footnote{Find our thinking on governance, economic modeling and incentives in OST sidepapers.}. \par
 With Simple Token we set out to be pragmatic about the capabilities of existing decentralization technologies and look to find answers that solve for these problems today with a clear roadmap towards internet-scale performance.  All the while we strive that all technical mechanisms are open and independently cryptographically verifiable. \par
@@ -318,5 +321,128 @@ OpenST will therefore aim to not depend on a single node implementation and will
 As OpenST looks to connect mainstream consumers with blockchain records user privacy is paramount.  To start of utility chains only store pseudo-anonymous addresses and their balances.   Unlike Ethereum mainnet, because utility chains themselves only serve as an application substrate they can have a finite lifetime and user balances can over longer timespans migrate over different chains, allowing for possible and eventual erasure of these pseudo-anonymous addresses. \par
 To strengthen privacy considerations for both the member companies and their users the use of payment channels helps keep the details of microtransactions off the utility chain, only regularly settling the netting on the utility chain. \par
 Finally there may still be correlatable data from pseudo-anonymous balances extractable from the utility chain.  As users for their balances of branded tokens within a consumer application are managed by the member company, user balances can be deterministically - but derived from off-chain information shared through receipts with the user - be broken up; forcefully breaking correlations between transfers on the utility chain. \par
+
+\onecolumn
+\section{Roadmap}
+At the highest level this diagram represents past work and future roadmap items.  Below we describe in more detail how we break down this roadmap into milestones and demos.  All milestones and work items are indicative only.
+
+\$ IMAGE ROADMAP \$
+
+\subsection{Milestone 1 : OpenST Platform v0.9}
+\subsubsection{Expected 7 November 2017}
+OpenST is a comprehensive project focusing first on user-experience for member companies, as they adopt cryptographically secured tokens into their applications, and for their end-users.  For this reason we want to ensure that the protocol is developed with real use-cases in mind.  We’ve set out a technical vision in this document.  To work towards this goal we plan a first milestone to (i) have a cryptographically auditable pathway for a member company to stake Simple Token on Ethereum testnet to create branded tokens on a utility chain (Ethereum Proof-of-Authority); (ii) have a member company’s users earn and spend branded tokens within their app (registered on a utility chain); and (iii) have a member company (a) transfer branded tokens to and (b) receive transfers of branded tokens from its users. \par
+
+The code for milestone 1 is published on \url{https://github.com/OpenSTFoundation}.  The smart contracts implementing the protocol are in the repository openst-protocol. The middleware and api is open-sourced in the openst-platform repository.  The version is v0.9.0. \par
+
+After the token generation event for OSTSimple Token completes on Ethereum mainnet, the OpenST Foundation plans to deploy the OpenST platform v0.9 on Ethereum mainnet, allowing the member company developers to start building on the OpenST platform and integrating their branded tokens in their applications. \par
+
+See appendix for sequence diagram outlining intended functionality for Milestone 1. \par
+
+\subsection{Milestone 2 : OpenST Platform v1.0 }
+\subsubsection{Q1 2018}
+For the OpenST platform v0.9 milestone, we preserve the two-phased commit structure to act atomically on both chains; however we monitor the process more closely by preserving a judge to act on the escrow steps; this role is taken by OpenST Foundation up to milestone 1.  With milestone 2 we want to remove the judge role of OpenST, and rely on the InterBlockchain Communication transfer of Merkle-proofs to transfer the mint- and claim- precommit proofs between Ethereum mainnet and the utility chain. We also want to test the user sovereignty mechanism in milestone 2.  With this milestone we look to have completed thorough security audits of the protocol and the implementation. \par
+
+Working towards milestone 2 we look to actively support and engage with third party developers to build on the OpenST protocol and create software and tools that provide a rich user-experience.  This can take the form of grants and bounties. \par
+
+\subsection{Milestone 3 : Public Launch of Initial OST Partner Companies}
+\subsubsection{Q2 2018}
+With milestone 1 and 2, we intend to engage with the initial member companies to introduce token economy use-cases to a small subset of their users. With milestone 3, we want to further work to improve the OpenST platform, have it reviewed by the wider crypto community, and engage with the initial member companies to prepare them to deploy the token economy use-cases to their entire user-base.
+
+
+\subsection{Milestone 4 : 10 Founding OST Partner Companies}
+\subsubsection{Q3-Q4 2018}
+We aim for end-users to earn and spend seamlessly across member companies by continuing work on enabling standalone wallets to integrate with OpenST.  We plan to standardize the OpenST API for third-party developers to build value-added services for mainstream consumer applications further stimulating the open tokenized ecosystem.
+
+\subsection{Milestone 5 : Consolidation of OpenST as open platform}
+\subsubsection{2019}
+We set out to consolidate the integration of mature decentralized scaling technologies into OpenST to support an open platform where +10.000 member companies can (without technical guidance) tokenize their existing mainstream consumer applications.
+
+\section{Acknowledgements}
+We thank our advisors and extended team.  \href{https://www.smithandcrown.com/}{Smith+Crown} has and continues to provide invaluable expertise on token economics.  Considerations on how vibrant token economies can grow have been paramount to shape technical mechanisms presented here.  \href{https://www.enuma.io/}{Enuma Technologies} has been instrumental to provide grounding blockchain engineering realism.  We thank them for sharing our bold vision and working with us to break it down into a roadmap that bridges an earliest minimal utility for the protocol to an open platform for tokenized mainstream consumer applications.  Special thanks go to the teams of \href{http://www.kwm.com/en/}{King \& Wood Mallesons} and \href{https://www.perkinscoie.com/en}{Perkins Coie} for continued legal and regulatory review of the technical proposals put forward across jurisdictions.  Similarly thanks goes out to \href{https://www.pwc.com/}{PwC} for advice on tax and governance matters.  We thank the teams behind \href{https://www.sparkchain.com/}{SparkChain} for the amazing work on supporting our communications, helping us to build FAQ and find clear language to convey our vision.  \href{http://www.duoh.com/}{Duoh} - thank you for gorgeous graphics and designs (and the incredible speed of turning these over in near real-time as we worked through technical proposals)!  Very special thanks goes to Jehan Chu, John Fiorelli and the entire team at \href{https://kenetic.capital/}{Kenetic} for their support and advice from the early days of Simple Token.  Last but not least, thanks to the amazing teams and support from \href{https://pepo.com/}{Pepo} who are working closely with us to integrate the very first prototypes already into Pepo, and to Pepo’s early financial backers whose support enabled the Simple Token concepts and project to develop over the past 18 months.\par
+
+
+For their invaluable supporting work on Simple Token we thank Bok Consulting, Cure+53, and Zeppelin Solutions as auditors of our token sale smart contracts.\par
+
+A second paragraph is reserved for our future team members.  We are hiring in Berlin, Germany and Pune, India.  We have our work carved out and are looking for exceptional and driven people to join us on this journey.  Reach out on hiring@simpletoken.org and share your insights on Simple Token with us!  If you’re not currently in those locations, we still want to hear from you. \par
+
+And finally let’s take a step back.  We want to thank a great many amazing decentralization technology teams, often underappreciated for the hard work they deliver that keeps pushing the technology forward at mind-boggling speeds.  This is truly an open-source community where the free flow of ideas and technologies makes us all stronger.  Simple Token would not be possible if it could not build on ground breaking work.  Simple Token and OpenST will look to earn its place in this ecosystem and contribute back where possible. \par
+
+Specifically thanks goes out Go-Ethereum, Solidity, Tendermint/Cosmos, Parity and the wider Ethereum community in no particular order.  A word of thanks goes out to the Bitcoin community for kicking all this off, and being the first fighters for user financial sovereignty. \par
+
+Lastly we want to thank - again in no specific order - for discussions, advice, review and friendship [...].\par
+
+All errors are our own.\par
+
+\section{Appendix}
+\subsection{Resource Paths for Branded Tokens}
+We want a branded token to effectively behave as the established EIP20 tokens on the public Ethereum mainnet, but with the additional benefits of the architecture laid out in body of this paper. The REST APIs are therefore an extension of the familiar EIP20 interface. In the resources paths below \texttt{SYM} represents the respective token’s symbol. \par
+
+\begin{table}[H]
+\centering
+\label{Appendix}
+\begin{tabular}{lll}
+Resource path                    & Query parameter / Result                                                                                                                                & Comment                  \\
+\texttt{GET /newkey}           & \texttt{seed=...}                                                                                                                                     & Optional seed            \\
+& \texttt{{"data": "0xADDR"}}                                                                                                                         & JSON result              \\
+\texttt{GET /SYM/name}         & \texttt{{"data": "Xcoin"}}                                                                                                                          & JSON result              \\
+\texttt{GET /SYM/decimals}     & \texttt{{"data": 2}}                                                                                                                                & JSON result              \\
+\texttt{GET /SYM/totalSupply}  & \texttt{{"data": 1000000000000000}}                                                                                                                 & JSON result              \\
+\texttt{GET /SYM/balanceOf}    & \texttt{owner=0xADDR}                                                                                                                                 & Owner’s address          \\
+& \texttt{{"data": 100000000}}                                                                                                                        & JSON result              \\
+\texttt{GET /SYM/transfer}     & \texttt{sender=0xADDR}                                                                                                                                & Sender’s address         \\
+& \texttt{value=100}                                                                                                                                    & Token balance            \\
+& \texttt{to=0xADDR}                                                                                                                                    & Receiver’s address       \\
+& \texttt{tag=upvote}                                                                                                                                   & Optional tag             \\
+& \texttt{{"data": "0xTXID"}}                                                                                                                         & JSON result              \\
+\texttt{GET /SYM/approve}      & \texttt{sender=0xADDR}                                                                                                                                & Sender’s address         \\
+& \texttt{spender=0xADDR}                                                                                                                               & Spender’s address        \\
+& \texttt{value=100}                                                                                                                                    & Token value of allowance \\
+& \texttt{tag=upvote}                                                                                                                                   & Optional tag             \\
+& \texttt{{"data": "0xTXID"}}                                                                                                                         & JSON result              \\
+\texttt{GET /SYM/allowance}    & \texttt{owner=0xADDR}                                                                                                                                 & Owner’s address          \\
+& \texttt{spender=0xADDR}                                                                                                                               & Spender’s address        \\
+& \texttt{{"data": 100}}                                                                                                                              & JSON result              \\
+\texttt{GET /SYM/transferFrom} & \texttt{sender=0xADDR}                                                                                                                                & Sender’s address         \\
+& \texttt{from=0xADDR}                                                                                                                                  & Spender’s address        \\
+& \texttt{value=100}                                                                                                                                    & Token balance            \\
+& \texttt{to=0xADDR}                                                                                                                                    & Receiver’s address       \\
+& \texttt{tag=upvote}                                                                                                                                   & Optional tag             \\
+& \texttt{{"data": "0xTXID"}}                                                                                                                         & JSON result              \\
+\texttt{GET /SYM/log}          & \texttt{owner=0xADDR}                                                                                                                                 & Owner’s address          \\
+& \texttt{{"data": {[{"txid": "0xTXID"}, ...}}} & JSON result																\end{tabular}
+\end{table} 
+
+All REST calls MUST happen over SSL and use HTTP Basic Authentication for authenticating the Partner Company client with the Simple Token host.
+In addition to the exposed REST APIs, a Partner Company MAY register with the host a call
+back URL for receiving HTTP callbacks for side-chain events related to the branded token. This callback MUST happen over SSL using HTTP Basic Authentication to the callback URL that was provided by the Partner Company at registration time. The JSON payload for the callback is identical to a single event’s payload as it is returned by the /SYM/log REST API.
+
+\subsection{Sequence Diagrams}
+These sequence diagrams are under reservation of corrections.
+
+\subsubsection{Milestone 1 : OpenST Platform v0.9}
+\$ IMAGE ROADMAP \$
+Deployment and staking of Simple Token
+
+\$ IMAGE ROADMAP \$
+User transfers Simple Token for branded token to Partner Company
+
+\$ IMAGE ROADMAP \$
+User payments in branded tokens
+
+\$ IMAGE ROADMAP \$
+User transfers branded token for OSTSimple Token to Partner Company
+
+
+\section{Change Log}
+\begin{table}[H]
+\centering
+\label{Appendix}
+\begin{tabular}{lll}
+2 October 2017  & Published first draft for peer-review v0.8.0    \\
+
+28 October 2017 & Improved language for protocol   \\
+5 November 2017 & Improved roadmap and added links to GitHub open-source code\\
+\end{tabular}
+\end{table}
 
 \end{document}
