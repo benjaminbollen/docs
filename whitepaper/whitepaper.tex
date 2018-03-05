@@ -127,7 +127,7 @@ Further note that the validators will have had to stake Simple Token Prime on th
 \subsection{Playing in Simple Token}
 To recapitulate OpenST protocol we run over an explicit example at the highest level detailing the two-phased commit and use it to illustrate how a Partner Company could go about accepting Simple Token from users for services directly or to receive branded tokens.\par
 As an explicit example we use Pepo\footnote{ \href{https://pepo.com/}{Pepo.com} is a local expertise mainstream consumer application that is engaged with Simple Token to integrate OpenST early on into Pepo.} as a Founding Partner Company.  For Milestone 1 (see Roadmap) we want Pepo to stake 10.000 Simple Token on Ethereum mainnet As an explicit example we use Pepo as a Founding Partner Company.  For Milestone 1 (see Roadmap) we want Pepo to stake 10.000 Simple Token on Ethereum mainnet to mint the first PepoCoin [“PC”].  PepoCoin is set here at a 100 PC for every ST.\par
-Step 1: Pepo starts out with 10.000 OST, a staking contract for PepoCoin on Ethereum that has no OST, and a minting contract on the utility chain; and no PC exist on the utility chain.\par
+Step 1: Pepo starts out with 10.000 OST, a staking contract for PepoCoin on Ethereum that has no OST, and a minting contract on the utility chain; and no PC exist on the utility chain.
 \begin{table}[H]
 \centering
 \label{Step-1}
@@ -140,19 +140,183 @@ PC Esc.Mint &            & 0 PC
 \end{tabular}
 \end{table}
 
+Step 2: To declare its intent Pepo moves 10.000 OST into the escrow of the PepoCoin staking contract on Ethereum mainnet. 
+\begin{table}[H]
+\centering
+\label{Step-2}
+\begin{tabular}{lll}
+    & Ethereum    &   Utility   \\
+Pepo        & 0 OST      & 0 PC \\
+Esc.Stake   & 10.000 OST &      \\
+PC Stake    & 0 OST      &      \\
+PC Esc.Mint &            & 0 PC
+\end{tabular}
+\end{table}
 
+Step 3: A proof of the intent by Pepo to mint one million PepoCoin out of ten thousand OST is proven on the utility chain.
+\begin{table}[H]
+\centering
+\label{Step-3}
+\begin{tabular}{lll}
+    & Ethereum    &   Utility   \\
+Pepo        & 0 OST      & 0 PC         \\
+Esc.Stake   & 10.000 OST &              \\
+PC Stake    & 0 OST      &              \\
+PC Esc.Mint &            & 1.000.000 PC
+\end{tabular}
+\end{table} 
 
+Step 4: A signed receipt by Pepo is first presented on Ethereum to move the stake into a locked position in the staking contract 
+\begin{table}[H]
+\centering
+\label{Step-4}
+\begin{tabular}{lll}
+    & Ethereum    &   Utility   \\
+Pepo        & 0 OST      & 0 PC         \\
+Esc.Stake   & 0 OST      &              \\
+PC Stake    & 10.000 OST &              \\
+PC Esc.Mint &            & 1.000.000 PC
+\end{tabular}
+\end{table} 
 
+Step 5: The same signed receipt can now be used by Pepo to release the million PC into its account.
+\begin{table}[H]
+\centering
+\label{Step-5}
+\begin{tabular}{lll}
+    & Ethereum    &   Utility   \\
+Pepo        & 0 OST      & 1.000.000 PC \\
+Esc.Stake   & 0 OST      &              \\
+PC Stake    & 10.000 OST &              \\
+PC Esc.Mint &            & 0 PC        
+\end{tabular}
+\end{table} 
+Imagine Alice has 100 Simple Token on Ethereum mainnet and wants to obtain 10.000 PepoCoin.  We will use this example to additionally illustrate the use of managed accounts and keys owned by Alice herself.\par 
 
+Step 6: We add Alice to the story.  She has 100 OST on Ethereum and wants to participate in Pepo.
+\begin{table}[H]
+\centering
+\label{Step-6}
+\begin{tabular}{lll}
+    & Ethereum    &   Utility   \\
+Pepo        & 0 OST      & 1.000.000 PC \\
+Alice       & 100 OST    & 0 PC         \\
+Esc.Stake   & 0 OST      &              \\
+PC Stake    & 10.000 OST &              \\
+PC Esc.Mint &            & 0 PC        
+\end{tabular}
+\end{table} 
 
+Step 7: To accept payments inOST ST without minting new PepoCoin Pepo can have a payment-escrow contract on Ethereum.  Alice moves her 100OST ST into the Pepo payment-escrow contract.  The escrow is locked until Alice signs for having a valid receipt from Pepo.
+\begin{table}[H]
+\centering
+\label{Step-7}
+\begin{tabular}{lll}
+    & Ethereum    &   Utility   \\
+Pepo        & 0 OST      & 1.000.000 PC \\
+Esc.Pepo    & 100 OST    &              \\
+Alice       & 0 OST      & 0 PC         \\
+Esc.Stake   & 0 OST      &              \\
+PC Stake    & 10.000 OST &              \\
+PC Esc.Mint &            & 0 PC 
+\end{tabular}
+\end{table} 
+Pepo conducts know-your-customer processes (KYC) on the funds received into the payment-escrow on Ethereum from Alice.  When the KYC clears, Pepo creates a managed account for Alice on the utility chain and moves the equivalent amount of PepoCoin into this account.  Note that for the managed account, Alice does not have the private key.\par
 
+Step 8: With the KYC for Alice cleared Pepo moves 10.000 PC into a managed account for Alice.
+\begin{table}[H]
+\centering
+\label{Step-8}
+\begin{tabular}{lll}
+    & Ethereum    &   Utility   \\
+Pepo        & 0 OST      & 990.000 PC \\
+Esc.Pepo    & 100 OST    &            \\
+Man.Alice   &            & 10.000 PC  \\
+Alice       & 0 OST      & 0 PC       \\
+Esc.Stake   & 0 OST      &            \\
+PC Stake    & 10.000 OST &            \\
+PC Esc.Mint &            & 0 PC
+\end{tabular}
+\end{table}
+Pepo sends Alice off-chain a signed receipt that asserts that the funds in the managed account for Alice are in fact Alice’s (identified by her account on Ethereum).  Alice can verify that on the utility chain the funds have moved into a managed account on her behalf.  She can sign on Ethereum that she accepts the receipt and this releases the OST to Pepo.\par
 
+Step 9: Alice receives the receipt off-chain from Pepo and verifies that the appropriate funds are managed on her behalf within Pepo.  She signs the receipt on Ethereum and this releases the funds to Pepo. 
+\begin{table}[H]
+\centering
+\label{Step-9}
+\begin{tabular}{lll}
+    & Ethereum    &   Utility   \\
+Pepo        & 100 OST    & 990.000 PC \\
+Esc.Pepo    & 0 OST      &            \\
+Man.Alice   &            & 10.000 PC  \\
+Alice       & 0 OST      & 0 PC       \\
+Esc.Stake   & 0 OST      &            \\
+PC Stake    & 10.000 OST &            \\
+PC Esc.Mint &            & 0 PC   
+\end{tabular}
+\end{table}
 
+Within the Pepo application Pepo manages the private keys of the users.  Alice however possesses the signed receipt she received from Pepo that asserts which accounts are managed on her behalf.  She presents this on Ethereum to move the OST to Pepo.  Pepo will continue to present her with receipts for all managed accounts on her behalf and Alice can continue to verify that they are correct.
+Should Alice wish to hard-exit from PepoCoin, she can use the same receipts, but present them on the utility chain as we described before.\par
 
+Step 10: Alice preserves her sovereignty because she can at any point present the receipts from Pepo on the utility chain and move her managed funds on the utility chain into an account controlled by her.
+\begin{table}[H]
+\centering
+\label{Step-10}
+\begin{tabular}{lll}
+    & Ethereum    &   Utility   \\
+Pepo        & 100 OST    & 990.000 PC \\
+Esc.Pepo    & 0 OST      &            \\
+Man.Alice   &            & 10.000 PC  \\
+Alice       & 0 OST      & 0 PC       \\
+Esc.Stake   & 0 OST      &            \\
+PC Stake    & 10.000 OST &            \\
+PC Esc.Mint &            & 0 PC   
+\end{tabular}
+\end{table} 
+While this hard-exit scenario should practically never occur, as it is cheaper and more efficient to sell out of her share of PepoCoin, it is crucial that the OpenST provides an exit path where Alice can act independently, without anyone’s permission.\par
 
+Step 11: When Alice has hard-exited her PepoCoins, she can no longer use them within the Pepo application, but she can use the unstaking process to recover her share of Simple Token on Ethereum.  The end-result of which is given below.
+\begin{table}[H]
+\centering
+\label{Step-11}
+\begin{tabular}{lll}
+    & Ethereum    &   Utility   \\
+Pepo        & 100 OST   & 990.000 PC \\
+Esc.Pepo    & 0 OST     &            \\
+Man.Alice   &           & 0 PC       \\
+Alice       & 100 OST   & 0 PC       \\
+Esc.Stake   & 0 OST     &            \\
+PC Stake    & 9.900 OST &            \\
+PC Esc.Mint &           & 0 PC  
+\end{tabular}
+\end{table} 
+We note that this example ignored loss due to transaction fees on Ethereum, the utility chain, and commissions, fees and taxes to Pepo or applicable authorities.  The example is illustrative only.
 
+\section{OpenST Platform}
 
+The OpenST Protocol described in the first chapter allows for value on Ethereum mainnet (the value chain) to be staked in favor of a branded token on a utility chain.  An important balance to strike for Simple Token is to bridge a good end-user experience with actual cryptographic value stored on Ethereum.  We require this bridge to be cryptographically secured.  Even if we want to be realistic and acknowledge that the majority of end-users may never want to manage their own private keys, it is important that any user at any point can decide to take control over her private keys. \par
+Likewise, while we present utility chains as a more performant and dedicated substrate on which applications can settle accounts, OpenST ensures at a protocol level that no trust needs to be placed in the utility chains or their validators, as all value can, if needed, be recovered on Ethereum mainnet, while at the same time achieving transaction throughput and user privacy using functional sharding, account scrambling and payment channels. \par
 
+\subsection{Network of Networks}
+An end-user can obtain or return branded tokens through the Partner Company that hosts the consumer application for Simple Token. As OST prime Simple Token prime is present on the utility chain as its base token, it is also equivalent to Simple Token EIP20 on Ethereum mainnet.  The transfer of branded token for Simple Token transaction can happen therefore on the utility chain (in OST prime Simple Token prime), making it instant, and removing the need to stake or unstake OST in the staking contract of the branded tokens. \par
+If we consider multiple utility chains, they each have a base token OST prime Simple Token prime, Simple Token double prime, etc. each equivalent to Simple Token on Ethereum mainnet, and by transition equivalent to each other. \par
+Existing inter-chain exchange or transfer protocols can be applied to allow the efficient value transfer of Simple Token (prime and double prime) between different utility chains; again without touching on Ethereum mainnet, which keeps the staking contracts for branded tokens on different chains invariant. \par
+A user who holds Simple Token (with Simple Token Wallet) can then seamlessly earn and spend across different branded tokens - without needing to be aware she is moving value across chains in the background. \par
+As an open protocol OpenST describes how different utility chains can interface with each other and with a value chain.  In the case of the OpenST Platform Simple Token EIP20 is defined on Ethereum mainnet from where it allows utility chains to shard for specific applications with branded tokens.  Value can flow between these utility chains further catalysing the adoption of existing protocols that solve for various needs.\par
+It is crucial to point out that there is no preferred entity hosting these utility chains.  While a given utility chain will have dedicated validators, the OpenST Platform itself spans across chains and any utility chain, hosted by any set of validators, can interact with the other utility chains on open and equal footing.  Every utility chain is always guaranteed to be fully redeemable on Ethereum mainnet and as such always replaceable. \par
 
+\subsection{Simple Token Architecture}
+As OpenST is an open network of utility chains, each hosting one or more branded tokens with value staked on Ethereum mainnet, it is paramount that each utility chain (and Ethereum) have a unique chain identifier associated with it (derived from the genesis block that started that utility chain for fork-accountable chains).  All transactions need to enforce that they are only valid on the intended utility chain. \par
+Further it is desirable that a utility chain can be restricted to not accept the creation of new smart contract code when a transaction deploys code to a new address.  Ethereum mainnet functions as a general computation substrate that allows anyone to deploy any code contract.  We note that this is not a requirement, but a preference to be decided by the validators of the utility chain. \par
+Simple Token prime is present on the utility chain as the base token to account for all gas usage.  In this sense there is no requirement to make the utility chain \textit{application-specific}.  However, while a cost will be accounted for running foreign contracts on the utility chain, it eats into the capacity of the chain that could otherwise be used for the branded tokens within the consumer applications. \par
+We explained that, in the case of branded tokens, by default users start out with accounts managed by the respective branding Partner Company\footnote{While users start by default with managed keys, OpenST requires they be provided - upon request - with signed receipts that can be submitted to the utility chain to claim branded token balances into recovery-addresses for which they control the private keys.}. As such OST Partner Companies are responsible for funding the balances of the managed accounts (just-in-time) with Simple Token prime\footnote{The Simple Token prime balances of managed accounts do not get transferred to the recovery-address, as this is Simple Token prime owned by the Partner Company.}. This way there are no transaction costs charged to the user when acting within the consumer application - but any user transferring Simple Token prime (or exiting her branded tokens to her own keys) pays for this in Simple Token prime. \par
+OpenST is agnostic to the blockchain implementation used to deploy an instance of the OpenST contracts.  As the OpenST Platform originates from OSTSimple Token EIP20 on Ethereum mainnet, Ethereum mainnet forms the pivot point for all utility chains within the OpenST platform.  To this end we expect to work with Ethereum-based implementations, where the only condition on the consensus engine is that a light client tracking contract can be implemented on Ethereum mainnet for the utility chain’s specific node implementation and consensus mechanism.\par
+OpenST will therefore aim to not depend on a single node implementation and will want to work with and contribute back to existing cryptographically sealed Ethereum blockchains.  These can have a consensus engine that runs on Proof-of-Authority, PBFT, or Proof-of-Stake Tendermint - or other Byzantine fault-tolerant (BFT) cryptographically sealed consensus engines\footnote{We note that Proof-of-Authority (PoA) is not Byzantine fault-tolerant; however a light client tracking contract for PoA can be implemented on Ethereum mainnet and this strengthens the security guarantees a PoA-utility chain would have, compared to running independently.  This security down-grade can be balanced against the increased robustness and throughput of a PoA consensus engine.  Note that a light client tracking contract on Ethereum for PoA utility chain should not naively be implemented, but improvements can be envisioned.}.\par
+
+\subsection{User Privacy Considerations}
+As OpenST looks to connect mainstream consumers with blockchain records user privacy is paramount.  To start of utility chains only store pseudo-anonymous addresses and their balances.   Unlike Ethereum mainnet, because utility chains themselves only serve as an application substrate they can have a finite lifetime and user balances can over longer timespans migrate over different chains, allowing for possible and eventual erasure of these pseudo-anonymous addresses. \par
+To strengthen privacy considerations for both the member companies and their users the use of payment channels helps keep the details of microtransactions off the utility chain, only regularly settling the netting on the utility chain. \par
+Finally there may still be correlatable data from pseudo-anonymous balances extractable from the utility chain.  As users for their balances of branded tokens within a consumer application are managed by the member company, user balances can be deterministically - but derived from off-chain information shared through receipts with the user - be broken up; forcefully breaking correlations between transfers on the utility chain. \par
 
 \end{document}
