@@ -1,0 +1,53 @@
+\documentclass[a0, landscape, 11pt, svgnames]{a0poster}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{listings}
+\usepackage{tikz-uml}
+\usepackage{amsfonts, amsmath, amsthm, amssymb}
+
+\date{\today}
+\title{OpenST Protocol sequence diagrams beyond v0.9.x}
+\author{Benjamin Bollen}
+
+\lstdefinelanguage{tikzuml}{language=[LaTeX]TeX, classoffset=0, morekeywords={umlbasiccomponent, umlprovidedinterface, umlrequiredinterface, umldelegateconnector, umlassemblyconnector, umlVHVassemblyconnector, umlHVHassemblyconnector, umlnote, umlusecase, umlactor, umlinherit, umlassoc, umlVHextend, umlinclude, umlstateinitial, umlbasicstate, umltrans, umlstatefinal, umlVHtrans, umlHVtrans, umldatabase, umlmulti, umlobject, umlfpart, umlcreatecall, umlclass, umlvirt, umlunicompo, umlimport, umlaggreg}, keywordstyle=\color{DarkBlue}, classoffset=1, morekeywords={umlcomponent, umlsystem, umlstate, umlseqdiag, umlcall, umlcallself, umlfragment, umlpackage}, keywordstyle=\color{DarkRed}, classoffset=0,  sensitive=true, morecomment=[l]{\%}}
+
+\begin{document}
+\begin{minipage}[b]{0.55\linewidth}
+\Huge \color{NavyBlue} \textbf{OpenST Protocol v0.9.3 } \color{Black}\\ % Title
+\huge\textit{Proposed sequence diagrams - Benjamin Bollen, 6 April 2018}\\[1cm] % Subtitle
+\end{minipage}
+
+\begin{tikzpicture}
+  \begin{umlseqdiag}
+    \umlactor[class=Address]{Staker}
+    \umlactor[class=Worker, x=8]{Staking Processor}
+    \umlboundary[class=ERC20, x=16]{OST}
+    \umlboundary[class=SK, x=24]{Branded Token Gate}
+    \umlcontrol[class=SK, x=32]{OpenSTValue}
+    \umlobject[class=SK, x=40]{SimpleStake}
+    \umlobject[class=SK, x=48]{Core}
+    \umlcontrol[class=SK, x=56]{Registrar}
+    \umlactor[class=Worker, x=64, fill=purple!40]{Foundation/Mosaic}
+    \umlcontrol[class=SK, x=72, fill=blue!40]{Registrar}
+    \umlobject[class=SK, x= 80, fill=blue!40]{Core}
+    \umlcontrol[class=SK, x=88, fill=blue!40]{OpenSTUtility}
+    \umlboundary[class=ERC20, x=96, fill=blue!40]{Branded Token}
+    \umlboundary[class=SK, x=104, fill=blue!40]{Token Holder}
+    
+    % staker approves branded token gate contract on OST for amount
+    \begin{umlcall}[op={: approve(gate, amount)}]{Staker}{OST}
+      % staker requests stake to gate
+      \begin{umlcall}{Staker}{Branded Token Gate}
+    
+      \end{umlcall}
+  
+    \end{umlcall}
+
+  \end{umlseqdiag}  
+\end{tikzpicture}
+
+
+\end{document}
+
