@@ -10,7 +10,7 @@
 
 \geometry{
   paperwidth=70cm,
-  paperheight=55cm,
+  paperheight=100cm,
   margin=1cm
 }
 
@@ -105,7 +105,7 @@
         \end{umlcall}
       \end{umlcall}
     \end{umlfragment}
-    \umlnote[x=2, y=-7]{policy}{evaluate request against policy}
+    \umlnote[x=2, y=-7]{policy}{evaluate request against policy (KYC/AML)}
     
     % optionally, staker can initiate revert after timeout and no action from Staking Processor
     \begin{umlfragment}[type=opt]
@@ -131,7 +131,7 @@
         \begin{umlcall}[op={: report(UC, blockHeight, stateRoot)}]{Foundation}{RegistrarVC}
           \begin{umlcall}[op={: commit(blockHeight, stateRoot)}]{RegistrarVC}{CoreUC}
             % state root of utility chain got reported on value chain
-            \begin{umlcall}[dt=10, type=return, op={emit ReportedStateRoot(UC, blockHeight, stateRoot)}]{CoreUC}{Staking Processor}
+            \begin{umlcall}[dt=10, type=return, op={emit CommittedStateRoot(UC, blockHeight, stateRoot)}]{CoreUC}{Staking Processor}
             \end{umlcall}
           \end{umlcall}
         \end{umlcall}
@@ -143,7 +143,7 @@
           % reporting through registrar is instant commit
           \begin{umlcall}[op={: commit(blockHeight, stateRoot)}]{RegistrarUC}{CoreVC}
             % state root of value chain got reported on utility chain
-            \begin{umlcall}[dt=10, type=return, op={emit ReportedStateRoot(VC, blockHeight, stateRoot)}]{CoreVC}{Staking Processor}
+            \begin{umlcall}[dt=10, type=return, op={emit CommittedStateRoot(VC, blockHeight, stateRoot)}]{CoreVC}{Staking Processor}
             \end{umlcall}
           \end{umlcall}
         \end{umlcall}
@@ -170,17 +170,32 @@
     \end{umlcall}
     
     % Staking Processor submits pre-image data for StakingIntentHash
-    \begin{umlcall}[dt=5, op={: ConfirmStakingIntent(StakingIntentHash, uuid, amountST, amountUT, stakerProcessor, stakingProcessorNonce, unlockHeight)}]{Staking Processor}{OpenSTUtility}
-      % OpenSTUtility assert valid pre-image data for StakingIntentHash
+    \begin{umlcall}[dt=5, op={: ConfirmStakingIntent(StakingIntentHash, uuid, hashLock, amountST, amountUT, stakerProcessor, stakingProcessorNonce, unlockHeight)}, return={emit StakingIntentConfirmed(StakingIntentHash, nonce, unlockHeight, expirationHeight)}]{Staking Processor}{OpenSTUtility}
+      % OpenSTUtility asserts valid pre-image data for StakingIntentHash
       \begin{umlcallself}[op={assert valid pre-image data}]{OpenSTUtility}
       \end{umlcallself}
       % OpenSTUtility checks StakingIntentHash against committed state root
       \begin{umlcall}[op={: getLatestHeight()}, return={latestHeight}]{OpenSTUtility}{CoreVC}
       \end{umlcall}
+      % OpenSTUtility asserts grace period before unlockHeight
+      \begin{umlcallself}[op={assert grace period before unlockHeight}]{OpenSTUtility}
+      \end{umlcallself}
       % OpenSTUtility store mint object with StakingIntentHash and expiration Height
       \begin{umlcallself}[op={store mint with expirationHeight}]{OpenSTUtility}
       \end{umlcallself}
     \end{umlcall}
+    
+    %%%
+    %%% Staking Processor has moved both value and utility chain to the first stage
+    %%% and can now either proceed or revert by revealing the hash lock secret or await timeout
+    %%%
+    
+    % 
+    \begin{umlfragment}[type=alt, label=Proceed, name=phasetwo, inner xsep=6]
+      \begin{umlcall}[dt=5]{Staking Processor}{OpenSTValue}
+      \end{umlcall}
+    \end{umlfragment}
+    \umlnote[x=0, y=-45]{phasetwo}{With both value chain and utility chain configured correctly for StakingIntentHash, Staking Processor can proceed by revealing the unlock secret, or revert by awaiting the unlock height }
     
   \end{umlseqdiag}
 \end{tikzpicture}
