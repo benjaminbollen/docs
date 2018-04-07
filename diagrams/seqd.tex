@@ -8,7 +8,7 @@
 \usepackage{amsfonts, amsmath, amsthm, amssymb}
 
 \date{\today}
-\title{OpenST Protocol sequence diagrams beyond v0.9.x}
+\title{OpenST Protocol sequence diagrams beyond v0.9.2}
 \author{Benjamin Bollen}
 
 \lstdefinelanguage{tikzuml}{language=[LaTeX]TeX, classoffset=0, morekeywords={umlbasiccomponent, umlprovidedinterface, umlrequiredinterface, umldelegateconnector, umlassemblyconnector, umlVHVassemblyconnector, umlHVHassemblyconnector, umlnote, umlusecase, umlactor, umlinherit, umlassoc, umlVHextend, umlinclude, umlstateinitial, umlbasicstate, umltrans, umlstatefinal, umlVHtrans, umlHVtrans, umldatabase, umlmulti, umlobject, umlfpart, umlcreatecall, umlclass, umlvirt, umlunicompo, umlimport, umlaggreg}, keywordstyle=\color{DarkBlue}, classoffset=1, morekeywords={umlcomponent, umlsystem, umlstate, umlseqdiag, umlcall, umlcallself, umlfragment, umlpackage}, keywordstyle=\color{DarkRed}, classoffset=0,  sensitive=true, morecomment=[l]{\%}}
@@ -16,7 +16,7 @@
 \begin{document}
 \begin{minipage}[b]{0.55\linewidth}
 \Huge \color{NavyBlue} \textbf{OpenST Protocol v0.9.3 } \color{Black}\\ % Title
-\huge\textit{Proposed sequence diagrams - Benjamin Bollen, 6 April 2018}\\[1cm] % Subtitle
+\huge\textit{Proposed sequence diagrams for stake and mint - Benjamin Bollen, last edit \today}\\[1cm] % Subtitle
 \end{minipage}
 
 \begin{tikzpicture}
@@ -37,15 +37,47 @@
     \umlboundary[class=SK, x=104, fill=blue!40]{Token Holder}
     
     % staker approves branded token gate contract on OST for amount
-    \begin{umlcall}[op={: approve(gate, amount)}]{Staker}{OST}
-      % staker requests stake to gate
-      \begin{umlcall}{Staker}{Branded Token Gate}
-    
+    \begin{umlcall}[op={: approve(gate, amount)}]{Staker}{OST}  
+    \end{umlcall}
+    % staker requests stake to gate
+    \begin{umlcall}[dt=5, op={: stakeRequest(amount, tokenHolder)}]{Staker}{Branded Token Gate}
+      % gate pulls amount from staker on OST
+      \begin{umlcall}[fill=green!20, op={: transferFrom(staker, gate, amount)}, return=<<OST(amount)>>]{Branded Token Gate}{OST}
       \end{umlcall}
-  
+      
+      % emit StakeRequested event which Staking processor listens to
+      \begin{umlcall}[dt=5, type=return, op={emit StakeRequested(staker, amount, tokenHolder)}]{Branded Token Gate}{Staking Processor}
+      \end{umlcall}
     \end{umlcall}
 
-  \end{umlseqdiag}  
+    % Staking Processor evaluates request against policy (monetary and KYC/AML)
+    \begin{umlfragment}[type=alt, label=true, name=policy, inner xsep=2]
+      % Staking Processor accepts request
+      \begin{umlcall}[dt=6, op={: acceptRequest(staker, amount, hashLock)}]{Staking Processor}{Branded Token Gate}  
+        % Gate calls on to OpenSTValue to stake (later abstract to library call)
+        \begin{umlcall}[op={: stake(uuid, amount, hashLock, tokenHolder)}, return={nonce, unlockHeight}]{Branded Token Gate}{OpenSTValue}
+          % OpenSTValue pulls amount plus bounty from Staking Processor to
+          % its OST account balance
+          \begin{umlcall}[dt=4, op={: transferFrom(processor, OpenSTValue, amount+bounty)}, fill=green!20, return=<<OST(amount+bounty)>>]{OpenSTValue}{OST}
+          \end{umlcall}
+          % store StakingIntentHash in contract storage
+          \begin{umlcallself}[op={store StakingIntentHash},]{OpenSTValue}
+          \end{umlcallself}
+          % HTLC(processor, amount+bounty)
+          \begin{umlcallself}[dt=0, op={HTLC(processor, amount+bounty)},]{OpenSTValue}
+          \end{umlcallself}
+          % emit StakingIntentDeclared
+          \begin{umlcall}[type=return, op={emit StakingIntentDeclared(nonce, unlockHeight, StakingIntentHash)}]{OpenSTValue}{Staking Processor}
+          \end{umlcall}
+        \end{umlcall}
+        % HTLC(staker, amount)
+        \begin{umlcallself}[op={HTLC(staker, amount)}]{Branded Token Gate}
+        \end{umlcallself}
+      \end{umlcall}
+
+    \end{umlfragment}
+    \umlnote[x=3, y=-9]{policy}{evaluate request against policy}
+  \end{umlseqdiag}
 \end{tikzpicture}
 
 
