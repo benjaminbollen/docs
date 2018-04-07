@@ -1,11 +1,18 @@
-\documentclass[a0, landscape, 11pt, svgnames]{a0poster}
+\documentclass[landscape, 11pt, svgnames]{article}
 
+\usepackage[showframe]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{listings}
 \usepackage{tikz-uml}
 \usepackage{amsfonts, amsmath, amsthm, amssymb}
+
+\geometry{
+  paperwidth=60cm,
+  paperheight=55cm,
+  margin=1cm
+}
 
 \date{\today}
 \title{OpenST Protocol sequence diagrams beyond v0.9.2}
@@ -22,19 +29,19 @@
 \begin{tikzpicture}
   \begin{umlseqdiag}
     \umlactor[class=Address]{Staker}
-    \umlactor[class=Worker, x=8]{Staking Processor}
-    \umlboundary[class=ERC20, x=16]{OST}
-    \umlboundary[class=SK, x=24]{Branded Token Gate}
-    \umlcontrol[class=SK, x=32]{OpenSTValue}
-    \umlobject[class=SK, x=40]{SimpleStake}
-    \umlobject[class=SK, x=48]{Core}
-    \umlcontrol[class=SK, x=56]{Registrar}
-    \umlactor[class=Worker, x=64, fill=purple!40]{Foundation/Mosaic}
-    \umlcontrol[class=SK, x=72, fill=blue!40]{Registrar}
-    \umlobject[class=SK, x= 80, fill=blue!40]{Core}
-    \umlcontrol[class=SK, x=88, fill=blue!40]{OpenSTUtility}
-    \umlboundary[class=ERC20, x=96, fill=blue!40]{Branded Token}
-    \umlboundary[class=SK, x=104, fill=blue!40]{Token Holder}
+    \umlactor[class=Worker]{Staking Processor}
+    \umlboundary[class=ERC20]{OST}
+    \umlboundary[class=SK]{Branded Token Gate}
+    \umlcontrol[class=SK]{OpenSTValue}
+    \umlobject[class=SK]{SimpleStake}
+    \umlobject[class=SK]{Core}
+    \umlcontrol[class=SK]{Registrar}
+    \umlactor[class=Worker, fill=purple!40]{Foundation/Mosaic}
+    \umlcontrol[class=SK, fill=blue!40]{Registrar}
+    \umlobject[class=SK, fill=blue!40]{Core}
+    \umlcontrol[class=SK, fill=blue!40]{OpenSTUtility}
+    \umlboundary[class=ERC20, fill=blue!40]{Branded Token}
+    \umlboundary[class=SK, fill=blue!40]{Token Holder}
     
     % staker approves branded token gate contract on OST for amount
     \begin{umlcall}[op={: approve(gate, amount)}]{Staker}{OST}  
@@ -43,6 +50,9 @@
     \begin{umlcall}[dt=5, op={: stakeRequest(amount, tokenHolder)}]{Staker}{Branded Token Gate}
       % gate pulls amount from staker on OST
       \begin{umlcall}[fill=green!20, op={: transferFrom(staker, gate, amount)}, return=<<OST(amount)>>]{Branded Token Gate}{OST}
+        % pull OST from Staking Processor
+        \begin{umlcall}[dt=5, fill=green!20, type=return]{Staker}{OST}
+        \end{umlcall}
       \end{umlcall}
       
       % emit StakeRequested event which Staking processor listens to
@@ -51,7 +61,7 @@
     \end{umlcall}
 
     % Staking Processor evaluates request against policy (monetary and KYC/AML)
-    \begin{umlfragment}[type=alt, label=true, name=policy, inner xsep=2]
+    \begin{umlfragment}[type=alt, label=accept, name=policy, inner xsep=2]
       % Staking Processor accepts request
       \begin{umlcall}[dt=6, op={: acceptRequest(staker, amount, hashLock)}]{Staking Processor}{Branded Token Gate}  
         % Gate calls on to OpenSTValue to stake (later abstract to library call)
@@ -59,6 +69,9 @@
           % OpenSTValue pulls amount plus bounty from Staking Processor to
           % its OST account balance
           \begin{umlcall}[dt=4, op={: transferFrom(processor, OpenSTValue, amount+bounty)}, fill=green!20, return=<<OST(amount+bounty)>>]{OpenSTValue}{OST}
+            % pull OST from Staking Processor
+            \begin{umlcall}[dt=10, fill=green!20, type=return]{Staking Processor}{OST}
+            \end{umlcall}
           \end{umlcall}
           % store StakingIntentHash in contract storage
           \begin{umlcallself}[op={store StakingIntentHash},]{OpenSTValue}
@@ -74,9 +87,32 @@
         \begin{umlcallself}[op={HTLC(staker, amount)}]{Branded Token Gate}
         \end{umlcallself}
       \end{umlcall}
-
+      
+      % Staking Processor rejects request
+      \umlfpart[reject]
+      \begin{umlcall}[dt=5, op={: rejectRequest(staker, amount)}]{Staking Processor}{Branded Token Gate}
+        % transfer amount back to staker
+        \begin{umlcall}[fill=green!20, op={: transfer(staker, amount)}]{Branded Token Gate}{OST}
+          % return OST to staker
+          \begin{umlcall}[type=return, fill=green!20, op=<<OST(amount)>>]{OST}{Staker}
+          \end{umlcall}
+        \end{umlcall}
+      \end{umlcall}
     \end{umlfragment}
-    \umlnote[x=3, y=-9]{policy}{evaluate request against policy}
+    \umlnote[x=2, y=-7]{policy}{evaluate request against policy}
+    
+    % optionally, staker can initiate revert after timeout and no action from Staking Processor
+    \begin{umlfragment}[type=opt]
+      % staker reverts Stake Request after timeout
+      \begin{umlcall}[dt=12, op={: revertStakeRequest(staker, amount)}, fill=green!20]{Staker}{Branded Token Gate}
+        % transfer amount back to staker
+        \begin{umlcall}[fill=green!20, op={: transfer(staker, amount)}]{Branded Token Gate}{OST}
+          % return OST to staker
+          \begin{umlcall}[type=return, fill=green!20, op=<<OST(amount)>>]{OST}{Staker}
+          \end{umlcall}
+        \end{umlcall}
+      \end{umlcall}
+    \end{umlfragment}
   \end{umlseqdiag}
 \end{tikzpicture}
 
