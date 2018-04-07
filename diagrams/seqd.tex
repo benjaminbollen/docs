@@ -151,6 +151,37 @@
       
     \end{umlfragment}
     \umlnote[x=28, y=-18]{mosaic}{Placeholder for OpenST Mosaic game}
+    
+    %%%
+    %%% Staking Processor has observed a committed state root that includes the StakingIntentHash
+    %%%
+    
+    % Staking Processor submits claim for StakingIntentHash by presenting Merkle proof
+    \begin{umlcall}[dt=15, op={: claimStakingIntentHash(StakingIntentHash, merkleProof[], committedBlockHeight)}, return={emit ValidatedStakingIntentHash(StakingIntentHash)}]{Staking Processor}{OpenSTUtility}
+      % OpenSTUtility checks StakingIntentHash against committed state root
+      \begin{umlcall}[op={: getStateRoot(blockHeight)}, return={stateRoot @ blockHeight}]{OpenSTUtility}{CoreVC}
+      \end{umlcall}
+      % OpenSTUtility validate merkle proof
+      \begin{umlcallself}[op={validate proof}]{OpenSTUtility}
+      \end{umlcallself}
+      % OpenSTUtility store valid StakingIntentHash
+      \begin{umlcallself}[op={store valid StakingIntentHash}]{OpenSTUtility}
+      \end{umlcallself}
+    \end{umlcall}
+    
+    % Staking Processor submits pre-image data for StakingIntentHash
+    \begin{umlcall}[dt=5, op={: ConfirmStakingIntent(StakingIntentHash, uuid, amountST, amountUT, stakerProcessor, stakingProcessorNonce, unlockHeight)}]{Staking Processor}{OpenSTUtility}
+      % OpenSTUtility assert valid pre-image data for StakingIntentHash
+      \begin{umlcallself}[op={assert valid pre-image data}]{OpenSTUtility}
+      \end{umlcallself}
+      % OpenSTUtility checks StakingIntentHash against committed state root
+      \begin{umlcall}[op={: getLatestHeight()}, return={latestHeight}]{OpenSTUtility}{CoreVC}
+      \end{umlcall}
+      % OpenSTUtility store mint object with StakingIntentHash and expiration Height
+      \begin{umlcallself}[op={store mint with expirationHeight}]{OpenSTUtility}
+      \end{umlcallself}
+    \end{umlcall}
+    
   \end{umlseqdiag}
 \end{tikzpicture}
 
