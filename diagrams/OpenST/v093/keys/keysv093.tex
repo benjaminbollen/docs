@@ -1,0 +1,61 @@
+\documentclass[landscape, 11pt, svgnames]{article}
+
+\usepackage[showframe]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{listings}
+\usepackage{../../../tikz-uml}
+\usepackage{amsfonts, amsmath, amsthm, amssymb}
+
+\geometry{
+  paperwidth=70cm,
+  paperheight=50cm,
+  margin=1cm
+}
+
+\date{\today}
+\title{Token Holder sequence diagrams v0.9.3}
+\author{Benjamin Bollen}
+
+\lstdefinelanguage{tikzuml}{language=[LaTeX]TeX, classoffset=0, morekeywords={umlbasiccomponent, umlprovidedinterface, umlrequiredinterface, umldelegateconnector, umlassemblyconnector, umlVHVassemblyconnector, umlHVHassemblyconnector, umlnote, umlusecase, umlactor, umlinherit, umlassoc, umlVHextend, umlinclude, umlstateinitial, umlbasicstate, umltrans, umlstatefinal, umlVHtrans, umlHVtrans, umldatabase, umlmulti, umlobject, umlfpart, umlcreatecall, umlclass, umlvirt, umlunicompo, umlimport, umlaggreg}, keywordstyle=\color{DarkBlue}, classoffset=1, morekeywords={umlcomponent, umlsystem, umlstate, umlseqdiag, umlcall, umlcallself, umlfragment, umlpackage}, keywordstyle=\color{DarkRed}, classoffset=0,  sensitive=true, morecomment=[l]{\%}}
+
+\begin{document}
+\begin{minipage}[b]{0.55\linewidth}
+\Huge \color{NavyBlue} \textbf{OpenST Protocol v0.9.3 } \color{Black}\\ % Title
+\huge\textit{[PROPOSED] sequence diagrams for keys engine - Benjamin Bollen, last edit \today}\\[1cm] % Subtitle
+\end{minipage}
+
+\begin{tikzpicture}
+  \begin{umlseqdiag}
+    \umlactor[class=Wallet]{Alice}
+    \umlactor[class=User, fill=green!20]{Alice App}
+    \umlactor[class=User, fill=green!20]{Bob App} 
+    \umlactor[class=Worker, fill=orange!20]{F}
+    \umlactor[class=Address, fill=orange!20]{BudgetHolder}
+    \umlboundary[class=ERC20]{OST}
+    \umlboundary[class=SK]{Branded Token Gate}
+    \umlboundary[class=Web3]{Value Chain}
+    \umlactor[class=Worker, fill=purple!40]{Foundation}
+    \umlboundary[class=Web3, fill=blue!40]{Utility Chain}
+    \umlcontrol[class=SK, fill=blue!40]{OpenSTUtility}
+    \umlboundary[class=ERC20, fill=blue!40]{Branded Token}
+    \umlboundary[class=SK, fill=blue!40]{Token Holder}
+    \umlboundary[class=SK, fill=orange!20]{Workers}
+    \umlboundary[class=SK, fill=orange!20]{Airdrop}
+
+    \begin{umlcall}[op={: createTokenHolder(owner)}]{Alice}{F}
+      \begin{umlcall}[op={: createTokenHolder(owner, workers)}]{F}{Token Holder}
+      \end{umlcall}
+    \end{umlcall}
+
+    \begin{umlcall}[op={: stakeMint(tokenHolder, amountOST)}]{Alice}{Token Holder}
+    \end{umlcall}
+
+
+  \end{umlseqdiag}
+\end{tikzpicture}
+
+
+\end{document}
+
