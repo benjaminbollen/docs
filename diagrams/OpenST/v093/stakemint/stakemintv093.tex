@@ -69,14 +69,20 @@
 
     % Facilitator evaluates request against policy (monetary and KYC/AML)
     \begin{umlfragment}[type=alt, label=accept, name=policy, inner xsep=2]
+      \begin{umlcall}[dt=6, op={: approve(gate, bounty)}]{Facilitator}{OST}
+      \end{umlcall}
       % Facilitator accepts request
-      \begin{umlcall}[dt=6, op={: acceptRequest(staker, amount, hashLock)}]{Facilitator}{Branded Token Gate}  
+      \begin{umlcall}[op={: acceptRequest(staker, amount, hashLock)}]{Facilitator}{Branded Token Gate}  
         % Pull Facilitator's bounty into Gate
         \begin{umlcall}[fill=green!20, op={: transferFrom(facilitator, gate, bounty)}, return={<<OST(bounty)>>}]{Branded Token Gate}{OST}
             % pull OST for bounty from Facilitator
             \begin{umlcall}[dt=5, fill=green!20, type=return]{Facilitator}{OST}
             \end{umlcall}
         \end{umlcall}
+        % Approve OpenSTValue as spender for Gate
+        \begin{umlcall}[op={: approve(openSTValue, amount)}]{Branded Token Gate}{OST}
+        \end{umlcall}
+        
         % Gate calls on to OpenSTValue to stake (later abstract to library call)
         \begin{umlcall}[op={: stake(uuid, staker, amount, hashLock, tokenHolder)}, return={nonce, unlockHeight}]{Branded Token Gate}{OpenSTValue}
           % check stakingAccount 
@@ -140,7 +146,7 @@
     
     \begin{umlfragment}[type=loop, name=mosaic]
       
-      \begin{umlcall}[dt=170, op={new block(blockHeight, stateRoot)}]{Utility Chain}{Foundation}
+      \begin{umlcall}[dt=175, op={new block(blockHeight, stateRoot)}]{Utility Chain}{Foundation}
         % Foundation report state root of Utility chain on CoreUC on value chain
         \begin{umlcall}[op={: report(UC, blockHeight, stateRoot)}]{Foundation}{RegistrarVC}
           \begin{umlcall}[op={: commit(blockHeight, stateRoot)}]{RegistrarVC}{CoreUC}
@@ -152,7 +158,7 @@
       \end{umlcall}
           
       % Foundation report state root of Value chain on CoreVC on utility chain
-      \begin{umlcall}[dt=200, op={new block(blockHeight, stateRoot)}]{Value Chain}{Foundation}
+      \begin{umlcall}[dt=205, op={new block(blockHeight, stateRoot)}]{Value Chain}{Foundation}
         \begin{umlcall}[op={: report(VC, blockHeight, stateRoot}]{Foundation}{RegistrarUC}
           % reporting through registrar is instant commit
           \begin{umlcall}[op={: commit(blockHeight, stateRoot)}]{RegistrarUC}{CoreVC}
