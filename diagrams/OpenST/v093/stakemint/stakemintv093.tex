@@ -55,21 +55,25 @@
     \begin{umlcall}[op={: approve(gate, amount)}]{Staker}{OST}  
     \end{umlcall}
     
+    % set workers for branded token
+      \begin{umlcall}[dt=5,op={: setWorker(worker, deactivationHeight)}]{Staker}{Workers}  
+      \end{umlcall}    
+    
     % approve workers to spend bounty amount
-      \begin{umlcall}[op={: approve(workers, bounty)}]{OST}{Workers}  
+      \begin{umlcall}[dt=10,op={: approve(worker, bounty)}]{OST}{Workers}  
       \end{umlcall}    
           
     % staker requests stake to gate
-    \begin{umlcall}[dt=10, op={: stakeRequest(amount, tokenHolder)}]{Staker}{Branded Token Gate}
+    \begin{umlcall}[dt=10, op={: requestStake(amount, gate)}]{Staker}{Branded Token Gate}
       % gate pulls amount from staker on OST
-      \begin{umlcall}[fill=green!20, op={: transferFrom(staker, gate, amount)}, return=<<OST(amount)>>]{Branded Token Gate}{OST}
+      \begin{umlcall}[fill=green!20, dt=5, op={: transferFrom(staker, gate, amount)}, return=<<OST(amount)>>]{Branded Token Gate}{OST}
         % pull OST from Facilitator
         \begin{umlcall}[dt=5, fill=green!20, type=return]{Staker}{OST}
         \end{umlcall}
       \end{umlcall}
       
       % emit StakeRequested event which Facilitator listens to
-      \begin{umlcall}[dt=5, type=return, op={emit StakeRequested(staker, amount, tokenHolder)}]{Branded Token Gate}{Facilitator}
+      \begin{umlcall}[dt=5, type=return, op={emit StakeRequested(staker, amount, gate)}]{Branded Token Gate}{Facilitator}
       \end{umlcall}
     \end{umlcall}
    
@@ -77,7 +81,7 @@
 
     % Facilitator evaluates request against policy (monetary and KYC/AML)
     \begin{umlfragment}[type=alt, label=accept, name=policy, inner xsep=2]
-      \begin{umlcall}[dt=6, op={: approve(gate, bounty)}]{Facilitator}{OST}
+      \begin{umlcall}[dt=10, op={: approve(gate, bounty)}]{Facilitator}{OST}
       \end{umlcall}
       % Facilitator accepts request
       \begin{umlcall}[op={: acceptRequest(staker, amount, hashLock)}]{Facilitator}{Branded Token Gate}  
