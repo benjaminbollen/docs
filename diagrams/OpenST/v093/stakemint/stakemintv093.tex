@@ -23,7 +23,7 @@
 \begin{document}
 \begin{minipage}[b]{0.55\linewidth}
 \Huge \color{NavyBlue} \textbf{OpenST Protocol v0.9.3 } \color{Black}\\ % Title
-\huge\textit{[PROPOSED] sequence diagrams for stake and mint - Benjamin Bollen, last edit \today}\\[1cm] % Subtitle
+\huge\textit{[PROPOSED] sequence diagrams for stake and mint - Benjamin Bollen \& Pranay Valson, last edit \today}\\[1cm] % Subtitle
 \end{minipage}
 
 \begin{tikzpicture}
@@ -31,7 +31,8 @@
     \umlactor[class=Address]{Staker}
     \umlactor[class=Worker]{Facilitator}
     \umlactor[class=Worker]{Hunter}
-    \umlboundary[class=ERC20]{OST}
+    \umlboundary[class=ERC20]{OST} 
+    \umlboundary[class=SK]{Workers} % Worker Contract 
     \umlboundary[class=SK]{Branded Token Gate}
     \umlcontrol[class=SK]{OpenSTValue}
     \umlobject[class=SK]{SimpleStake}
@@ -53,8 +54,13 @@
     % staker approves branded token gate contract on OST for amount
     \begin{umlcall}[op={: approve(gate, amount)}]{Staker}{OST}  
     \end{umlcall}
+    
+    % approve workers to spend bounty amount
+      \begin{umlcall}[op={: approve(workers, bounty)}]{OST}{Workers}  
+      \end{umlcall}    
+          
     % staker requests stake to gate
-    \begin{umlcall}[dt=5, op={: stakeRequest(amount, tokenHolder)}]{Staker}{Branded Token Gate}
+    \begin{umlcall}[dt=10, op={: stakeRequest(amount, tokenHolder)}]{Staker}{Branded Token Gate}
       % gate pulls amount from staker on OST
       \begin{umlcall}[fill=green!20, op={: transferFrom(staker, gate, amount)}, return=<<OST(amount)>>]{Branded Token Gate}{OST}
         % pull OST from Facilitator
@@ -66,6 +72,8 @@
       \begin{umlcall}[dt=5, type=return, op={emit StakeRequested(staker, amount, tokenHolder)}]{Branded Token Gate}{Facilitator}
       \end{umlcall}
     \end{umlcall}
+   
+
 
     % Facilitator evaluates request against policy (monetary and KYC/AML)
     \begin{umlfragment}[type=alt, label=accept, name=policy, inner xsep=2]
