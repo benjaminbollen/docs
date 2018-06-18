@@ -116,13 +116,16 @@
       
       % Facilitator rejects request
       \umlfpart[reject]
-      \begin{umlcall}[dt=5, op={: rejectRequest(staker, amount)}]{Facilitator}{Branded Token Gate}
+      \begin{umlcall}[dt=5, op={: rejectStakeRequest(staker, reason)}]{Facilitator}{Branded Token Gate}
         % transfer amount back to staker
-        \begin{umlcall}[fill=green!20, op={: transfer(staker, amount)}]{Branded Token Gate}{OST}
+        \begin{umlcall}[fill=green!20, op={: transfer(staker, amountST)}]{Branded Token Gate}{OST}
           % return OST to staker
           \begin{umlcall}[type=return, fill=green!20, op=<<OST(amount)>>]{OST}{Staker}
+          % emit stake request rejected 
+          \begin{umlcall}[dt=10, type=return, op={emit StakeRequestRejected(staker, amountST, reason)}]{Branded Token Gate}{Staker}
           \end{umlcall}
         \end{umlcall}
+      \end{umlcall}
       \end{umlcall}
     \end{umlfragment}
     \umlnote[x=2, y=-7]{policy}{evaluate request against policy (KYC/AML)}
