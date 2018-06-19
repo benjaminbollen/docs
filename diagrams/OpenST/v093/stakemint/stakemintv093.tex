@@ -45,7 +45,7 @@
     \umlobject[class=SK, fill=blue!40]{CoreVC}
     \umlcontrol[class=SK, fill=blue!40]{OpenSTUtility}
     \umlboundary[class=ERC20, fill=blue!40]{Branded Token}
-    \umlboundary[class=SK, fill=blue!40]{Token Holder}
+   % \umlboundary[class=SK, fill=blue!40]{Token Holder} %Token Holder contract in v0.9.4
   
     %%%
     %%%  Staker initiates stake
@@ -54,6 +54,9 @@
     % staker approves branded token gate contract on OST for amount
     \begin{umlcall}[op={: approve(gate, amountST)}]{Staker}{OST}  
     \end{umlcall}
+    % worker approves worker contract for bounty amount
+   % \begin{umlcall}[dt=9,op={: approve(worker, bounty)}]{Facilitator}{Workers}  
+   % \end{umlcall}
           
     % staker requests stake to gate
     \begin{umlcall}[dt=10, op={: requestStake(amountST, gate)}]{Staker}{Branded Token Gate}
@@ -88,7 +91,7 @@
         \end{umlcall}
         
         % Gate calls on to OpenSTValue to stake (later abstract to library call)
-        \begin{umlcall}[op={: stake(uuid, amountST, openSTValue, hashLock, gate)}]{Branded Token Gate}{OpenSTValue} % return={amountUT, nonce, unlockHeight, stakingIntentHash}
+        \begin{umlcall}[op={: stake(uuid, amountST, openSTValue, hashLock, brandedToken)}]{Branded Token Gate}{OpenSTValue} % return={amountUT, nonce, unlockHeight, stakingIntentHash}
           % check stakingAccount 
           \begin{umlcallself}[op={require(msg.sender = gate = stakingAccount)}]{OpenSTValue}
           \end{umlcallself}
@@ -106,7 +109,7 @@
           %\begin{umlcallself}[dt=0, op={HTLC(staker, amount)},]{OpenSTValue}
           %\end{umlcallself}
           % emit StakingIntentDeclared
-          \begin{umlcall}[type=return, op={emit StakingIntentDeclared(uuid, gate, nonce, openSTvalue, amountST, amountUT, unlockHeight, StakingIntentHash, ChainIdUtility)}]{OpenSTValue}{Facilitator}
+          \begin{umlcall}[type=return, op={emit StakingIntentDeclared(uuid, brandedToken, nonce, openSTvalue, amountST, amountUT, unlockHeight, StakingIntentHash, ChainIdUtility)}]{OpenSTValue}{Facilitator}
           \end{umlcall}
         \end{umlcall}
         % HTLC(facilitator, bounty)
@@ -218,7 +221,7 @@
     %%%
     
     % Correctly initialised staking information on both systems
-    \begin{umlfragment}[type=alt, label=proceed, name=phasetwo, inner xsep=6]
+    \begin{umlfragment}[type=alt, label=proceed, name=phasetwo, inner xsep=0.5]
       \begin{umlcall}[dt=6, fill=green!20, op={: processStaking(StakingIntentHash, unlockSecret)}]{Facilitator}{Branded Token Gate}
         % check hashlock 
         \begin{umlcallself}[op={require(H(unlockSecret) = hashLock)}]{Branded Token Gate}
@@ -241,9 +244,9 @@
         \end{umlcall}
         % transfer bounty from gate to facilitator
         \begin{umlcall}[dt=5, fill=green!20, op={: transfer(facilitator, bounty)}]{Branded Token Gate}{OST}
-          \begin{umlcall}[fill=green!20, type=return, op={<<OST(bounty)>>}]{OST}{Workers}
-           \begin{umlcall}[fill=green!20, type=return, op={<<OST(bounty)>>}]{Workers}{Facilitator}
-          \end{umlcall}
+          \begin{umlcall}[fill=green!20, type=return, op={<<OST(bounty)>>}]{OST}{Facilitator}
+          % \begin{umlcall}[fill=green!20, type=return, op={<<OST(bounty)>>}]{Workers}{Facilitator}
+          %\end{umlcall}
           \end{umlcall}
         \end{umlcall}
       \end{umlcall}
@@ -257,19 +260,19 @@
         \begin{umlcallself}[op={require(expirationHeight > block.number)}]{OpenSTUtility}
         \end{umlcallself}
         % mint Branded Tokens
-        \begin{umlcall}[fill=green!20, op={: mint(amountUT, gate)}]{OpenSTUtility}{Branded Token}
+        \begin{umlcall}[fill=green!20, op={: mint(brandedToken, amountUT)}]{OpenSTUtility}{Branded Token}
           % store claim
           \begin{umlcallself}[op={store claim}]{Branded Token}
           \end{umlcallself}
         \end{umlcall}
-        \begin{umlcall}[type=return, op={emit ProcessedMint(uuid, StakingIntentHash, tokenAddress, staker, gate, amountUT, unlockSecret)}]{OpenSTUtility}{Hunter}
+        \begin{umlcall}[type=return, op={emit ProcessedMint(uuid, StakingIntentHash, tokenAddress, staker, brandedToken, amountUT, unlockSecret)}]{OpenSTUtility}{Hunter}
         \end{umlcall}
       \end{umlcall}
       
       % Facilitator (or anyone) can call claim to transfer UT to token holder
-      \begin{umlcall}[dt=5, op={: claim(gate)}]{Facilitator}{Branded Token}
-        \begin{umlcall}[fill=green!20, type=return, op={<<UT(amountUT)>>}]{Branded Token}{Branded Token Gate}
-        \end{umlcall}
+      \begin{umlcall}[dt=5, op={: claim(beneficiary)}]{Facilitator}{Branded Token}
+       % \begin{umlcall}[fill=green!20, type=return, op={<<UT(amountUT)>>}]{Branded Token}{Branded Token Gate}
+       % \end{umlcall}
       \end{umlcall}
       
       %%%
@@ -329,9 +332,9 @@
         \end{umlcall}
         % transfer bounty from gate to facilitator
         \begin{umlcall}[dt=5, fill=green!20, op={: transfer(facilitator, bounty)}]{Branded Token Gate}{OST}
-          \begin{umlcall}[fill=green!20, type=return, op={<<OST(bounty)>>}]{OST}{Workers}
-          \begin{umlcall}[fill=green!20, type=return, op={<<OST(bounty)>>}]{Workers}{Facilitator}
-          \end{umlcall}
+          \begin{umlcall}[fill=green!20, type=return, op={<<OST(bounty)>>}]{OST}{Facilitator}
+          %\begin{umlcall}[fill=green!20, type=return, op={<<OST(bounty)>>}]{Workers}{Facilitator}
+          %\end{umlcall}
           \end{umlcall}
         \end{umlcall}
       \end{umlcall} 
