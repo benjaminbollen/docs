@@ -226,7 +226,7 @@
         % Facilitator first calls processStaking to ensure the bounty is return to him
         \begin{umlcall}[dt=4, op={: processStaking(StakingIntentHash, unlockSecret)}]{Branded Token Gate}{OpenSTValue}
           % check stakingAccount 
-          \begin{umlcallself}[op={require(msg.sender = gate = stakingAccount || stakingAccount = 0x)}]{OpenSTValue}
+          \begin{umlcallself}[op={require(msg.sender = gate = stakingAccount)}]{OpenSTValue}
           \end{umlcallself}
           % check hashlock 
           \begin{umlcallself}[op={require(H(unlockSecret) = hashLock)}]{OpenSTValue}
@@ -242,6 +242,8 @@
         % transfer bounty from gate to facilitator
         \begin{umlcall}[dt=5, fill=green!20, op={: transfer(facilitator, bounty)}]{Branded Token Gate}{OST}
           \begin{umlcall}[fill=green!20, type=return, op={<<OST(bounty)>>}]{OST}{Workers}
+           \begin{umlcall}[fill=green!20, type=return, op={<<OST(bounty)>>}]{Workers}{Facilitator}
+          \end{umlcall}
           \end{umlcall}
         \end{umlcall}
       \end{umlcall}
@@ -283,17 +285,17 @@
           % Facilitator first calls processStaking to ensure the bounty is return to him
           \begin{umlcall}[dt=4, op={: processStaking(StakingIntentHash, unlockSecret)}]{Branded Token Gate}{OpenSTValue}
             % check stakingAccount 
-            \begin{umlcallself}[op={require(msg.sender = gate = stakingAccount || stakingAccount = 0x)}]{OpenSTValue}
+            \begin{umlcallself}[op={require(msg.sender = gate = stakingAccount)}]{OpenSTValue}
             \end{umlcallself}
             % check hashlock 
             \begin{umlcallself}[op={require(H(unlockSecret) = hashLock)}]{OpenSTValue}
             \end{umlcallself}
             % transfer amount OST to SimpleStake
-            \begin{umlcall}[fill=green!20, op={: transfer(simpleStake, amount)}]{OpenSTValue}{OST}
-              \begin{umlcall}[dt=5, fill=green!20, type=return, op={<<OST(amount)>>}]{OST}{SimpleStake}
+            \begin{umlcall}[fill=green!20, op={: transfer(simpleStake, amountST)}]{OpenSTValue}{OST}
+              \begin{umlcall}[dt=5, fill=green!20, type=return, op={<<OST(amountST)>>}]{OST}{SimpleStake}
               \end{umlcall}
             \end{umlcall}
-            \begin{umlcall}[dt=5, type=return, op={emit ProcessedStake(StakingIntentHash, unlockSecret)}]{OpenSTValue}{Facilitator}
+            \begin{umlcall}[dt=5, type=return, op={emit ProcessedStake(uuid, StakingIntentHash, simpleStake, staker, amountST, amountUT, unlockSecret)}]{OpenSTValue}{Facilitator}
             \end{umlcall}
           \end{umlcall}
           % transfer bounty from gate to facilitator
@@ -320,14 +322,16 @@
           \begin{umlcallself}[op={require(unlockHeight <= block.number)}]{OpenSTValue}
           \end{umlcallself}
           % transfer amount and bounty OST to facilitator
-          \begin{umlcall}[fill=green!20, op={: transfer(staker, amount)}]{OpenSTValue}{OST}
+          \begin{umlcall}[fill=green!20, op={: transfer(staker, amountST)}]{OpenSTValue}{OST}
             \begin{umlcall}[fill=green!20, type=return, op={<<OST(amount)>>}]{OST}{Staker}
             \end{umlcall}
           \end{umlcall}
         \end{umlcall}
         % transfer bounty from gate to facilitator
         \begin{umlcall}[dt=5, fill=green!20, op={: transfer(facilitator, bounty)}]{Branded Token Gate}{OST}
-          \begin{umlcall}[fill=green!20, type=return, op={<<OST(bounty)>>}]{OST}{Facilitator}
+          \begin{umlcall}[fill=green!20, type=return, op={<<OST(bounty)>>}]{OST}{Workers}
+          \begin{umlcall}[fill=green!20, type=return, op={<<OST(bounty)>>}]{Workers}{Facilitator}
+          \end{umlcall}
           \end{umlcall}
         \end{umlcall}
       \end{umlcall} 
