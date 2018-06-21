@@ -120,6 +120,9 @@
       % Facilitator rejects request
       \umlfpart[reject]
       \begin{umlcall}[dt=5, op={: rejectStakeRequest(staker, reason)}]{Facilitator}{Branded Token Gate}
+        % gate checks msg.sender == whitelister worker address and there is no hashlock
+        \begin{umlcallself}[op={require(msg.sender=worker \&\& no hashLock)}]{Branded Token Gate}
+        \end{umlcallself}      
         % transfer amount back to staker
         \begin{umlcall}[fill=green!20, op={: transfer(staker, amountST)}]{Branded Token Gate}{OST}
           % return OST to staker
@@ -139,7 +142,7 @@
       % staker reverts Stake Request after timeout
       \begin{umlcall}[dt=12, op={: revertStakeRequest()}, fill=green!20]{Staker}{Branded Token Gate}
         % gate checks amount is not locked under HTLC or time-lock is not yet expired
-        \begin{umlcallself}[op={require(msg.sender=staker and no HTLC)}]{Branded Token Gate}
+        \begin{umlcallself}[op={require(msg.sender=staker \&\& no hashLock)}]{Branded Token Gate}
         \end{umlcallself}
         % transfer amount back to staker
         \begin{umlcall}[fill=green!20, op={: transfer(staker, amountST)}]{Branded Token Gate}{OST}
@@ -156,7 +159,7 @@
     
     \begin{umlfragment}[type=loop, name=mosaic]
       
-      \begin{umlcall}[dt=180, op={new block(blockHeight, stateRoot)}]{Utility Chain}{Foundation}
+      \begin{umlcall}[dt=193, op={new block(blockHeight, stateRoot)}]{Utility Chain}{Foundation}
         % Foundation report state root of Utility chain on CoreUC on value chain
         \begin{umlcall}[op={: report(UC, blockHeight, stateRoot)}]{Foundation}{RegistrarVC}
           \begin{umlcall}[op={: commit(blockHeight, stateRoot)}]{RegistrarVC}{CoreUC}
@@ -224,13 +227,16 @@
     \begin{umlfragment}[type=alt, label=proceed, name=phasetwo, inner xsep=1.5]
       \begin{umlcall}[dt=6, fill=green!20, op={: processStaking(StakingIntentHash, unlockSecret)}]{Facilitator}{Branded Token Gate}
         % check hashlock 
-        \begin{umlcallself}[op={require(H(unlockSecret) = hashLock)}]{Branded Token Gate}
-        \end{umlcallself}
+        %\begin{umlcallself}[op={require(H(unlockSecret) = hashLock)}]{Branded Token Gate}
+        %\end{umlcallself}
+        % check msg.sender = worker
+        \begin{umlcallself}[op={require(msg.sender = worker )}]{Branded Token Gate}
+        \end{umlcallself}        
         % Facilitator first calls processStaking to ensure the bounty is return to him
         \begin{umlcall}[dt=4, op={: processStaking(StakingIntentHash, unlockSecret)}]{Branded Token Gate}{OpenSTValue}
           % check stakingAccount 
-          \begin{umlcallself}[op={require(msg.sender = gate = stakingAccount || stakingAccount = 0x)}]{OpenSTValue}
-          \end{umlcallself}
+          %\begin{umlcallself}[op={require(msg.sender = gate = stakingAccount || stakingAccount = 0x)}]{OpenSTValue}
+          %\end{umlcallself}
           % check hashlock 
           \begin{umlcallself}[op={require(H(unlockSecret) = hashLock)}]{OpenSTValue}
           \end{umlcallself}
