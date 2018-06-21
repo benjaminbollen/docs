@@ -23,7 +23,7 @@
 \begin{document}
 \begin{minipage}[b]{0.55\linewidth}
 \Huge \color{NavyBlue} \textbf{OpenST Protocol v0.9.3 } \color{Black}\\ % Title
-\huge\textit{[PROPOSED] sequence diagrams for stake and mint - Benjamin Bollen, last edit \today}\\[1cm] % Subtitle
+\huge\textit{sequence diagrams for stake and mint - Benjamin Bollen \& Pranay Valson, last edit \today}\\[1cm] % Subtitle
 \end{minipage}
 
 \begin{tikzpicture}
@@ -229,8 +229,8 @@
         % check hashlock 
         %\begin{umlcallself}[op={require(H(unlockSecret) = hashLock)}]{Branded Token Gate}
         %\end{umlcallself}
-        % check msg.sender = worker
-        \begin{umlcallself}[op={require(msg.sender = worker )}]{Branded Token Gate}
+        % check msg.sender = facilitator
+        \begin{umlcallself}[op={require(msg.sender = facilitator)}]{Branded Token Gate}
         \end{umlcallself}        
         % Facilitator first calls processStaking to ensure the bounty is return to him
         \begin{umlcall}[dt=4, op={: processStaking(StakingIntentHash, unlockSecret)}]{Branded Token Gate}{OpenSTValue}
@@ -320,13 +320,16 @@
      
       \begin{umlcall}[dt=20, fill=green!20, op={: revertStaking(StakingIntentHash)}]{Facilitator}{Branded Token Gate}
         % check unlockHeight is in the past
-        \begin{umlcallself}[op={require(unlockHeight <= block.number)}]{Branded Token Gate}
-        \end{umlcallself}
+        %\begin{umlcallself}[op={require(unlockHeight <= block.number)}]{Branded Token Gate}
+        %\end{umlcallself}
+          % check msg.sender = facilitator
+          \begin{umlcallself}[op={require(msg.sender = facilitator)}]{Branded Token Gate}
+          \end{umlcallself}        
         % Facilitator reverts stake to get back amount and bounty
         \begin{umlcall}[fill=green!20, op={: revertStaking(StakingIntentHash)}]{Branded Token Gate}{OpenSTValue}
           % check stakingAccount 
-          \begin{umlcallself}[op={require(msg.sender = gate = stakingAccount || stakingAccount = 0x)}]{OpenSTValue}
-          \end{umlcallself}
+         % \begin{umlcallself}[op={require(msg.sender = gate = stakingAccount || stakingAccount = 0x)}]{OpenSTValue}
+          %\end{umlcallself}
           % check unlockHeight
           \begin{umlcallself}[op={require(unlockHeight <= block.number)}]{OpenSTValue}
           \end{umlcallself}
@@ -348,11 +351,13 @@
       \begin{umlcall}[op={: revertMinting(StakingIntentHash)}]{Facilitator}{OpenSTUtility}
         % require mint not yet expired
         \begin{umlcallself}[op={require(expirationHeight <= block.number)}]{OpenSTUtility}
+          \begin{umlcall}[dt=5, type=return, op={emit RevertedMint(uuid, StakingIntentHash, staker, beneficiary, amountUT)}]{OpenSTUtility}{Facilitator}
+          \end{umlcall}
         \end{umlcallself}
       \end{umlcall}
     \end{umlfragment}
     \umlnote[x=1, y=-47, width=100]{phasetwo}{With both value chain and utility chain configured correctly for StakingIntentHash, Facilitator can proceed by revealing the unlock secret, or revert by awaiting the unlock height }
-    \umlnote[x=40, y=-100, width=120]{phasetwo}{Any actor can call revertStaking and the bounty is returned to the facilitator}
+    \umlnote[x=40, y=-100, width=120]{phasetwo}{Only a facilitator can call revertStaking and then bounty is returned to the facilitator}
 
   \end{umlseqdiag}
 \end{tikzpicture}
