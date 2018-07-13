@@ -1,31 +1,58 @@
-\documentclass[12pt,a4paper, twocolumn]{article}
+\documentclass[12pt,a4paper,draft]{article}
 
 \usepackage[english]{babel}
 \usepackage{amsmath}
 
-\title{{\sc OpenST\\ \Large{a framework for building token economies}}}
-\author{\textbf{Benjamin Bollen}\\ for OpenST Foundation}
+\title{\sc OpenST\\ \Large{a framework for building token economies}}
+\author{\textbf{Benjamin Bollen, Martin Schenck}\\ for OpenST Foundation}
 \date{OpenST v0.10 - May 2018}
 
 \begin{document}
 
 \maketitle
-\abstract{We present improvements to the OpenST protocol. OpenST is a framework powered by Ethereum to build token economies. We lay out in detail two contributions, OpenST Mosaic and OpenST Gateway, which work together to scale Ethereum OpenST Mosaic is a layer-2}
 
-\maketitle
+\abstract{We present improvements to the OpenST protocol. OpenST is a framework powered by Ethereum to build token economies. We lay out in detail two contributions, OpenST Mosaic and OpenST Gateway, which work together to scale Ethereum OpenST Mosaic is a layer-2}
 
 \section{Introduction}
 
-OpenST is a holistic solution powered by Ethereum to scale Ethereum to 
+OpenST is a holistic solution powered by Ethereum to scale Ethereum to.
+
+\section{Existing Work}
 
 \section{OpenST}
 
-\section{OpenST Mosaic}
+\section{OpenST Gateway}
+
+Assumption that state root is known to the respective other chain.
 
 Consider an origin blockchain $O$ which is assumed to have liveliness and BFT security properties.  The origin blockchain produces blocks $e_i$ at height $i$.
 
 \paragraph{Lemma 1 - branch referencing} Without loss of generality a transaction can always 
 
-\section{Paru}
+\section{OpenST Mosaic}
 
+Mosaic transfers blockchain state roots from a source to a target.
+
+\subsection{Transferring origin's state to auxiliary}
+
+\subsection{Transferring auxiliary's state to origin}
+
+\section{Conclusion and Outlook}
+
+\subsection{Outlook}
+
+\begin{itemize}
+	\item dynamic validator set
+	\item long range revision attack
+	\item catastrophic crash
+\end{itemize}
+
+\begin{thebibliography}{9}
+
+\bibitem{casper_ffg}
+  Vitalik Buterin and Virgil Griffith:
+  Casper the Friendly Finality Gadget (2017)\\
+  URL \texttt{https://github.com/ethereum/research/tree/master/\\papers/casper-basics}.
+
+\end{thebibliography}
 \end{document}
