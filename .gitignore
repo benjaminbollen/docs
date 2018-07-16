@@ -1,5 +1,6 @@
-## Operating system
+## Operating system or IDE
 .DS_Store
+*.swp
 
 ## Core latex/pdflatex auxiliary files:
 *.aux

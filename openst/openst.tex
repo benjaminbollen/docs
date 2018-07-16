@@ -2,8 +2,19 @@
 
 \usepackage[english]{babel}
 \usepackage{amsmath}
+\usepackage{upgreek}
 
-\title{\sc OpenST\\ \Large{a framework for building token economies}}
+% State root
+\newcommand{\SR}{\operatorname{SR}}
+% Storage root
+\newcommand{\SO}{\operatorname{SO}}
+% OSTblock gas limit
+\newcommand{\OL}{\operatorname{OL}}
+
+
+\input{eth_header}
+
+\title{OpenST\\\sc\Large{a framework for building token economies}}
 \author{\textbf{Benjamin Bollen, Martin Schenck}\\ for OpenST Foundation}
 \date{OpenST v0.10 - May 2018}
 
@@ -11,7 +22,12 @@
 
 \maketitle
 
-\abstract{We present improvements to the OpenST protocol. OpenST is a framework powered by Ethereum to build token economies. We lay out in detail two contributions, OpenST Mosaic and OpenST Gateway, which work together to scale Ethereum OpenST Mosaic is a layer-2}
+\begin{abstract}
+We present improvements to the OpenST protocol.
+OpenST is a framework powered by Ethereum to build token economies.
+We lay out in detail two contributions, OpenST Mosaic and OpenST Gateway,
+which work together to scale Ethereum OpenST Mosaic is a layer-2.	
+\end{abstract}
 
 \section{Introduction}
 
@@ -32,33 +48,101 @@
 \paragraph{Interblockchain Communication}
 
 \paragraph{Casper FFG}
-\cite{casper_ffg}
+\cite{casperffg}
 
 \section{Our Contribution}
 
 \section{Openly Scaling Blockchains}
 
 \subsection{OpenST Gateway}
+\label{subsec:gateway}
 
-Assumption that state root is known to the respective other chain.
+%% TODO: Assumption that state root is known to the respective other chain.
+%% TODO: Solved with Mosaic.
 
 \subsection{OpenST Mosaic}
 
 Mosaic transfers blockchain state roots from a source to a target.
+An independent, trustless validator set observes both chains and votes on blocks.
 
 %Consider an origin blockchain $O$ which is assumed to have liveliness and BFT security properties.  The origin blockchain produces blocks $e_i$ at height $i$.
 %
 %\paragraph{Lemma 1 - branch referencing} Without loss of generality a transaction can always 
 
+%% TODO: Introduce terms
+Validator $\upnu$.
+Validator set $\mathcal{V}$.
+Origin $\mathcal{O}$.
+Auxiliary $\mathcal{A}$.
+
+Gateway contract $g$.
+Gateway $\mathcal{G} = (g, \overline{g}, t_m)$.
+
+State root $\SR$.
+State object's storage root $\SO$.
+
+Block on origin $b_\mathcal{O}$.
+Block on auxiliary $b_\mathcal{A}$.
+OSTblock $\mathcal{B}$.
+Block at height $i$ $b_{\mathcal{O}i}$.
+OSTblock at height $\alpha$ $\mathcal{B}_\alpha$.
+
+OSTBlock gas limit $\OL$.
+
 \subsubsection{Observing the origin chain}
+
+Validators transfer state roots bi-directional.
+We will first demonstrate how they transfer the state root from origin as the source to auxiliary as the target.
+In order to apply Mosaic universally,
+we abstract away from the consensus algorithm of origin and layer Casper \cite{casperffg} on top of the chain.
+On auxiliary,
+validators from the validator set vote to justify and finalise blocks from origin according to the Casper rules.
+In order to do so, a validator proposes the block header of a checkpoint from origin to auxiliary.
+The other validators in the current validator set vote on the block.
+The block gets justified with a $\frac{2}{3}$ majority as per Casper.
+Blocks that will be proposed in the future must include all previously finalised blocks in their history.
+This is not checked computationally on auxiliary,
+but rather by the validators by means of voting.
+
+As a result, validators transfer state roots from origin to auxiliary in regular intervals.
+When the Gateway transfers state objects to auxiliary,
+their existence on origin can be proven against the state root that is now stored on auxiliary.
+
+%% TODO: OSTblocks
+
+Origin cannot follow Casper's fork choice rule when the justification and finalisation is only recorded on auxiliary.
+Furthermore, we cannot expect origin to adapt to Mosaic's requirements.
+To avoid conflicting forks of origin,
+we propose to trail behind origin's head by a specific number of blocks to make a conflict unlikely.
+%% TODO: give an example or make ethereum specific or both?
+However, if at any time a conflict does arise, auxiliary must agree to switch to origin's branch.
+There is an economic incentive to do so as auxiliary could not be finalised anymore and any earnings on the auxiliary chain were practically lost.
+Coordination of auxiliary's miners or stake holders should be done off-chain.
 
 \subsubsection{Leveraging origins security}
 
 \subsubsection{Asynchronously finalising on origin}
 
+In this section we will demonstrate how auxiliary is finalised by copying its state root to origin.
+In order to be able to universally apply Mosaic,
+we abstract away from the consensus algorithm of the utility chain and layer Casper \cite{casperffg} on top of it.
+Validators vote on auxiliary's checkpoints as per the rules defined in the Casper paper.
+When a checkpoint is finalised, its state root can be transferred to origin.
+To transfer the state to origin, a validator of the current validator set $\mathcal{V}_\alpha$ proposes the closing of the current OSTblock.
+
 \subsubsection{OSTgas}
 
-\subsubsection{Rewarding Validators}
+OSTgas is auxiliary's alternative to gas on Ethereum.
+Transactions pay gas to the miners or stake holders.
+And miners or stake holders pay gas to the validators in order to finalise their state on origin.
+
+Validators need to agree on when to transfer a finalised checkpoint of auxiliary to origin.
+Generally, validators can transfer any finalised checkpoint.
+However, that leads to a transaction on origin and therefore incurs costs.
+
+\subsubsection{Rewarding validators}
+
+\subsubsection{Variable validator set}
 
 \section{Securing Simple User Experience}
 
@@ -80,10 +164,9 @@ APIs; no need to follow the chain.
 
 \begin{thebibliography}{9}
 
-\bibitem{casper_ffg}
+\bibitem{casperffg}
   Vitalik Buterin and Virgil Griffith:
-  Casper the Friendly Finality Gadget (2017)\\
-  URL \texttt{https://github.com/ethereum/research/tree/master/\\papers/casper-basics}.
+  Casper the Friendly Finality Gadget (2017) URL \texttt{https://\\github.com/ethereum/research/tree/master/papers/casper-basics}.
 
 \end{thebibliography}
 \end{document}
