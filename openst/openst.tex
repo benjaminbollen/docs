@@ -153,8 +153,13 @@ You could write a block as a transaction that transforms the state from the inpu
 If you consider blocks on auxiliary as transactions, you can form blocks with an ordered set of these transactions.
 These blocks we call \emph{OSTblocks.}
 An OSTblock is an ordered set of transactions, where each transaction represents a single block's state change on the auxiliary chain.
-
-
+When an OSTblock gets closed, its header is written to the origin chain.
+An OSTblock header consists of:
+\begin{itemize}
+	\item The state root $\SR_\A$ of auxiliary
+	\item The height $i$ of the block $b_{\A{}i}$ on auxiliary
+	\item %% TODO define OSTblock header
+\end{itemize}
 
 Validators vote on auxiliary's checkpoints on auxiliary as per the rules defined in the Casper paper.
 When a checkpoint is finalised, its state root can be transferred to origin.
