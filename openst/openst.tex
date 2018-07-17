@@ -118,10 +118,17 @@ Their deposit is stored on origin.
 Similarly to Casper, their deposit rises and falls with rewards and penalties, respectively.
 When we say "$\frac{2}{3}$ of validators", we equally refer to the deposit-weighted fraction.
 However, there are different kinds of voting message types, as described below.
-% TODO do not assume a fixed set, start and explain the dynamic set from the start
-% TODO what is a dynamic set of validators
-At this stage, we assume a fixed set of validators, $\V$.
-A dynamic set of validators will be described later.
+
+% TODO describe that OSTblock headers announce the set of validators for the following OSTblock
+The set of validators needs to be able to change.
+The logic is similar to that of Casper with the notable difference that, instead of dynasties, we use OSTblocks (described below).
+When a potential validator sends a \emph{deposit message} on origin at OSTblock height $\alpha$,
+then the validator $\upnu$ will join the validator set at OSTblock height $\alpha+2$.
+% TODO a lot copied from Casper. OK? Required?
+Analogous to Casper, we call $\alpha+2$ the validator's \emph{start OSTblock}, $\BS(\upnu)$.
+If a validator $\upnu$'s withdraw message is included on origin's blockchain during an open OSTblock $\B_\alpha$,
+it similarly leaves the set of validators at OSTblock height $\alpha+2$.
+We call $\alpha+2$ the validator $\upnu$'s \emph{end OSTblock} $\BE(\upnu)$.
 
 % TODO *mosaic* validators?
 % TODO should we have different names for mosaic validators and "casper on origin" validators?
@@ -218,18 +225,6 @@ The block creators of auxiliary will pay a fraction of their earned OSTgas to th
 % TODO why?
 Due to the OSTblocks, validators can only copy the state from auxiliary to origin after the state of origin has been copied to auxiliary.
 Thus, validators are incentivised to close an OSTblock and open a new one in order to earn the OSTgas fee for the transfer of auxiliary's state.
-
-% TODO move this way up so that the concept of a dynamic validator set is known everywhere
-% TODO describe that OSTblock headers announce the set of validators for the following OSTblock
-The set of validators needs to be able to change.
-The logic is similar to that of Casper with the notable difference that, instead of dynasties, we use OSTblocks.
-When a potential validator sends a \emph{deposit message} on origin at OSTblock height $\alpha$,
-then the validator $\upnu$ will join the validator set at OSTblock height $\alpha+2$.
-% TODO a lot copied from Casper. OK? Required?
-Analogous to Casper, we call $\alpha+2$ the validator's \emph{start OSTblock}, $\BS(\upnu)$.
-If a validator $\upnu$'s withdraw message is included on origin's blockchain during an open OSTblock $\B_\alpha$,
-it similarly leaves the set of validators at OSTblock height $\alpha+2$.
-We call $\alpha+2$ the validator $\upnu$'s \emph{end OSTblock} $\BE(\upnu)$.
 
 % TODO Slashing/Punishments validators on origin (e.g. when they misbehave on auxiliary)
 
