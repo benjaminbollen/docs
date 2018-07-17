@@ -1,4 +1,4 @@
-\documentclass[12pt,a4paper,draft]{article}
+\documentclass[12pt,a4paper]{article}
 
 \usepackage[english]{babel}
 \usepackage{amsmath}
@@ -21,6 +21,7 @@
 
 
 \input{eth_header}
+\graphicspath{ {./images/} }
 
 \title{OpenST\\\sc\Large{a framework for building token economies}}
 \author{\textbf{Benjamin Bollen, Martin Schenck}\\ for OpenST Foundation}
@@ -93,14 +94,17 @@ OpenST Mosaic enables chain-to-chain state transfer.
 That allows us to secure an insecure chain's state on a secure chain.
 We call the secure chain \emph{origin} and the insecure one \emph{auxiliary}.
 
+% TODO the following section is misplaced, not all concepts are known
 In order to transfer and verify state, it is required to transfer state bi-directional between auxiliary and origin.
 That way, auxiliary can verify that its state has been finalised on origin and
 the set of validators, that is tracked on origin, is also known to auxiliary.
 
+% TODO extend the following section to include details on the validators and voting (what, when, where, etc.)
 \emph{Validators} are actors that stake value on origin in order to vote on state.
-At this stage, we assume a fixed set of validators.
+At this stage, we assume a fixed set of validators, $\V$.
 A dynamic set of validators will be described later.
 
+% TODO explain alpha and OSTblock heights before defining the OSTblock header
 \emph{OSTblocks} are a compressed representation of auxiliary's transactions.
 % TODO are OSTblocks' transactions blocks or dynasties from auxiliary?
 Transactions in an OSTblock each represent one block of the auxiliary chain.
@@ -112,9 +116,11 @@ The OSTblock header of block $\B_\alpha$ at height $\alpha$ contains:
 	\item The root hash of the state tree of auxiliary
 	\item The set of validators for the next OSTblock, $\V_{\alpha+1}$
 \end{enumerate}
-We do not store the content of an OSTblock, only the header.
-The content can be re-created at any time from the auxiliary chain.
+We do not store the body of an OSTblock on origin, only the header.
+The content can be re-created at any time from the auxiliary chain and proven with the state root.
 
+% TODO process should be linked to figure fig:mosaic
+% TODO extend process to describe all steps in the figure
 Process:
 \begin{enumerate}
 	\item Open a new OSTblock $\B_\alpha$ at height $\alpha$: copy state from origin to auxiliary
@@ -123,26 +129,38 @@ Process:
 	\item Open $\B_{\alpha+1}$
 \end{enumerate}
 
-In order to be block proposal mechanism agnostic, we layer Casper \cite{casperffg} on top of auxiliary.
+\begin{figure}
+    \centering
+	\includegraphics[width=\textwidth]{mosaic}
+	\caption{The Mosaic State Transfer}
+	\label{fig:mosaic}
+\end{figure}
+In order to be block proposal mechanism agnostic, we layer Casper~\cite{casperffg} on top of auxiliary.
+% TODO missing context. Extend or move to validators paragraph above
 Validators vote on supermajority links.
 Auxiliary must follow Casper's fork choice rule.
+%% TODO missing context
 Checkpoints get finalised.
 The validators can transfer the state of a finalised auxiliary checkpoint to origin.
+% TODO language
 A validator uses the Mosaic Gateway to transfer the state to origin.
 On origin, a $\frac{2}{3	}$ majority vote is required by the validators in order to commit the state on origin.
 The state is regarded economically finalised when the block that contains the commit is considered economically final on origin.
 
+% TODO extend this paragraph
 On the auxiliary chain, \emph{OSTgas} is the equivalent to gas on Ethereum.
 For transactions to be included in blocks on auxiliary, a fee is paid for the consumed OSTgas.
 
 Validators could commit every finalised state from auxiliary to origin.
 However, that may be infeasible due to constraints on origin or from an economic viewpoint of the validators.
-We propose points in the life of the auxiliary chain where the validators must close the OSTblock.
+Therefore, we propose points in the life of the auxiliary chain where the validators must close the OSTblock.
+% TODO link to figure; explain here or above where figure is explained; or move figure down
 Whenever a certain, fixed limit of OSTgas has been spent on auxiliary since the opening of the OSTblock,
 the validators must close the OSTblock at the next finalised auxiliary checkpoint. 
 
 Actors on the auxiliary chain have an economic incentive to finalise their state on origin.
 The block creators of auxiliary will pay a fraction of their earned OSTgas to the validators as a fee when the validators move the state to origin.
+% TODO context and language
 Due to the OSTblocks, validators can only copy the state from auxiliary to origin after the state of origin has been copied to auxiliary.
 Thus, validators are incentivised to close an OSTblock and open a new one in order to earn the OSTgas fee for the transfer of auxiliary's state.
 
@@ -150,6 +168,7 @@ The set of validators needs to be able to change.
 The logic is similar to that of Casper with the notable difference that, instead of dynasties, we use OSTblocks.
 When a potential validator sends a \emph{deposit message} on origin at OSTblock height $\alpha$,
 then the validator $\upnu$ will join the validator set at OSTblock height $\alpha+2$.
+% TODO we use OSTblocks, not dynasties
 Analogous to Casper, we call $\alpha+2$ the validator's \emph{start dynasty}, $\DS(\upnu)$.
 
 Slashing validators on origin when they misbehave on auxiliary
