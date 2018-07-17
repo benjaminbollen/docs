@@ -8,6 +8,10 @@
 \newcommand{\OC}{\mathcal{O}}
 \newcommand{\V}{\mathcal{V}}
 \newcommand{\G}{\mathcal{G}}
+% OSTblock
+\newcommand{\B}{\mathcal{B}}
+\newcommand{\DS}{\operatorname{DS}}
+\newcommand{\DE}{\operatorname{DE}}
 % State root
 \newcommand{\SR}{\operatorname{SR}}
 % Storage root
@@ -30,13 +34,19 @@
 We present improvements to the OpenST protocol.
 OpenST is a framework powered by Ethereum to build token economies.
 We lay out in detail two contributions, OpenST Mosaic and OpenST Gateway,
-which work together to scale Ethereum OpenST Mosaic is a layer-2.	
+which work together to scale Ethereum. OpenST Mosaic is a layer-2.	
 \end{abstract}
 
+%
+% Section
+%
 \section{Introduction}
 
 %OpenST is a holistic solution powered by Ethereum to scale Ethereum to.
 
+%
+% Section
+%
 \section{OpenST}
 
 \subsection{Use Cases}
@@ -45,170 +55,124 @@ which work together to scale Ethereum OpenST Mosaic is a layer-2.
 
 \subsubsection{DApp}
 
+%
+% Section
+%
 \section{Related Work}
 
 \paragraph{Verifiers' Dilemma}
+\cite{verifiersdilemma}
 
 \paragraph{Interblockchain Communication}
+\cite{cosmos}
 
 \paragraph{Casper FFG}
 \cite{casperffg}
 
+%
+% Section
+%
 \section{Our Contribution}
 
+%
+% Section
+%
 \section{Openly Scaling Blockchains}
 
 \subsection{OpenST Gateway}
 \label{subsec:gateway}
 
-\emph{!!!Wrong due to lack of knowledge!!!}
-
-%% TODO: Assumption that state root is known to the respective other chain. Solved with Mosaic.
-
-An OpenST Gateway $\G$ transfers state objects between two chains.
-The transfer is bi-directional.
-Transfer of one state object $\SO$ takes place from a source blockchain to a target blockchain.
-To enable bi-directional transfer, two Gateway smart contracts $g$ and $\overline{g}$ must be deployed, one per chain.
-A transformation function $t_m$ defines a mapping of a source state object to a target state object.
-Thus a Gateway can be written as $\G = (g, \overline{g}, t_m)$ where $g$ is the smart contract on the source chain and $\overline{g}$ is the smart contract on the target chain.
-A simple case for $t_m$ is the transfer of the storage root hash of a contract.
-
-%% TODO: due to lack of understanding this is incorrect
-Transfer happens in two phases:
-\begin{enumerate}
-	\item Confirm certain event has taken place on source
-	\item Process certain action on target
-\end{enumerate}
-
+OpenST Gateway enables chain-to-chain transfer of state objects.
 
 \subsection{OpenST Mosaic}
 \label{subsec:mosaic}
 
-Mosaic transfers blockchain states between two blockchains.
-The origin blockchain $\OC$ is assumed to have liveliness and BFT security properties.
-The auxiliary blockchain $\A$ is not assumed to have any security features.
-Mosaic finalises the state of $\A$ on $\OC$ and confirms the transfer securely on $\A$.
+OpenST Mosaic enables chain-to-chain state transfer.
+That allows us to secure an insecure chain's state on a secure chain.
+We call the secure chain \emph{origin} and the insecure one \emph{auxiliary}.
 
-An independent, trustless validator set $\V$ observes both chains and votes on blocks on both chains.
-We layer the Casper FFG Proof-of-Stake \cite{casperffg} algorithm on top of the chains to be block proposal mechanism agnostic.
+In order to transfer and verify state, it is required to transfer state bi-directional between auxiliary and origin.
+That way, auxiliary can verify that its state has been finalised on origin and
+the set of validators, that is tracked on origin, is also known to auxiliary.
 
-%Consider an origin blockchain $O$ which is assumed to have liveliness and BFT security properties.  The origin blockchain produces blocks $e_i$ at height $i$.
+\emph{Validators} are actors that stake value on origin in order to vote on state.
+At this stage, we assume a fixed set of validators.
+A variable validator set will be described later.
+
+OSTblocks
+
+Process:
+\begin{enumerate}
+	\item Open a new OSTblock $\B_\alpha$ at height $\alpha$: copy state from origin to auxiliary
+	\item Auxiliary creates blocks
+	\item Close $\B_\alpha$: copy state from auxiliary to origin
+	\item Open $\B_{\alpha+1}$
+\end{enumerate}
+
+In order to be block proposal mechanism agnostic, we layer Casper \cite{casperffg} on top of auxiliary.
+Validators vote on supermajority links.
+Auxiliary must follow Casper's fork choice rule.
+Checkpoints get finalised.
+The validators can transfer the state of a finalised auxiliary checkpoint to origin.
+A validator uses the Mosaic Gateway to transfer the state to origin.
+On origin, a $\frac{2}{3	}$ majority vote is required by the validators in order to commit the state on origin.
+The state is regarded economically finalised when the block that contains the commit is considered economically final on origin.
+
+On the auxiliary chain, \emph{OSTgas} is the equivalent to gas on Ethereum.
+For transactions to be included in blocks on auxiliary, a fee is paid for the consumed OSTgas.
+
+Validators could commit every finalised state from auxiliary to origin.
+However, that may be infeasible due to constraints on origin or from an economic viewpoint of the validators.
+We propose points in the life of the auxiliary chain where the validators must close the OSTblock.
+Whenever a certain, fixed limit of OSTgas has been spent on auxiliary since the opening of the OSTblock,
+the validators must close the OSTblock at the next finalised checkpoint on auxiliary. 
+
+Actors on the auxiliary chain have an economic incentive to finalise their state on origin.
+The block creators of auxiliary will pay a fraction of their earned OSTgas to the validators as a fee when the validators move the state to origin.
+Due to the OSTblocks, validators can only copy the state from auxiliary to origin after the state of origin has been copied to auxiliary.
+Thus, validators are incentivised to close an OSTblock and open a new one in order to earn the OSTgas fee for the transfer of auxiliary's state.
+
+The set of validators needs to be able to change.
+The logic is similar to that of Casper with the notable difference that, instead of dynasties, we use OSTblocks.
+When a potential validator sends a \emph{deposit message} on origin at OSTblock height $\alpha$,
+then the validator $\upnu$ will join the validator set at OSTblock height $\alpha+2$.
+Analogous to Casper, we call $\alpha+2$ the validator's \emph{start dynasty}, $\DS(\upnu)$.
+
+Slashing validators on origin when they misbehave on auxiliary
+
+Keeping stake four months back on origin should mean a shorter time back on auxiliary to forbid voting (3 months?).
+
 %
-%\paragraph{Lemma 1 - branch referencing} Without loss of generality a transaction can always 
-
-%% TODO: Introduce terms
-%Validator $\upnu$.
-%Validator set $\mathcal{V}$.
-%Origin $\mathcal{O}$.
-%Auxiliary $\mathcal{A}$.
+% Section
 %
-%Gateway contract $g$.
-%Gateway $\mathcal{G} = (g, \overline{g}, t_m)$.
-%
-%State root $\SR$.
-%State object's storage root $\SO$.
-%
-%Block on origin $b_\mathcal{O}$.
-%Block on auxiliary $b_\mathcal{A}$.
-%OSTblock $\mathcal{B}$.
-%Block at height $i$ $b_{\mathcal{O}i}$.
-%OSTblock at height $\alpha$ $\mathcal{B}_\alpha$.
-%
-%OSTBlock gas limit $\OL$.
-
-\subsubsection{Observing the origin chain}
-
-We want to be able to observe $\OC$ from $\A$.
-Since $\A$ is not assumed to have any security features,
-we need to know whether the state of $\A$ has been successfully transferred to $\OC$.
-Only then can we assume that the given state of $\A$ is final.
-
-On auxiliary,
-validators from the validator set vote to justify and finalise blocks from origin according to the Casper set of rules.
-In order to do so, a validator proposes the block header of a checkpoint from origin to auxiliary.
-The other validators in the current validator set vote on the proposal.
-The block gets justified with a $\frac{2}{3}$ majority as per Casper.
-
-Origin cannot follow Casper's fork choice rule when the justification and finalisation is only recorded on auxiliary.
-Furthermore, we cannot expect origin to adapt to Mosaic's requirements.
-To avoid conflicting forks of a Proof-of-Work origin,
-we propose to trail behind origin's head by a specific number of blocks to make a conflict unlikely.
-%% TODO: give an example or make ethereum specific or both?
-However, if at any time a conflict does arise, auxiliary must agree to switch to origin's fork.
-There is an economic incentive to do so as auxiliary could not be finalised anymore and any earnings on the auxiliary chain were practically lost.
-Coordination of auxiliary's miners or stake holders should be done off-chain and is not discussed in more detail in this paper.
-
-\subsubsection{Leveraging origins security}
-
-Once a certain state of $\A$ is finalised on $\OC$, it is considered final in the sense that blocks of $\OC$ can be considered final.
-By finalising $\A$ on $\OC$, we apply the security properties of $\OC$ on the finalised checkpoints.
-Therefore $\A$ can be considered secure in certain intervals.
-
-\subsubsection{Asynchronously finalising on origin}
-
-To compress auxiliary, consider the following.
-A transaction is a transformation from one state to another.
-A block is an ordered set of transactions, moving from one state to another.
-You could write a block as a transaction that transforms the state from the input of the first transaction of the block to the output of the last transaction of the block.
-If you consider blocks on auxiliary as transactions, you can form blocks with an ordered set of these transactions.
-These blocks we call \emph{OSTblocks.}
-An OSTblock is an ordered set of transactions, where each transaction represents a single block's state change on the auxiliary chain.
-When an OSTblock gets closed, its header is written to the origin chain.
-An OSTblock header consists of:
-\begin{itemize}
-	\item The state root $\SR_\A$ of auxiliary
-	\item The height $i$ of the block $b_{\A{}i}$ on auxiliary
-	\item %% TODO define OSTblock header
-\end{itemize}
-
-Validators vote on auxiliary's checkpoints on auxiliary as per the rules defined in the Casper paper.
-When a checkpoint is finalised, its state root can be transferred to origin.
-To transfer the state to origin, a validator of the current validator set $\V_\alpha$ proposes the closing of the current OSTblock.
-
-%% TODO: OSTblocks
-
-\subsubsection{OSTgas}
-
-OSTgas is auxiliary's alternative to gas on Ethereum.
-Transactions pay gas to the miners or stake holders.
-And miners or stake holders pay gas to the validators in order to finalise their state on origin.
-
-Validators need to agree on when to transfer a finalised checkpoint of auxiliary to origin.
-Generally, validators can transfer any finalised checkpoint.
-However, that leads to a transaction on origin and therefore incurs costs.
-
-\subsubsection{Rewarding validators}
-
-\subsubsection{Variable validator set}
-
-The validator set should be variable and open.
-Validators can join and leave the validator set by sending a \emph{deposit message} or a \emph{withdraw message}, respectively.
-The rules from Casper apply and the validators will join and leave the validator set at dynasty $d+2$ after their message has been processed in dynasty $d$.
-When a validator sends a \emph{deposit message} at OSTblock height $B_\alpha$
-
 \section{Securing Simple User Experience}
 
 \subsection{Token Holder Contracts}
 
 APIs; no need to follow the chain.
 
+%
+% Section
+%
 \section{Platform}
 
 \subsection{Token Rules}
 
 \subsection{OpenST Platform}
 
+%
+% Section
+%
 \section{Outlook}
 
 \subsection{Neo and Cardano}
 
+%
+% Section
+%
 \section{Conclusion}
 
-\begin{thebibliography}{9}
+\bibliographystyle{naturemag}
+\bibliography{openst}
 
-\bibitem{casperffg}
-  Vitalik Buterin and Virgil Griffith:
-  Casper the Friendly Finality Gadget (2017) URL \texttt{https://\\github.com/ethereum/research/tree/master/papers/casper-basics}.
-
-\end{thebibliography}
 \end{document}
