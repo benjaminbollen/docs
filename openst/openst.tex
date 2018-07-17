@@ -143,22 +143,6 @@ The OSTblock header of block $\B_\alpha$ at height $\alpha$ contains:
 We do not store the body of an OSTblock on origin, only the header.
 The content can be re-created at any time from the auxiliary chain and proven with the state root.
 
-% TODO process should be linked to figure fig:mosaic
-% TODO extend process to describe all steps in the figure
-Process:
-\begin{enumerate}
-	\item Open a new OSTblock $\B_\alpha$ at height $\alpha$: copy state from origin to auxiliary
-	\item Auxiliary creates blocks
-	\item Close $\B_\alpha$: copy state from auxiliary to origin
-	\item Open $\B_{\alpha+1}$
-\end{enumerate}
-
-\begin{figure}
-    \centering
-	\includegraphics[width=\textwidth]{mosaic}
-	\caption{\textbf{The Mosaic state transfer.} }%TODO description
-	\label{fig:mosaic}
-\end{figure}
 In order to be block proposal mechanism agnostic, we layer Casper~\cite{casperffg} on top of auxiliary.
 % TODO missing context. Extend or move to validators paragraph above
 Validators vote on supermajority links.
@@ -170,6 +154,20 @@ The validators can transfer the state of a finalised auxiliary checkpoint to ori
 A validator uses the Mosaic Gateway to transfer the state to origin.
 On origin, a $\frac{2}{3	}$ majority vote is required by the validators in order to commit the state on origin.
 The state is regarded economically finalised when the block that contains the commit is considered economically final on origin.
+
+\begin{figure}[htb]
+    \centering
+	\includegraphics[width=\textwidth]{mosaic}
+	\caption{
+		\textbf{The Mosaic state transfer.} 
+		The closing of $\B_{\alpha-1}$ means that the finalised checkpoint $b_{\A{}i}$ is the last block of $\B_{\alpha-1}$.
+		Even though the details of $\B_\alpha$ will not be known until the opening is transferred to $\A$,
+		the first block in $\B_\alpha$ will be $b_{\A{}i+1}$.
+		Once a checkpoint is finalised ofter the OSTgas limit has been reached,
+		$\V$ will signal the closing of $\B_\alpha$ to $\OC$.
+	}
+	\label{fig:mosaic}
+\end{figure}
 
 % TODO extend this paragraph
 On the auxiliary chain, \emph{OSTgas} is the equivalent to gas on Ethereum.
