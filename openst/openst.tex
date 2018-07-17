@@ -3,6 +3,7 @@
 \usepackage[english]{babel}
 \usepackage{amsmath}
 \usepackage{upgreek}
+\usepackage{paralist}
 
 \newcommand{\A}{\mathcal{A}}
 \newcommand{\OC}{\mathcal{O}}
@@ -93,16 +94,33 @@ OpenST Gateway enables chain-to-chain transfer of state objects.
 OpenST Mosaic enables chain-to-chain state transfer.
 That allows us to secure an insecure chain's state on a secure chain.
 We call the secure chain \emph{origin} and the insecure one \emph{auxiliary}.
+In order to be blockchain proposal mechanism agnostic, we layer Casper~\cite{casperffg} on top of both chains.
 
 % TODO the following section is misplaced, not all concepts are known
 In order to transfer and verify state, it is required to transfer state bi-directional between auxiliary and origin.
 That way, auxiliary can verify that its state has been finalised on origin and
 the set of validators, that is tracked on origin, is also known to auxiliary.
 
-% TODO extend the following section to include details on the validators and voting (what, when, where, etc.)
-\emph{Validators} are actors that stake value on origin in order to vote on state.
+\emph{Validators} are actors that vote on state.
+They are similar to validators in Casper~\cite{casperffg}.
+Their deposit is stored on origin.
+Similarly to Casper, their deposit rises and falls with rewards and penalties, respectively.
+When we say "$\frac{2}{3}$ of validators", we equally refer to the deposit-weighted fraction.
+However, there are different kinds of voting message types.
 At this stage, we assume a fixed set of validators, $\V$.
 A dynamic set of validators will be described later.
+
+Validators can vote on a number of events:
+\begin{inparaenum}[(a)]
+	\item state transfers to auxiliary,
+	\item checkpoint justifications on auxiliary, and
+ 	\item state transfers to origin.
+\end{inparaenum}
+When state is transferred from origin to auxiliary,
+the validators vote according to the Casper rules like the state transfer represents a checkpoint.
+On auxiliary, checkpoints are justified by supermajority links as described in Casper.
+Casper applied to auxiliary the same way its application to Ethereum is described in the Casper paper.
+When auxiliary's state is transferred to origin, a simple $\frac{2}{3}$ majority vote on that state commits it to origin.
 
 % TODO explain alpha and OSTblock heights before defining the OSTblock header
 \emph{OSTblocks} are a compressed representation of auxiliary's transactions.
