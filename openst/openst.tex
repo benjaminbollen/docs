@@ -11,8 +11,8 @@
 \newcommand{\G}{\mathcal{G}}
 % OSTblock
 \newcommand{\B}{\mathcal{B}}
-\newcommand{\DS}{\operatorname{DS}}
-\newcommand{\DE}{\operatorname{DE}}
+\newcommand{\BS}{\operatorname{BS}}
+\newcommand{\BE}{\operatorname{BE}}
 % State root
 \newcommand{\SR}{\operatorname{SR}}
 % Storage root
@@ -186,8 +186,11 @@ The set of validators needs to be able to change.
 The logic is similar to that of Casper with the notable difference that, instead of dynasties, we use OSTblocks.
 When a potential validator sends a \emph{deposit message} on origin at OSTblock height $\alpha$,
 then the validator $\upnu$ will join the validator set at OSTblock height $\alpha+2$.
-% TODO we use OSTblocks, not dynasties
-Analogous to Casper, we call $\alpha+2$ the validator's \emph{start dynasty}, $\DS(\upnu)$.
+% TODO a lot copied from Casper. OK? Required?
+Analogous to Casper, we call $\alpha+2$ the validator's \emph{start OSTblock}, $\BS(\upnu)$.
+If a validator $\upnu$'s withdraw message is included on origin's blockchain during an open OSTblock $\B_\alpha$,
+it similarly leaves the set of validators at OSTblock height $\alpha+2$.
+We call $\alpha+2$ the validator $\upnu$'s \emph{end OSTblock} $\BE(\upnu)$.
 
 % TODO Slashing validators on origin (e.g. when they misbehave on auxiliary)
 
