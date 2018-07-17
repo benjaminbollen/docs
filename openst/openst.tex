@@ -93,7 +93,7 @@ OpenST Gateway enables chain-to-chain transfer of state objects.
 
 OpenST Mosaic enables chain-to-chain state transfer.
 That allows us to secure an insecure chain's state on a secure chain.
-We call the secure chain \emph{origin} and the insecure one \emph{auxiliary}.
+We call the secure chain \emph{origin} $\OC$ and the insecure one \emph{auxiliary} $\A$.
 In order to be blockchain proposal mechanism agnostic, we layer Casper~\cite{casperffg} on top of both chains.
 
 % TODO the following section is misplaced, not all concepts are known
@@ -122,11 +122,17 @@ On auxiliary, checkpoints are justified by supermajority links as described in C
 Casper applied to auxiliary the same way its application to Ethereum is described in the Casper paper.
 When auxiliary's state is transferred to origin, a simple $\frac{2}{3}$ majority vote on that state commits it to origin.
 
-% TODO explain alpha and OSTblock heights before defining the OSTblock header
 \emph{OSTblocks} are a compressed representation of auxiliary's transactions.
 % TODO are OSTblocks' transactions blocks or dynasties from auxiliary?
 Transactions in an OSTblock each represent one block of the auxiliary chain.
 An OSTblock transaction represents the state change from the beginning of its associated block to the end of that block.
+Therefore, OSTblocks are generated at a much slower pace.
+We call $\alpha$ the height of OSTblock $\B_\alpha$.
+The next OSTblock, that points to $\B_\alpha$ in its header,
+is OSTblock $\B_{\alpha+1}$ at height $\alpha+1$.
+Due to the aforementioned compression of blocks on auxiliary,
+$\B_\alpha$ may contain auxiliary blocks $b_{\A{}i}$ to $b_{\A{}i+m}$.
+
 The OSTblock header of block $\B_\alpha$ at height $\alpha$ contains:
 \begin{enumerate}
 	\item A link to the previous OSTblock
