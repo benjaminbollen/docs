@@ -186,6 +186,7 @@ The block creators of auxiliary will pay a fraction of their earned OSTgas to th
 Due to the OSTblocks, validators can only copy the state from auxiliary to origin after the state of origin has been copied to auxiliary.
 Thus, validators are incentivised to close an OSTblock and open a new one in order to earn the OSTgas fee for the transfer of auxiliary's state.
 
+% TODO describe that OSTblock headers announce the set of validators for the following OSTblock
 The set of validators needs to be able to change.
 The logic is similar to that of Casper with the notable difference that, instead of dynasties, we use OSTblocks.
 When a potential validator sends a \emph{deposit message} on origin at OSTblock height $\alpha$,
