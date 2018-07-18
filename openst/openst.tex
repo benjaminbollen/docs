@@ -91,12 +91,15 @@ OpenST Gateway enables chain-to-chain transfer of state objects.
 % TODO are OSTblocks "checkpoints" on auxiliary?
 \subsection{OpenST Mosaic}
 \label{subsec:mosaic}
-% TODO which properties of the origin chain should we assume? Is it ethereum? PoW? Lively BFT?
 OpenST Mosaic enables chain-to-chain state transfer.
 That allows us to secure an insecure chain's state on a secure chain.
 We call the secure chain \emph{origin} $\OC$ and the insecure one \emph{auxiliary} $\A$.
-% TODO is it really required to do casper about origin? we will trail behind head and a simple 2/3 majority should be sufficient. What about other block proposal mechanisms on origin?
-In order to be blockchain proposal mechanism agnostic, we layer Casper~\cite{casperffg} on top of both chains.
+In order to be blockchain proposal mechanism agnostic,
+we layer Casper~\cite{casperffg} on top of any auxiliary chain.
+We apply Casper to auxiliary the same way its application to Ethereum is described in the paper.
+We assume origin to have at least two properties:
+practical byzantine fault tolerance (PBFT)~\cite{pbft} and plausible liveness~\cite{casperffg}.
+Furthermore, we assume origin to have a concept of finality or at least economic finality.
 
 Mosaic consists of Mosaic nodes that observe both $\OC$ and $\A$
 as well as a specific Gateway like the ones described in section~\ref{subsec:gateway}.
@@ -114,12 +117,12 @@ the set of validators, that is tracked on origin, is also known to auxiliary.
 
 % TODO *mosaic* validators?
 % TODO what is state
-\emph{Validators} are actors that vote on state.
+\emph{Validators} are actors that vote on state that is transferred between the two chains.
 % TODO what do we mean by similar
 % TODO introduce slashing here?
-They are similar to validators in Casper~\cite{casperffg}.
-Their deposit is stored on origin.
-Similarly to Casper, their deposit rises and falls with rewards and penalties, respectively.
+In addition, on auxiliary, they take the role of the Casper~\cite{casperffg} validators.
+Their deposit, however, is stored on origin.
+Similarly to Casper, any validator's deposit rises and falls with rewards and penalties, respectively.
 When we say "$\frac{2}{3}$ of validators", we equally refer to the deposit-weighted fraction.
 However, there are different kinds of voting message types, as described below.
 
@@ -144,13 +147,10 @@ Validators can vote on a number of events:
 	\item checkpoint justifications on auxiliary, and
  	\item auxiliary state transfers to origin.
 \end{inparaenum}
-When state is transferred from origin to auxiliary,
-% TODO language; unclear; add explanation; do we need it?
-the validators vote according to the Casper rules like the state transfer represents a checkpoint.
-On auxiliary, checkpoints are justified by supermajority links as described in Casper.
-Casper applied to auxiliary the same way its application to Ethereum is described in the Casper paper.
+On auxiliary, checkpoints are justified and finalised by supermajority links as described in Casper.
+Origin's (economical) finality is assumed as a given.
 % TODO what is a commit?
-When auxiliary's state is transferred to origin, a simple $\frac{2}{3}$ majority vote on that state commits it to origin.
+Thus, when state is transferred between the two chains, a simple $\frac{2}{3}$ majority vote on that state commits it to the receiving chain.
 
 \emph{OSTblocks} are a compressed representation of auxiliary's transactions.
 % TODO are OSTblocks' transactions blocks or dynasties from auxiliary?
@@ -179,7 +179,7 @@ The body can be re-created at any time from the auxiliary chain and proven again
 We consider an OSTblock \emph{closed,} when the full header with the state root from auxiliary is committed to origin.
 We consider an OSTblock \emph{opened,} when the new OSTblock header has been transferred to auxiliary.
 
-% TODO language whole paragraph
+% TODO language whole paragraph; also duplicate
 In order to be block proposal mechanism agnostic, we layer Casper~\cite{casperffg} on top of auxiliary.
 % TODO missing context. Extend or move to validators paragraph above
 Validators vote on supermajority links.
