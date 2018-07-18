@@ -212,16 +212,16 @@ The state is regarded economically finalised when the block that contains the co
 On the auxiliary chain, \emph{OSTgas} is the equivalent to gas on Ethereum.
 For transactions to be included in blocks on auxiliary, a fee is paid for the consumed OSTgas.
 
-% TODO make clear that the OSTgas limit is only a fallback and any finalised checkpoint can be transferred
 % TODO mention Gateways here or more appropriately in the introduction to mosaic
 % TODO possibly move this further up
-Validators could commit every finalised state from auxiliary to origin.
+Validators are allowed to commit every finalised state from auxiliary to origin.
 However, that may be infeasible from an economic viewpoint of the validators.
 Therefore, we propose points on the auxiliary chain where the validators must close the OSTblock.
-Whenever a certain, fixed limit of OSTgas has been spent on auxiliary since the opening of the OSTblock,
-% TODO reward and punishment; how do we enforce this?
-the validators must close the OSTblock at the next finalised auxiliary checkpoint.
-This is marked in figure~\ref{fig:mosaic} by the dashed line.
+Whenever a certain fixed limit of OSTgas has been spent on auxiliary since the opening of the OSTblock,
+the validators \emph{must} close the OSTblock at the next finalised auxiliary checkpoint.
+If a validator does not vote to commit that checkpoint,
+its deposit can be slashed.
+The OSTgas limit is marked in figure~\ref{fig:mosaic} by the dashed line.
 
 Actors on the auxiliary chain have an economic incentive to finalise their state on origin.
 % TODO OSTgas to _which_ validators?
