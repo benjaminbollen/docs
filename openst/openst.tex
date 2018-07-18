@@ -125,11 +125,11 @@ Their deposit, however, is only a single deposit for all actions and it is store
 Similarly to Casper, any Mosaic validator's deposit rises and falls with rewards and penalties, respectively.
 When we say "$\frac{2}{3}$ of validators", we equally refer to the deposit-weighted fraction.
 
-% TODO describe that OSTblock headers announce the set of validators for the following OSTblock
 The set of Mosaic validators needs to be able to change.
 The logic is similar to that of Casper with the notable difference that, instead of dynasties, we use OSTblocks (described below).
 When a potential validator sends a \emph{deposit message} on origin at OSTblock height $\alpha$,
-then the validator $\upnu$ will join the validator set at OSTblock height $\alpha+2$.
+then the validator will be announced as part of the next set of validators in the header of OSTblock $\alpha+1$ and 
+the validator $\upnu$ will join the validator set at OSTblock height $\alpha+2$.
 % TODO a lot copied from Casper. OK? Required?
 Analogous to Casper, we call $\alpha+2$ the validator's \emph{start OSTblock}, $\BS(\upnu)$.
 If a validator $\upnu$'s withdraw message is included on origin's blockchain during an open OSTblock $\B_\alpha$,
