@@ -138,7 +138,6 @@ We call $\alpha+2$ the validator $\upnu$'s \emph{end OSTblock} $\BE(\upnu)$.
 
 % TODO inparaenum not clear enough; maybe split it into paragraphs
 Mosaic validators can vote on a number of events:
-% TODO are these different kinds of validators?
 \begin{inparaenum}[(a)]
 	\item origin state transfers to auxiliary,
   	\item auxiliary state transfers to origin and
@@ -161,8 +160,9 @@ We call $\alpha$ the height of OSTblock $\B_\alpha$.
 The next OSTblock, that points to $\B_\alpha$ in its header,
 is OSTblock $\B_{\alpha+1}$ at height $\alpha+1$.
 Due to the aforementioned compression of blocks on auxiliary,
-% TODO clarify that "+m" means any number of blocks
-$\B_\alpha$ may contain auxiliary blocks $b_{\A{}i}$ to $b_{\A{}i+m}$.
+$\B_\alpha$ may contain auxiliary blocks $b_{\A{}i}$ to $b_{\A{}i+m}$,
+which means any number $m$ of blocks,
+where $b_{\A{}i+m}$ must be a Casper checkpoint that has been finalised on auxiliary.
 
 The OSTblock header of block $\B_\alpha$ at height $\alpha$ contains:
 \begin{enumerate}
