@@ -108,17 +108,18 @@ an independent client software that observes both full nodes,
 and there is one smart contract per chain that makes up the Gateway.
 
 % TODO the following paragraph is misplaced, not all concepts are known
-% TODO What does "verify" state mean?
-In order to transfer and verify state, it is required to transfer state bi-directionally between auxiliary and origin.
-% TODO what does finalise on origin mean
-% TODO what does it give to finalise on origin?
-That way, auxiliary can verify that its state has been finalised on origin and
-the set of validators, that is tracked on origin, is also known to auxiliary.
+It is required to move state from auxiliary to origin in order for the state to be finalised.
+State is only assumed to be final on origin,
+as we do not assume any security properties of auxiliary.
+On the other hand it is required to move state from origin to auxiliary,
+because auxiliary must be made aware of the fact that its state has become final.
+When we say that we transfer state,
+we actually refer to the transfer of the root of the state tree.
+Any state can be proven against a known root.
 
 % TODO *mosaic* validators?
 % TODO what is state
 \emph{Validators} are actors that vote on state that is transferred between the two chains.
-% TODO what do we mean by similar
 % TODO introduce slashing here?
 In addition, on auxiliary, they take the role of the Casper~\cite{casperffg} validators.
 Their deposit, however, is stored on origin.
