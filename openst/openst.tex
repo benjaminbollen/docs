@@ -120,9 +120,7 @@ When we say that we transfer state between chains,
 then we always assume an existing Gateway as described in section~\ref{subsec:gateway}.
 That Gateway is used to transfer the root of state tree from one chain to another.
 
-% TODO what is state
 Mosaic \emph{Validators} are actors that vote on state that is transferred between the two chains.
-% TODO introduce slashing here?
 In addition, on auxiliary, the Mosaic validators also take the role of the Casper~\cite{casperffg} validators.
 Their deposit, however, is only a single deposit for all actions and it is stored solely on origin.
 Similarly to Casper, any Mosaic validator's deposit rises and falls with rewards and penalties, respectively.
@@ -144,14 +142,14 @@ Mosaic validators can vote on a number of events:
 \begin{inparaenum}[(a)]
 	\item origin state transfers to auxiliary,
   	\item auxiliary state transfers to origin and
-	\item checkpoint justifications on auxiliary in the role of a Casper validator there.
+	\item checkpoint justifications on auxiliary in the role of a Casper validator.
 \end{inparaenum}
 On auxiliary, checkpoints are justified and finalised by supermajority links as described in Casper.
 Origin's (economical) finality is assumed as a given.
 Thus, state is final on its respective chain and only the transfer must be must be approved on the other chain.
-% TODO what is a commit?
 When state is transferred between the two chains, in any direction,
 a simple $\frac{2}{3}$ majority vote on that state successfully commits it to the receiving chain.
+A committed state that is (economically) finalised is regarded as finalised on the receiving chain.
 
 \emph{OSTblocks} are a compressed representation of auxiliary's transactions.
 % TODO are OSTblocks' transactions blocks or dynasties from auxiliary?
@@ -225,8 +223,7 @@ its deposit can be slashed.
 The OSTgas limit is marked in figure~\ref{fig:mosaic} by the dashed line.
 
 Actors on the auxiliary chain have an economic incentive to finalise their state on origin.
-% TODO OSTgas to _which_ validators?
-The block creators of auxiliary will pay a fraction of their earned OSTgas to the validators as a fee when the validators move the state to origin.
+The block creators of auxiliary will pay a fraction of their earned OSTgas to the Mosaic validators as a fee when the validators move the state to origin.
 % TODO context and language
 % TODO why?
 Due to the OSTblocks, Mosaic validators can only copy the state from auxiliary to origin after the state of origin has been copied to auxiliary.
