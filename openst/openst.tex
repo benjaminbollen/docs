@@ -116,6 +116,9 @@ because auxiliary must be made aware of the fact that its state has become final
 When we say that we transfer state,
 we actually refer to the transfer of the root of the state tree.
 Any state can be proven against a known root.
+When we say that we transfer state between chains,
+then we always assume an existing Gateway as described in section~\ref{subsec:gateway}.
+That Gateway is used to transfer the root of state tree from one chain to another.
 
 % TODO what is state
 Mosaic \emph{Validators} are actors that vote on state that is transferred between the two chains.
@@ -211,7 +214,6 @@ The state is regarded economically finalised when the block that contains the co
 On the auxiliary chain, \emph{OSTgas} is the equivalent to gas on Ethereum.
 For transactions to be included in blocks on auxiliary, a fee is paid for the consumed OSTgas.
 
-% TODO mention Gateways here or more appropriately in the introduction to mosaic
 % TODO possibly move this further up
 Mosaic validators are allowed to commit every finalised state from auxiliary to origin.
 However, that may be infeasible from an economic viewpoint of the validators.
