@@ -117,18 +117,16 @@ When we say that we transfer state,
 we actually refer to the transfer of the root of the state tree.
 Any state can be proven against a known root.
 
-% TODO *mosaic* validators?
 % TODO what is state
-\emph{Validators} are actors that vote on state that is transferred between the two chains.
+Mosaic \emph{Validators} are actors that vote on state that is transferred between the two chains.
 % TODO introduce slashing here?
-In addition, on auxiliary, they take the role of the Casper~\cite{casperffg} validators.
-Their deposit, however, is stored on origin.
-Similarly to Casper, any validator's deposit rises and falls with rewards and penalties, respectively.
+In addition, on auxiliary, the Mosaic validators also take the role of the Casper~\cite{casperffg} validators.
+Their deposit, however, is only a single deposit for all actions and it is stored solely on origin.
+Similarly to Casper, any Mosaic validator's deposit rises and falls with rewards and penalties, respectively.
 When we say "$\frac{2}{3}$ of validators", we equally refer to the deposit-weighted fraction.
-However, there are different kinds of voting message types, as described below.
 
 % TODO describe that OSTblock headers announce the set of validators for the following OSTblock
-The set of validators needs to be able to change.
+The set of Mosaic validators needs to be able to change.
 The logic is similar to that of Casper with the notable difference that, instead of dynasties, we use OSTblocks (described below).
 When a potential validator sends a \emph{deposit message} on origin at OSTblock height $\alpha$,
 then the validator $\upnu$ will join the validator set at OSTblock height $\alpha+2$.
@@ -138,20 +136,20 @@ If a validator $\upnu$'s withdraw message is included on origin's blockchain dur
 it similarly leaves the set of validators at OSTblock height $\alpha+2$.
 We call $\alpha+2$ the validator $\upnu$'s \emph{end OSTblock} $\BE(\upnu)$.
 
-% TODO *mosaic* validators?
-% TODO should we have different names for mosaic validators and "casper on origin" validators?
 % TODO inparaenum not clear enough; maybe split it into paragraphs
-Validators can vote on a number of events:
+Mosaic validators can vote on a number of events:
 % TODO are these different kinds of validators?
 \begin{inparaenum}[(a)]
 	\item origin state transfers to auxiliary,
-	\item checkpoint justifications on auxiliary, and
- 	\item auxiliary state transfers to origin.
+  	\item auxiliary state transfers to origin and
+	\item checkpoint justifications on auxiliary in the role of a Casper validator there.
 \end{inparaenum}
 On auxiliary, checkpoints are justified and finalised by supermajority links as described in Casper.
 Origin's (economical) finality is assumed as a given.
+Thus, state is final on its respective chain and only the transfer must be must be approved on the other chain.
 % TODO what is a commit?
-Thus, when state is transferred between the two chains, a simple $\frac{2}{3}$ majority vote on that state commits it to the receiving chain.
+When state is transferred between the two chains, in any direction,
+a simple $\frac{2}{3}$ majority vote on that state successfully commits it to the receiving chain.
 
 \emph{OSTblocks} are a compressed representation of auxiliary's transactions.
 % TODO are OSTblocks' transactions blocks or dynasties from auxiliary?
@@ -169,9 +167,9 @@ $\B_\alpha$ may contain auxiliary blocks $b_{\A{}i}$ to $b_{\A{}i+m}$.
 The OSTblock header of block $\B_\alpha$ at height $\alpha$ contains:
 \begin{enumerate}
 	\item A link to the previous OSTblock
-	\item The signatures of the validators in $\V_\alpha$
+	\item The signatures of the Mosaic validators in $\V_\alpha$
 	\item The state root of the last block of auxiliary that is contained within the OSTblock
-	\item The set of validators for the next OSTblock, $\V_{\alpha+1}$
+	\item The set of Mosaic validators for the next OSTblock, $\V_{\alpha+1}$
 \end{enumerate}
 The body of an OSTblock consists of all the transactions that make up the blocks on auxiliary that are contained within this OSTblock.
 We do not store the body of an OSTblock on origin, only the header.
@@ -215,7 +213,7 @@ For transactions to be included in blocks on auxiliary, a fee is paid for the co
 
 % TODO mention Gateways here or more appropriately in the introduction to mosaic
 % TODO possibly move this further up
-Validators are allowed to commit every finalised state from auxiliary to origin.
+Mosaic validators are allowed to commit every finalised state from auxiliary to origin.
 However, that may be infeasible from an economic viewpoint of the validators.
 Therefore, we propose points on the auxiliary chain where the validators must close the OSTblock.
 Whenever a certain fixed limit of OSTgas has been spent on auxiliary since the opening of the OSTblock,
@@ -229,11 +227,11 @@ Actors on the auxiliary chain have an economic incentive to finalise their state
 The block creators of auxiliary will pay a fraction of their earned OSTgas to the validators as a fee when the validators move the state to origin.
 % TODO context and language
 % TODO why?
-Due to the OSTblocks, validators can only copy the state from auxiliary to origin after the state of origin has been copied to auxiliary.
+Due to the OSTblocks, Mosaic validators can only copy the state from auxiliary to origin after the state of origin has been copied to auxiliary.
 Thus, validators are incentivised to close an OSTblock and open a new one in order to earn the OSTgas fee for the transfer of auxiliary's state.
 
 % TODO extend paragraph on punishment
-It must be possible to hold validators accountable if they misbehave.
+It must be possible to hold Mosaic validators accountable if they misbehave.
 In order to do so, anyone must be able to present proof of malicious actions on origin,
 as the validators' deposits are stored there.
 When a validator violates a slashing condition on auxiliary by making an illegal vote,
@@ -244,9 +242,9 @@ the proof and the subsequent slashing can be carried out on origin as well.
 
 % TODO extend paragraph on long range revisions
 To prevent long range revisions, we apply the same rules that Casper applies:
-after a validator leaves the set of validators, its deposit is kept for another four months.
+after a Mosaic validator leaves the set of validators, its deposit is kept for another four months.
 Casper votes on auxiliary can only be carried out up to three months into the past.
-That leaves one month headroom to blame an adversary on origin and get its deposit slashed.
+That leaves one month headroom to blame auxiliary's adversaries on origin and get its deposit slashed.
 
 %
 % Section
