@@ -4,6 +4,7 @@
 \usepackage{amsmath}
 \usepackage{upgreek}
 \usepackage{paralist}
+\usepackage{verbatim}
 
 \newcommand{\A}{\mathcal{A}}
 \newcommand{\OC}{\mathcal{O}}
@@ -24,7 +25,7 @@
 \input{eth_header}
 \graphicspath{ {./images/} }
 
-\title{OpenST\\\sc\Large{a framework for building token economies}}
+\title{OpenST Mosaic\\\sc\Large{a framework to scale Ethereum}}
 \author{\textbf{Benjamin Bollen, Martin Schenck}\\ for OpenST Foundation}
 \date{OpenST v0.10 - May 2018}
 
@@ -51,17 +52,6 @@ OpenST Mosaic is a layer-2
 %
 % Section
 %
-\section{OpenST}
-
-\subsection{Use Cases}
-
-\subsubsection{BT}
-
-\subsubsection{DApp}
-
-%
-% Section
-%
 \section{Related Work}
 
 \paragraph{Verifiers' Dilemma}
@@ -81,15 +71,27 @@ OpenST Mosaic is a layer-2
 %
 % Section
 %
-\section{Openly Scaling Blockchains}
+\section{OpenST Mosaic}
 
-\subsection{OpenST Gateway}
-\label{subsec:gateway}
+%
+% %% Objective
+% Scale Etherum to thousands of transactions per second
+% => Finalise thousands of transactions per second on Ethereum
+%
+% %% Origin
+% Assume origin BFT and lively
+%
+% %% Method
+% 1. Ownership model: Tokens and NFT
+% 2. Borrow ownership onto auxiliary
+%    Aux halts => non time-limited recovery
+% 3. Origin finality is authoritative because ownership only borrowed 
+%
 
-OpenST Gateway enables chain-to-chain transfer of state objects.
 
 % TODO are OSTblocks "checkpoints" on auxiliary?
 \subsection{OpenST Mosaic}
+\begin{comment}
 \label{subsec:mosaic}
 OpenST Mosaic enables chain-to-chain state transfer.
 That allows us to secure an insecure chain's state on a secure chain.
@@ -244,30 +246,19 @@ To prevent long range revisions, we apply the same rules that Casper applies:
 after a Mosaic validator leaves the set of validators, its deposit is kept for another four months.
 Casper votes on auxiliary can only be carried out up to three months into the past.
 That leaves one month headroom to blame auxiliary's adversaries on origin and get its deposit slashed.
+\end{comment}
 
-%
-% Section
-%
-\section{Securing Simple User Experience}
+\subsection{OpenST Gateway}
+\label{subsec:gateway}
 
-\subsection{Token Holder Contracts}
-
-APIs; no need to follow the chain.
-
-%
-% Section
-%
-\section{Platform}
-
-\subsection{Token Rules}
-
-\subsection{OpenST Platform}
+OpenST Gateway enables chain-to-chain transfer of state objects.
 
 %
 % Section
 %
 \section{Outlook}
 
+\subsection{Token Economies}
 \subsection{Neo and Cardano}
 
 %
