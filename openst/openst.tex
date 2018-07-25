@@ -48,12 +48,14 @@ OpenST Mosaic is a layer-2
 % Section
 %
 \section{Introduction}
-Ethereum is inherently limited in the number of transactions it can perform per second~\cite{ethereum}.
-In order for Ethereum to gain mass adoption, an increase in throughput is desired.
+Ethereum~\cite{ethereum} with its current proof of work Nakamoto consensus protocol is inherently limited in the number of transactions it can perform per second~\cite{verifiersdilemma}.
+In order for Ethereum to gain mass adoption, an increase in throughput is required.
 Current efforts include state channels~\cite{lightning} like the Raiden Network~\cite{raiden} and side chains~\cite{sidechains} like Plasma~\cite{plasma}.
 A drawback of the proposed solutions is the fact that the user has to be always online in order to ensure integrity of her transactions.
+Furthermore, in case of a mass exit, a congested Ethereum network could lead to lost funds.
 
-OpenST Mosaic is a holistic solution powered by Ethereum to scale Ethereum to thousands of transactions per second.
+OpenST Mosaic is a holistic solution powered by Ethereum that we expect to securely scale Ethereum to thousands of transactions per second.
+We achieve that by verifiably finalising batches of sidechain transactions on Ethereum.
 
 
 %
@@ -78,7 +80,19 @@ OpenST Mosaic is a holistic solution powered by Ethereum to scale Ethereum to th
 %
 % Section
 %
-\section{OpenST Mosaic}
+\section{OpenST-Mosaic}
+OpenST Mosaic is not conceptually bound to Ethereum.
+As layer one we assume a blockchain that has byzantine fault tolerance~\cite{pbft} and plausible liveliness~\cite{casperffg}.
+We call that blockchain \emph{Origin} $\OC$.
+We chose Ethereum as Origin for our first implementation.
+Transactions will take place on a sidechain that we call \emph{Auxiliary} $\A$.
+Origin and Auxiliary must both % TODO what is it called that state is tracked and a state root exists?
+
+We assume Origin to track all ownership.
+Origin only lends ownership to Auxiliary.
+Thus, finality on Origin is always authoritative.
+If Auxiliary halts, users can recover the assets they own and there is no restriction in time for them to do so,
+enabling a coordinated mass exit over time.
 
 %
 % %% Objective
@@ -95,11 +109,124 @@ OpenST Mosaic is a holistic solution powered by Ethereum to scale Ethereum to th
 % 3. Origin finality is authoritative because ownership only borrowed 
 %
 
+% Somewhere say that we transfer state roots back and forth
 
-% TODO are OSTblocks "checkpoints" on auxiliary?
-\subsection{OpenST Mosaic}
-\begin{comment}
+\subsection{OpenST-Mosaic}
 \label{subsec:mosaic}
+
+%Quote FFG slashing conditions and voting rules.
+
+% General assumption
+%Each validator can verify the blocks $a_i$ it has received (incomplete view).
+%Origin is byzantine fault tolerant -> each validator can assert (prob) finality of the state of origin.
+
+% See lemma plus accountability must be done twice in two directions
+
+% TH 1 and 2 Vo can be slashed for the actions of Va
+
+% All theorems and lemmas assume liveliness of Origin!!
+
+%Theorem 1 and 2 assume known sets of validators
+%Maybe theorem 1 is 1a and 1b
+%1a simulated accountable safety
+%1b simulated plausible liveliness
+
+\begin{lemma}
+	\label{lemma:mapping}
+	Given a mapping $\V^\OC\cong\V^\A$ on $\OC$
+	there is a proof that any message signature by a validator $\upnu^\A$ of $\V^\A$ on $\A$ belongs to the respective validator $\upnu^\OC$ of $\V^\OC$ on $\OC$.
+\end{lemma}
+
+\begin{theorem}[Remote Accountability]
+	\label{theorem:remoteaccountability}
+	A vote on $\A$ that violates a Casper Commandment can be punished on $\OC$.
+	\begin{proof}
+		Given lemma~\ref{lemma:mapping}, a violation of either Casper Commandment can be proven on $\OC$ without the respective transaction residing on $\OC$.
+		If a validator $\upnu^\A$ published two distinct votes for the same target height, the relevant votes can be presented on $\OC$ and the signature can be validated.
+		An offending validator $\upnu^\OC$ can be identified according to lemma~\ref{lemma:mapping} and its deposit slashed.
+		The same is true if a validator $\upnu^\A$ votes within the span of its other votes.
+		All relevant votes including their signatures can be presented on $\OC$.
+	\end{proof}
+\end{theorem}
+
+\begin{theorem}[Simulated Finality]
+	\label{theorem:simulatedfinality}
+	Given Origin $\OC$ with blocks $b^{\OC}_i$, checkpoints $c^{\OC}_i$ can be reported on Auxiliary $\A$, such that a set of validators $\V^\OC$ with stake on $\OC$ can reach finality about the reported checkpoints $c^{\OC}_i$ on $\A$ as $\V^\A$ with accountable safety enforced on $\OC$.
+	%Using FFG voting rules
+	%Validators Vo on origin can be held accountable for votes by Va (given mapping) cast per FFG rules
+	\begin{proof}
+		Accountable safety is enforced according to theorem~\ref{theorem:remoteaccountability}.
+		%Asserting the FFG slashing conditions depend only on the relevant votes themselves.
+		%As such votes that were committed to Auxiliary can be reported on Origin to enforce slashing the stake on Origin.
+		%We can always report vote objects on origin.
+		%=> auxiliary public keys must be known on origin. mapping on O
+		%Vo can be made accountable for Va as mapping is known.
+		%because origin is assumed to be alive you can have finality of the simulated origin on auxiliary.
+		%
+		%votes inherently verifiable
+		
+		%lemma votes can be transferred to origin
+		%
+		%Simulating Origin.
+		%Don't want to reproduce all of Origin.
+		%=> only simulate finality of blocks without executing transactions
+		%=> Casper FFG: have majority vote on state root and have slashing conditions that are independent of the content of the transactions; but for already produced blocks
+		%
+		%Origin: blocks with headers; set of validators: stake to slash; Origin has a mapping of Vorigin to Vauxiliary; (register checkpoints on Origin in order to prove Aux votes later?)
+		%Auxiliary: blocks with headers; assume without loss of generality that the validator set Vauxiliary; contract where you can report block headers from Origin (reward? only if block gets finalised?); FFG voting => vote objects	
+	\end{proof}
+\end{theorem}
+%Transfer state from Origin to Auxiliary.
+%Report blocks from Origin.
+%FFG voting rules.
+%Simulated finality.
+%Slash on origin.
+
+\begin{theorem}[Leveraged Security]
+	\label{theorem:leveragedsecurity}
+	%Vo can be held accountable for actions of Va
+	%
+	%Full casper and we can slash value on origin.
+	%Blocks $a_i$ on $\A$ can be finalised on $\A$ by Va using FFG voting rules with stake of Vo on origin.
+	%Auxiliary isn't alive; only last finalised block ai can always be validated on origin to 
+	\begin{proof}
+		Lemma~\ref{lemma:mapping}.
+	\end{proof}
+\end{theorem}
+%Auxiliary blocks are not reported to origin.
+%Casper contained on Auxiliary.
+%Slashing on Origin.
+%Slashing on Origin can be proven by presenting conflicting vote objects and their signatures.
+
+% we now want an async measure to require Va to report to O
+% Gas limit rule. if va does not vote on finalised after gas limit: slash on o
+% Introduce OSTblock
+%
+% gas limit means that if not the next finalised block is reported then anyone can blame on an older finalised block above the limit and all validators will be pushed
+% we need to track all gas consumption
+
+\begin{theorem}[]
+	\label{theorem:}
+	%Validator can always behave correctly and then won't be slashed on origin.
+	%Validators 
+	%
+	%Gas limit does not break Th2 (or FFG).
+	%Vo is rewarded for having Va in the signature tree.
+	\begin{proof}
+		
+	\end{proof}
+\end{theorem}
+%OSTblock and forced closing.
+%Doesn't brake any of the existing assumptions.
+
+\begin{comment}
+\begin{theorem}[Accountable Safety]
+\label{theorem:safety}
+Two conflicting checkpoints $a_m$ and $b_n$ cannot both be finalized.
+\begin{proof}
+Let $a_m$ (with justified direct child $a_{m+1}$) and $b_n$ (with justified direct child $b_{n+1}$) be distinct finalized checkpoints as in.
+\end{proof}
+\end{theorem}
 OpenST Mosaic enables chain-to-chain state transfer.
 That allows us to secure an insecure chain's state on a secure chain.
 We call the secure chain \emph{origin} $\OC$ and the insecure one \emph{auxiliary} $\A$.
@@ -255,10 +382,24 @@ Casper votes on auxiliary can only be carried out up to three months into the pa
 That leaves one month headroom to blame auxiliary's adversaries on origin and get its deposit slashed.
 \end{comment}
 
-\subsection{OpenST Gateway}
+\subsection{OpenST-Gateway}
 \label{subsec:gateway}
 
 OpenST Gateway enables chain-to-chain transfer of state objects.
+
+\subsection{Reward Structure}
+On Origin in OST.
+
+rewarding for reported block headers that get finalised
+
+\subsection{Dynamic Set of Validators}
+
+\subsection{Set-Up of An Auxiliary Chain}
+Start running with gas cost of 0.
+Set up contract with base token.
+Set up Gateways, but closed.
+Give one week of blaming on Origin. How can there be proof on Origin without Aux's state root? Or is that also transferred in the set-up phase? If so: why is it trusted?
+Open Gateways.
 
 %
 % Section
