@@ -133,11 +133,9 @@ enabling a coordinated mass exit over time.
 %1a simulated accountable safety
 %1b simulated plausible liveliness
 
-\begin{lemma}
-	\label{lemma:mapping}
-	Given a mapping $\V^\OC\cong\V^\A$ on $\OC$
-	there is a proof that any message signature by a validator $\upnu^\A$ of $\V^\A$ on $\A$ belongs to the respective validator $\upnu^\OC$ of $\V^\OC$ on $\OC$.
-\end{lemma}
+
+We assume without loss of generality that for every validator-address $v^O$ in the validator set $\V^O$ on origin a corresponding, unique validator-address $v^A$ on auxiliary $A$ can be associated and we call the resulting validator set $\V^A$, the validator set on $A$. A single actor is assumed to control and be responsible for both $v^O$ and the associated $v^A$. On origin $v^O$ will always be held accountable for any signed message by $v^A$ on $A$, because and only $v^O$ has stake on origin.
+
 
 \begin{lemma}[Remote Accountability]
 	\label{theorem:remoteaccountability}
