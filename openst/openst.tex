@@ -23,7 +23,7 @@
 
 
 \input{eth_header}
-\graphicspath{ {./images/} }
+\graphicspath{{images/}}
 
 \title{OpenST Mosaic\\\sc\Large{a framework to scale Ethereum}}
 % TODO add all authors
@@ -141,7 +141,7 @@ On origin $v^O$ will always be held accountable for any signed message by $v^A$ 
 
 
 \begin{lemma}[Remote Accountability]
-	\label{theorem:remoteaccountability}
+	\label{lemma:remoteaccountability}
 	A vote on $\A$ that violates a Casper Commandment can be punished on $\OC$.
 	\begin{proof}
 		% TODO @benjaminbollen removed the lemma so we can not reference it anymore
@@ -157,31 +157,27 @@ On origin $v^O$ will always be held accountable for any signed message by $v^A$ 
 	\label{theorem:partialview}
 	Given Origin $\OC$ with blocks $b^{\OC}_i$, checkpoints $c^{\OC}_i$ can be reported on Auxiliary $\A$, such that a set of validators $\V^\OC$ with stake on $\OC$ can reach finality about the reported checkpoints $c^{\OC}_i$ on $\A$ as $\V^\A$ with accountable safety enforced on $\OC$.
 	\begin{proof}
-		If you report checkpoints from Origin as $\left\langle h_c, h(h_c) \right\rangle$ where $h_c$ is the hash of any checkpoint c on Origin and $h(c)$ is the height of checkpoint c in Origin's checkpoint tree, then you can vote on Origin's checkpoints on Auxiliary according to the Casper FFG voting rules.
+		If you report checkpoints from Origin as $\left\langle h_c, h(c) \right\rangle$ where $h_c$ is the hash of any checkpoint c on Origin and $h(c)$ is the height of checkpoint c in Origin's checkpoint tree, then you can vote on Origin's checkpoints on Auxiliary according to the Casper FFG voting rules.
 		A Casper FFG vote consists of two checkpoint hashes, two checkpoint heights, and the validator signature, all of which is now available on Auxiliary.
 		
-		Accountable safety is enforced according to theorem~\ref{theorem:remoteaccountability}.
+		Accountable safety is enforced according to lemma~\ref{lemma:remoteaccountability}.
 		%(register checkpoints on Origin in order to prove Aux votes later?)
 	\end{proof}
 \end{theorem}
 
 \begin{theorem}[Leveraged Security]
 	\label{theorem:leveragedsecurity}
-	% @benjaminbollen write theorem and proof here
-	
-	%Vo can be held accountable for actions of Va
-	%
-	%Full casper and we can slash value on origin.
-	%Blocks $a_i$ on $\A$ can be finalised on $\A$ by Va using FFG voting rules with stake of Vo on origin.
-	%Auxiliary isn't alive; only last finalised block ai can always be validated on origin to 
+	Given that the auxiliary chain $A$ follows the Casper fork choice rule and
+	given that the validators staked on Origin $O$,
+	Casper can be applied to $A$ as a whole; without validators staking on $A$.
+	It is not necessary to report blocks or block headers from $A$ to $O$.
 	\begin{proof}
-		Lemma~\ref{lemma:mapping}.
+		Validators staked on Origin
+		Lemma~\ref{lemma:remoteaccountability} proves that the validators can be slashed or Origin for their actions on Auxiliary.
+		Even though Auxiliary is not necessarily lively, Casper still has plausible liveliness,
+		as Casper assumes that the underlying chain keeps producing blocks.
 	\end{proof}
 \end{theorem}
-%Auxiliary blocks are not reported to origin.
-%Casper contained on Auxiliary.
-%Slashing on Origin.
-%Slashing on Origin can be proven by presenting conflicting vote objects and their signatures.
 
 % @benjaminbollen will write the following section
 % we now want an async measure to require Va to report to O
@@ -208,7 +204,6 @@ On origin $v^O$ will always be held accountable for any signed message by $v^A$ 
 %Doesn't brake any of the existing assumptions.
 
 \begin{comment}
-
 %
 % %% Original Mosaic text below
 %
@@ -325,8 +320,7 @@ The state is regarded economically finalised when the block that contains the co
 \begin{figure}[htb]
     \centering
 	\includegraphics[width=\textwidth]{mosaic}
-	\caption{
-		\textbf{The Mosaic state transfer.}
+	\caption{\textbf{The Mosaic state transfer.}
 		The closing of $\B_{\alpha-1}$ means that the finalised checkpoint $b_{\A{}i}$ is the last block of $\B_{\alpha-1}$.
 		Even though the details of $\B_\alpha$ will not be known until the opening is transferred to $\A$,
 		the first block in $\B_\alpha$ will be $b_{\A{}i+1}$.
