@@ -179,27 +179,22 @@ On origin $v^O$ will always be held accountable for any signed message by $v^A$ 
 
 % @benjaminbollen will write the following section
 % we now want an async measure to require Va to report to O
-% Gas limit rule. if va does not vote on finalised after gas limit: slash on o
 % Introduce OSTblock
 %
-% gas limit means that if not the next finalised block is reported then anyone can blame on an older finalised block above the limit and all validators will be pushed
+% gas limit means that if not the next finalised block is reported then anyone can blame on an older finalised block above the limit and all validators will be punished
 % we need to track all gas consumption
 % validators get paid per gas
 
-\begin{theorem}[]
-	\label{theorem:}
-	% @benjaminbollen will write this section
-	%Validator can always behave correctly and then won't be slashed on origin.
-	%Validators 
-	%
-	%Gas limit does not break Th2 (or FFG).
-	%Vo is rewarded for having Va in the signature tree.
+\begin{theorem}[Honesty Guard]
+	\label{theorem:honestyguard}
+	An honest validator will not be punished by the OSTgas limit rules.
 	\begin{proof}
-		
+		All validators, including the honest ones,
+		would be punished if the lowest finalised auxiliary checkpoint above the gas limit were not reported to Origin.
+		If there is at least one honest validator, however, that validator would report the auxiliary checkpoint to Origin.
+		Thus, all validators get only punished if none of them is honest.
 	\end{proof}
 \end{theorem}
-%OSTblock and forced closing.
-%Doesn't brake any of the existing assumptions.
 
 \begin{comment}
 %
