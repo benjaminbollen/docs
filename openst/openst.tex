@@ -155,6 +155,9 @@ On origin $v^O$ will always be held accountable for any signed message by $v^A$ 
 	\label{theorem:partialview}
 	Given Origin $O$ with blocks $b^{O}_i$, checkpoints $c^{O}_i$ can be reported on Auxiliary $A$, such that a set of validators $\V^O$ with stake on $O$ can reach finality about the reported checkpoints $c^{O}_i$ on $A$ as $\V^A$ with accountable safety enforced on $O$.
 	\begin{proof}
+		% TODO we need the block header from O
+		% TODO we need to assume that validators can observe both chains
+		% TODO mention that we need to trail O's head
 		If you report checkpoints from Origin as $\left\langle h_c, h(c) \right\rangle$ where $h_c$ is the hash of any checkpoint c on Origin and $h(c)$ is the height of checkpoint c in Origin's checkpoint tree, then you can vote on Origin's checkpoints on Auxiliary according to the Casper FFG voting rules.
 		A Casper FFG vote consists of two checkpoint hashes, two checkpoint heights, and the validator signature, all of which is now available on Auxiliary.
 		
@@ -170,8 +173,11 @@ On origin $v^O$ will always be held accountable for any signed message by $v^A$ 
 	Casper can be applied to $A$ as a whole; without validators staking on $A$.
 	It is not necessary to report blocks or block headers from $A$ to $O$.
 	\begin{proof}
+		% TODO
 		Validators staked on Origin
-		Lemma~\ref{lemma:remoteaccountability} proves that the validators can be slashed or Origin for their actions on Auxiliary.
+		
+		% TODO more precision
+		Lemma~\ref{lemma:remoteaccountability} proves that the validators can be slashed on Origin for their actions on Auxiliary.
 		Even though Auxiliary is not necessarily lively, Casper still has plausible liveliness,
 		as Casper assumes that the underlying chain keeps producing blocks.
 	\end{proof}
@@ -182,10 +188,9 @@ Therefore, validators do not have an incentive to copy the state root from Auxil
 We present an asynchronous mechanism that forces validators to copy the state root.
 We define the amount of consumed gas since the last copied checkpoint $g$.
 We define a limit of consumed gas $l$.
-The finalised auxiliary checkpoint with the smallest height where $g>l$ must be copied to Origin.
+The finalised auxiliary checkpoint with the smallest dynasty where $g \geq l$ must be copied to Origin.
 \begin{equation}
-	% TODO fix equation
-	\neg\exists f_m := h(f_i) < h(f_m) \land g(f_i) > l
+	\neg\exists f : h(f') < h(f) \land g(f') \geq l
 \end{equation}
 
 If the validators fail to copy that finalised checkpoint,
@@ -199,6 +204,8 @@ When that happens, all validators in the validator set are punished and the fish
 
 We must track the consumed gas on Auxiliary in order to for this proof to work.
 
+% TODO signatures can be combined into a tree and then each vO can verify it. Otherwise it can get too costly for a single party to report a block and get all signatures verified within one transaction
+
 % What if Auxiliary does not have gas? We need gas in addition to a state root to be able to use Auxiliary.
 
 % At this point we don't actually need the OSTblock concept. Only variable set of validators
@@ -209,7 +216,7 @@ We must track the consumed gas on Auxiliary in order to for this proof to work.
 
 \begin{theorem}[Honesty Guard]
 	\label{theorem:honestyguard}
-	An honest validator will not be punished by the OSTgas limit rules.
+	An honest validator will not be punished by the gas limit rules.
 	\begin{proof}
 		All validators, including the honest ones,
 		would be punished if the lowest finalised auxiliary checkpoint above the gas limit were not reported to Origin.
@@ -217,6 +224,8 @@ We must track the consumed gas on Auxiliary in order to for this proof to work.
 		Thus, all validators get only punished if none of them is honest.
 	\end{proof}
 \end{theorem}
+
+% TODO small reward for the reporter in order to mitigate parasitic behaviour
 
 \begin{comment}
 %
