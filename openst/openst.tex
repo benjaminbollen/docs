@@ -134,13 +134,17 @@ enabling a coordinated mass exit over time.
 %1b simulated plausible liveliness
 
 
-We assume without loss of generality that for every validator-address $v^O$ in the validator set $\V^O$ on origin a corresponding, unique validator-address $v^A$ on auxiliary $A$ can be associated and we call the resulting validator set $\V^A$, the validator set on $A$. A single actor is assumed to control and be responsible for both $v^O$ and the associated $v^A$. On origin $v^O$ will always be held accountable for any signed message by $v^A$ on $A$, because and only $v^O$ has stake on origin.
+We assume without loss of generality that for every validator-address $v^O$ in the validator set $\V^O$ on origin a corresponding,
+unique validator-address $v^A$ on auxiliary $A$ can be associated and we call the resulting validator set $\V^A$,
+the validator set on $A$. A single actor is assumed to control and be responsible for both $v^O$ and the associated $v^A$.
+On origin $v^O$ will always be held accountable for any signed message by $v^A$ on $A$, because and only $v^O$ has stake on origin.
 
 
 \begin{lemma}[Remote Accountability]
 	\label{theorem:remoteaccountability}
 	A vote on $\A$ that violates a Casper Commandment can be punished on $\OC$.
 	\begin{proof}
+		% TODO @benjaminbollen removed the lemma so we can not reference it anymore
 		Given lemma~\ref{lemma:mapping}, a violation of either Casper Commandment can be proven on $\OC$ without the respective transaction residing on $\OC$.
 		If a validator $\upnu^\A$ published two distinct votes for the same target height, the relevant votes can be presented on $\OC$ and the signature can be validated.
 		An offending validator $\upnu^\OC$ can be identified according to lemma~\ref{lemma:mapping} and its deposit slashed.
@@ -152,37 +156,14 @@ We assume without loss of generality that for every validator-address $v^O$ in t
 \begin{theorem}[Partial View]
 	\label{theorem:partialview}
 	Given Origin $\OC$ with blocks $b^{\OC}_i$, checkpoints $c^{\OC}_i$ can be reported on Auxiliary $\A$, such that a set of validators $\V^\OC$ with stake on $\OC$ can reach finality about the reported checkpoints $c^{\OC}_i$ on $\A$ as $\V^\A$ with accountable safety enforced on $\OC$.
-	%Using FFG voting rules
-	%Validators Vo on origin can be held accountable for votes by Va (given mapping) cast per FFG rules
 	\begin{proof}
-		% @benjaminbollen finish the proof here
+		If you report checkpoints from Origin as $\left\langle h_c, h(h_c) \right\rangle$ where $h_c$ is the hash of any checkpoint c on Origin and $h(c)$ is the height of checkpoint c in Origin's checkpoint tree, then you can vote on Origin's checkpoints on Auxiliary according to the Casper FFG voting rules.
+		A Casper FFG vote consists of two checkpoint hashes, two checkpoint heights, and the validator signature, all of which is now available on Auxiliary.
 		
 		Accountable safety is enforced according to theorem~\ref{theorem:remoteaccountability}.
-		%Asserting the FFG slashing conditions depend only on the relevant votes themselves.
-		%As such votes that were committed to Auxiliary can be reported on Origin to enforce slashing the stake on Origin.
-		%We can always report vote objects on origin.
-		%=> auxiliary public keys must be known on origin. mapping on O
-		%Vo can be made accountable for Va as mapping is known.
-		%because origin is assumed to be alive you can have finality of the simulated origin on auxiliary.
-		%
-		%votes inherently verifiable
-		
-		%lemma votes can be transferred to origin
-		%
-		%Simulating Origin.
-		%Don't want to reproduce all of Origin.
-		%=> only simulate finality of blocks without executing transactions
-		%=> Casper FFG: have majority vote on state root and have slashing conditions that are independent of the content of the transactions; but for already produced blocks
-		%
-		%Origin: blocks with headers; set of validators: stake to slash; Origin has a mapping of Vorigin to Vauxiliary; (register checkpoints on Origin in order to prove Aux votes later?)
-		%Auxiliary: blocks with headers; assume without loss of generality that the validator set Vauxiliary; contract where you can report block headers from Origin (reward? only if block gets finalised?); FFG voting => vote objects	
+		%(register checkpoints on Origin in order to prove Aux votes later?)
 	\end{proof}
 \end{theorem}
-%Transfer state from Origin to Auxiliary.
-%Report blocks from Origin.
-%FFG voting rules.
-%Simulated finality.
-%Slash on origin.
 
 \begin{theorem}[Leveraged Security]
 	\label{theorem:leveragedsecurity}
