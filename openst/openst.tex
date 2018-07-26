@@ -6,8 +6,6 @@
 \usepackage{paralist}
 \usepackage{verbatim}
 
-\newcommand{\A}{\mathcal{A}}
-\newcommand{\OC}{\mathcal{O}}
 \newcommand{\V}{\mathcal{V}}
 \newcommand{\G}{\mathcal{G}}
 % OSTblock
@@ -83,9 +81,9 @@ We achieve that by verifiably finalising batches of sidechain transactions on Et
 \section{OpenST-Mosaic}
 OpenST Mosaic is not conceptually bound to Ethereum.
 As layer one we assume a blockchain that has byzantine fault tolerance~\cite{pbft} and plausible liveliness~\cite{casperffg}.
-We call that blockchain \emph{Origin} $\OC$.
+We call that blockchain \emph{Origin} $O$.
 We chose Ethereum as Origin for our first implementation.
-Transactions will take place on a sidechain that we call \emph{Auxiliary} $\A$.
+Transactions will take place on a sidechain that we call \emph{Auxiliary} $A$.
 Origin and Auxiliary must both % TODO what is it called that state is tracked and a state root exists?
 
 We assume Origin to track all ownership.
@@ -142,20 +140,20 @@ On origin $v^O$ will always be held accountable for any signed message by $v^A$ 
 
 \begin{lemma}[Remote Accountability]
 	\label{lemma:remoteaccountability}
-	A vote on $\A$ that violates a Casper Commandment can be punished on $\OC$.
+	A vote on $A$ that violates a Casper Commandment can be punished on $O$.
 	\begin{proof}
 		% TODO @benjaminbollen removed the lemma so we can not reference it anymore
-		Given lemma~\ref{lemma:mapping}, a violation of either Casper Commandment can be proven on $\OC$ without the respective transaction residing on $\OC$.
-		If a validator $\upnu^\A$ published two distinct votes for the same target height, the relevant votes can be presented on $\OC$ and the signature can be validated.
-		An offending validator $\upnu^\OC$ can be identified according to lemma~\ref{lemma:mapping} and its deposit slashed.
-		The same is true if a validator $\upnu^\A$ votes within the span of its other votes.
-		All relevant votes including their signatures can be presented on $\OC$.
+		Given lemma~\ref{lemma:mapping}, a violation of either Casper Commandment can be proven on $O$ without the respective transaction residing on $O$.
+		If a validator $\upnu^A$ published two distinct votes for the same target height, the relevant votes can be presented on $O$ and the signature can be validated.
+		An offending validator $\upnu^O$ can be identified according to lemma~\ref{lemma:mapping} and its deposit slashed.
+		The same is true if a validator $\upnu^A$ votes within the span of its other votes.
+		All relevant votes including their signatures can be presented on $O$.
 	\end{proof}
 \end{lemma}
 
 \begin{theorem}[Partial View]
 	\label{theorem:partialview}
-	Given Origin $\OC$ with blocks $b^{\OC}_i$, checkpoints $c^{\OC}_i$ can be reported on Auxiliary $\A$, such that a set of validators $\V^\OC$ with stake on $\OC$ can reach finality about the reported checkpoints $c^{\OC}_i$ on $\A$ as $\V^\A$ with accountable safety enforced on $\OC$.
+	Given Origin $O$ with blocks $b^{O}_i$, checkpoints $c^{O}_i$ can be reported on Auxiliary $A$, such that a set of validators $\V^O$ with stake on $O$ can reach finality about the reported checkpoints $c^{O}_i$ on $A$ as $\V^A$ with accountable safety enforced on $O$.
 	\begin{proof}
 		If you report checkpoints from Origin as $\left\langle h_c, h(c) \right\rangle$ where $h_c$ is the hash of any checkpoint c on Origin and $h(c)$ is the height of checkpoint c in Origin's checkpoint tree, then you can vote on Origin's checkpoints on Auxiliary according to the Casper FFG voting rules.
 		A Casper FFG vote consists of two checkpoint hashes, two checkpoint heights, and the validator signature, all of which is now available on Auxiliary.
@@ -217,7 +215,7 @@ Let $a_m$ (with justified direct child $a_{m+1}$) and $b_n$ (with justified dire
 \end{theorem}
 OpenST Mosaic enables chain-to-chain state transfer.
 That allows us to secure an insecure chain's state on a secure chain.
-We call the secure chain \emph{origin} $\OC$ and the insecure one \emph{auxiliary} $\A$.
+We call the secure chain \emph{origin} $O$ and the insecure one \emph{auxiliary} $A$.
 In order to be blockchain proposal mechanism agnostic,
 we layer Casper~\cite{casperffg} on top of any auxiliary chain.
 We apply Casper to auxiliary the same way its application to Ethereum is described in the paper.
@@ -225,7 +223,7 @@ We assume origin to have at least two properties:
 practical byzantine fault tolerance (PBFT)~\cite{pbft} and plausible liveness~\cite{casperffg}.
 Furthermore, we assume origin to have a concept of finality or at least economic finality.
 
-Mosaic consists of Mosaic nodes that observe both $\OC$ and $\A$
+Mosaic consists of Mosaic nodes that observe both $O$ and $A$
 as well as a specific Gateway like the ones described in section~\ref{subsec:gateway}.
 That means every Mosaic node runs a full node per chain,
 an independent client software that observes both full nodes,
@@ -285,11 +283,11 @@ We call $\alpha$ the height of OSTblock $\B_\alpha$.
 The next OSTblock, that points to $\B_\alpha$ in its header,
 is OSTblock $\B_{\alpha+1}$ at height $\alpha+1$.
 Due to the aforementioned compression of blocks on auxiliary,
-$\B_\alpha$ may contain auxiliary blocks $b_{\A{}i}$ to $b_{\A{}i+m}$,
+$\B_\alpha$ may contain auxiliary blocks $b_{A{}i}$ to $b_{A{}i+m}$,
 which means any number $m$ of blocks,
-where $b_{\A{}i+m}$ must be a Casper checkpoint that has been finalised on auxiliary.
+where $b_{A{}i+m}$ must be a Casper checkpoint that has been finalised on auxiliary.
 
-The OSTblock header of block $\B_\alpha$ at height $\alpha$ contains:
+The OSTblock header of block $\B_alpha$ at height $\alpha$ contains:
 \begin{enumerate}
 	\item A link to the previous OSTblock
 	\item The signatures of the Mosaic validators in $\V_\alpha$
@@ -321,12 +319,12 @@ The state is regarded economically finalised when the block that contains the co
     \centering
 	\includegraphics[width=\textwidth]{mosaic}
 	\caption{\textbf{The Mosaic state transfer.}
-		The closing of $\B_{\alpha-1}$ means that the finalised checkpoint $b_{\A{}i}$ is the last block of $\B_{\alpha-1}$.
-		Even though the details of $\B_\alpha$ will not be known until the opening is transferred to $\A$,
-		the first block in $\B_\alpha$ will be $b_{\A{}i+1}$.
+		The closing of $\B_{\alpha-1}$ means that the finalised checkpoint $b_{A{}i}$ is the last block of $\B_{\alpha-1}$.
+		Even though the details of $\B_\alpha$ will not be known until the opening is transferred to $A$,
+		the first block in $\B_\alpha$ will be $b_{A{}i+1}$.
 		Once a checkpoint is finalised after the OSTgas limit has been reached,
 		% TODO V or a Mosaic node? where's the difference?
-		$\V$ will signal the closing of $\B_\alpha$ to $\OC$.
+		$\V$ will signal the closing of $\B_\alpha$ to $O$.
 	}
 	\label{fig:mosaic}
 \end{figure}
