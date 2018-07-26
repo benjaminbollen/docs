@@ -177,11 +177,33 @@ On origin $v^O$ will always be held accountable for any signed message by $v^A$ 
 	\end{proof}
 \end{theorem}
 
-% @benjaminbollen will write the following section
-% we now want an async measure to require Va to report to O
-% Introduce OSTblock
-%
-% gas limit means that if not the next finalised block is reported then anyone can blame on an older finalised block above the limit and all validators will be punished
+Reporting a finalised auxiliary checkpoint to Origin costs gas on Origin.
+Therefore, validators do not have an incentive to copy the state root from Auxiliary to Origin.
+We present an asynchronous mechanism that forces validators to copy the state root.
+We define the amount of consumed gas since the last copied checkpoint $g$.
+We define a limit of consumed gas $l$.
+The finalised auxiliary checkpoint with the smallest height where $g>l$ must be copied to Origin.
+\begin{equation}
+	% TODO fix equation
+	\neg\exists f_m := h(f_i) < h(f_m) \land g(f_i) > l
+\end{equation}
+
+If the validators fail to copy that finalised checkpoint,
+they are still incentivised to copy a later checkpoint to get rewarded (see below).
+When a validator copies a state root of a later finalised checkpoint from Auxiliary to Origin,
+then it can be proven that there exists a finalised checkpoint with a lesser height that is also above the gas limit.
+To do that, a fisherman could present the earlier finalised checkpoint to Origin after the later one was committed.
+The height, consumed gas, and validator signatures can be proven.
+% TODO proof that they can be proven?
+When that happens, all validators in the validator set are punished and the fisherman is rewarded.
+
+We must track the consumed gas on Auxiliary in order to for this proof to work.
+
+% What if Auxiliary does not have gas? We need gas in addition to a state root to be able to use Auxiliary.
+
+% At this point we don't actually need the OSTblock concept. Only variable set of validators
+
+% Should be in the "Rewards" section:
 % we need to track all gas consumption
 % validators get paid per gas
 
@@ -198,7 +220,9 @@ On origin $v^O$ will always be held accountable for any signed message by $v^A$ 
 
 \begin{comment}
 %
+% %%
 % %% Original Mosaic text below
+% %%
 %
 
 \begin{theorem}[Accountable Safety]
