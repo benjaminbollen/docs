@@ -34,12 +34,16 @@
 
 % TODO check bibliography
 \begin{abstract}
-We present improvements to the OpenST protocol.
-OpenST is a framework powered by Ethereum to build token economies.
-We lay out in detail two contributions, OpenST Mosaic and OpenST Gateway,
-which work together to scale Ethereum.
-OpenST Mosaic is a layer-2
-% TODO finish abstract
+We present Mosaic, a set of blockchains defined in smart contracts on Ethereum.
+Each chain has an open set of validators staked on Ethereum and each block is sealed by a super-majority vote.
+We introduce byzantine fault-tolerant consensus rules that allow the validators to leverage more efficient auxiliary systems for block production,
+while committing only the headers back to Ethereum.
+Value tokens are locked on Ethereum and the auxiliary systems borrow a utility representation,
+making Ethereum the sole source of truth.
+In addition, economic finality on the auxiliary systems is reached asynchronously and validators get collaboratively rewarded based on gas consumed.
+As a result Mosaic can finalise thousands of transactions per second on Ethereum at a lower gas price.
+To pass tokens between Ethereum and the auxiliary systems,
+we have built an atomic gateway protocol that existing Ethereum DApps can deploy to scale.
 \end{abstract}
 
 %
