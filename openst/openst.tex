@@ -23,7 +23,7 @@
 \input{eth_header}
 \graphicspath{{images/}}
 
-\title{OpenST Mosaic\\\sc\Large{token-sharding as an ownership model \\ for scalable computations}}
+\title{Mosaic\\\sc\Large{Running Meta-Blockchains to Scale DApps}}
 % TODO add all authors
 \author{\textbf{Benjamin Bollen, Martin Schenck}\\ for OpenST Foundation \\ working draft}
 \date{OpenST v0.10 - May 2018}
@@ -34,67 +34,58 @@
 
 % TODO check bibliography
 \begin{abstract}
-We present Mosaic, a set of blockchains defined in smart contracts on Ethereum.
-Each chain has an open set of validators staked on Ethereum and each block is sealed by a super-majority vote.
-We introduce byzantine fault-tolerant consensus rules that allow the validators to leverage more efficient auxiliary systems for block production,
-while committing only the headers back to Ethereum.
-Value tokens are locked on Ethereum and the auxiliary systems borrow a utility representation,
-making Ethereum the sole source of truth.
-In addition, economic finality on the auxiliary systems is reached asynchronously and validators get collaboratively rewarded based on gas consumed.
-As a result Mosaic can finalise thousands of transactions per second on Ethereum at a lower gas price.
-To pass tokens between Ethereum and the auxiliary systems,
-we have built an atomic gateway protocol that existing Ethereum DApps can deploy to scale.
+Mosaic is a set of Byzantine fault tolerant (BFT) meta-blockchains defined in smart contracts on Ethereum. A meta-blockchain has an open set of validators staked on Ethereum, and has a smart-contract based consensus engine.  Each block is committed by a super-majority vote. Mosaic introduces BFT consensus rules that allow validators to leverage more efficient auxiliary systems running in parallel for block production, while millions of transactions can be finalised before the header is asynchronously committed to Ethereum. Ethereum remains the sole source of truth by locking value tokens on Ethereum while minting a utility token representation on the auxiliary systems. Validators get rewarded collaboratively based on gas consumed thereby solving for the verifier’s dilemma. As a result Mosaic can finalise thousands of transactions per second on Ethereum at a lower gas price. We have built an atomic gateway protocol that Ethereum DApps can deploy to leverage Mosaic to scale.
 \end{abstract}
 
 %
 % Section
 %
 \section{Introduction}
-Ethereum~\cite{ethereum} with its current proof of work Nakamoto consensus protocol is inherently limited in the number of transactions it can perform per second~\cite{verifiersdilemma}.
-In order for Ethereum to gain mass adoption, an increase in throughput is required.
-Current efforts include state channels~\cite{lightning} like the Raiden Network~\cite{raiden} and side chains~\cite{sidechains} like Plasma~\cite{plasma}.
-A drawback of the proposed solutions is the fact that the user has to be always online in order to ensure integrity of her transactions.
-Furthermore, in case of a mass exit, a congested Ethereum network could lead to lost funds.
+%Ethereum~\cite{ethereum} with its current proof of work Nakamoto consensus protocol is inherently limited in the number of transactions it can perform per second~\cite{verifiersdilemma}.
+%In order for Ethereum to gain mass adoption, an increase in throughput is required.
+%Current efforts include state channels~\cite{lightning} like the Raiden Network~\cite{raiden} and side chains~\cite{sidechains} like Plasma~\cite{plasma}.
+%A drawback of the proposed solutions is the fact that the user has to be always online in order to ensure integrity of her transactions.
+%Furthermore, in case of a mass exit, a congested Ethereum network could lead to lost funds.
+%
 
-OpenST Mosaic is a holistic solution powered by Ethereum that we expect to securely scale Ethereum to thousands of transactions per second.
-We achieve that by verifiably finalising batches of sidechain transactions on Ethereum.
 
 
 %
 % Section
 %
-\section{Related Work}
-
-\paragraph{Verifiers' Dilemma}
-\cite{verifiersdilemma}
-
-\paragraph{Interblockchain Communication}
-\cite{cosmos}
-
-\paragraph{Casper FFG}
-\cite{casperffg}
+%\section{Related Work}
+%
+%\paragraph{Verifiers' Dilemma}
+%\cite{verifiersdilemma}
+%
+%\paragraph{Interblockchain Communication}
+%\cite{cosmos}
+%
+%\paragraph{Casper FFG}
+%\cite{casperffg}
 
 %
 % Section
 %
-\section{Our Contribution}
+%\section{Our Contribution}
 
 %
 % Section
 %
-\section{OpenST-Mosaic}
-OpenST Mosaic is not conceptually bound to Ethereum.
-As layer one we assume a blockchain that has byzantine fault tolerance~\cite{pbft} and plausible liveliness~\cite{casperffg}.
-We call that blockchain \emph{Origin} $O$.
-We chose Ethereum as Origin for our first implementation.
-Transactions will take place on a sidechain that we call \emph{Auxiliary} $A$.
-Origin and Auxiliary must both % TODO what is it called that state is tracked and a state root exists?
+\section{A mosaic of cores}
 
-We assume Origin to track all ownership.
-Origin only lends ownership to Auxiliary.
-Thus, finality on Origin is always authoritative.
-If Auxiliary halts, users can recover the assets they own and there is no restriction in time for them to do so,
-enabling a coordinated mass exit over time.
+A meta-blockchain is defined in a smart contract by a genesis state, a staked validator set and consensus rules to progress the state.
+%As layer one we assume a blockchain that has byzantine fault tolerance~\cite{pbft} and plausible liveliness~\cite{casperffg}.
+%We call that blockchain \emph{Origin} $O$.
+%We chose Ethereum as Origin for our first implementation.
+%Transactions will take place on a sidechain that we call \emph{Auxiliary} $A$.
+%Origin and Auxiliary must both % TODO what is it called that state is tracked and a state root exists?
+%
+%We assume Origin to track all ownership.
+%Origin only lends ownership to Auxiliary.
+%Thus, finality on Origin is always authoritative.
+%If Auxiliary halts, users can recover the assets they own and there is no restriction in time for them to do so,
+%enabling a coordinated mass exit over time.
 
 %
 % %% Objective

@@ -6,6 +6,8 @@
 \usepackage{paralist}
 \usepackage{verbatim}
 
+% a core C
+\newcommand{\C}{\mathcal{C}}
 \newcommand{\V}{\mathcal{V}}
 \newcommand{\G}{\mathcal{G}}
 % OSTblock
@@ -33,7 +35,7 @@
 
 % TODO check bibliography
 \begin{abstract}
-Mosaic is a set of Byzantine fault tolerant (BFT) meta-blockchains defined in smart contracts on Ethereum. A meta-blockchain has an open set of validators staked on Ethereum, and has a smart-contract based consensus engine.  Each block is committed by a super-majority vote. Mosaic introduces BFT consensus rules that allow validators to leverage more efficient auxiliary systems running in parallel for block production, while millions of transactions can be finalised before the header is asynchronously committed to Ethereum. Ethereum remains the sole source of truth by locking value tokens on Ethereum while minting a utility token representation on the auxiliary systems. Validators get rewarded collaboratively based on gas consumed thereby solving for the verifier’s dilemma. As a result Mosaic can finalise thousands of transactions per second on Ethereum at a lower gas price. We have built an atomic gateway protocol that Ethereum DApps can deploy to leverage Mosaic to scale.
+Mosaic is a set of Byzantine fault tolerant (BFT) meta-blockchains defined in smart contracts on Ethereum. A meta-blockchain has an open set of validators staked on Ethereum, and has a smart-contract based consensus engine.  Each block is committed by a super-majority vote. Mosaic introduces BFT consensus rules that allow validators to leverage more efficient auxiliary systems running in parallel for block production, while millions of transactions can be finalised before the header is asynchronously committed to Ethereum. Ethereum remains the sole source of truth by locking value tokens on Ethereum while minting a utility token representation on the auxiliary systems. Validators get rewarded collaboratively based on gas consumed thereby addressing the verifier’s dilemma that affects proof-of-work. As a result Mosaic can finalise thousands of transactions per second on Ethereum at a lower gas price. We have built an atomic gateway protocol that Ethereum DApps can deploy to leverage Mosaic to scale.
 \end{abstract}
 
 %
@@ -41,17 +43,27 @@ Mosaic is a set of Byzantine fault tolerant (BFT) meta-blockchains defined in sm
 %
 \section{Introduction}
 
+Both Ethereum and Bitcoin have established over several years that ``proof-of-work'' (PoW) blockchains provide robust security and liveliness properties, albeit at a high transaction cost and with limited transaction throughput capacity. It has been understood that for PoW mining to be secure, it must be inefficient as formulated by the Verifiers dilemma.  This follows from the reward structure where a miner is rewarded for mining a block, but miners are not rewarded for verifying transactions within a mined block.
+
+While PoW mining is far from perfect (and in the long term unsustainable) it currently supports Ethereum to repeatedly reach global consensus about the state of a shared ledger of accounts and their storage. It additionally has spurred work on how to replace PoW with more efficient solutions to reach global consensus on an open network. A significant amount of this work is captured under the category of ``proof-of-stake'' (PoS) based blockchain technology such that security is not derived from expended energy, but rather on the amount of (self-referential) stake an agent has in the system to influence the production and commitment of new blocks.
+
+In this paper we set out to build on the existing work of Byzantine fault-tolerant (BFT) based proof-of-stake blockchains. We present Mosaic as a layer2 protocol to extend the transaction throughput capacity of the underlying, \emph{origin} blockchain.  Mosaic allows to preserve the native interface of the origin blockchain.  In the case of Ethereum, this means Mosaic enables smart contract developers to write code for the same Ethereum Virtual Machine (EVM) interface while benefitting from an increased transaction throughput from adopting Mosaic.
+
+  % 
+
 %
 % Section
 %
 \section{A mosaic of cores}
 
+Origin (Ethereum) is a blockchain assumed to have accountability and liveliness properties.  Origin produces blocks $O_i$. 
 
 
-A meta-blockchain or core is defined in a smart contract by a genesis state, a staked validator set and consensus rules to progress the state.
+A meta-blockchain is defined in a \emph{core} contract on the origin blockchain.
 
-\subsection{OpenST-Mosaic}
+\subsection{Running origin and auxiliary chains}
 \label{subsec:mosaic}
+
 
 
 %Quote FFG slashing conditions and voting rules.
@@ -348,6 +360,12 @@ That leaves one month headroom to blame auxiliary's adversaries on origin and ge
 % Section
 %
 \section{Conclusion}
+
+\section{Appendix}
+
+\subsection{Origin and Core identifiers}
+
+Each Origin chain and each Core have a unique identifier such that vote messages can associated with a specific core or origin chain.
 
 \bibliographystyle{naturemag}
 \bibliography{mosaic.bib}
