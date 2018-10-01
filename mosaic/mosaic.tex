@@ -180,6 +180,16 @@ Assume an observed checkpoint $a$ was finalised on a contradictory branch of ori
 
 \subsection{Proposing meta-blocks on origin}
 
+In order to be able to verify the correct observation of auxiliary on origin, the transition object $T^A$ is part of the meta-block.
+$T^A$ is tracked on the auxiliary chain with every block and consists of the lates observed $f(T^O)$, the accumulated transaction root, the accumulated gas consumed, and the current dynasty on auxiliary.
+
+An on-chain smart contract calculates $T^A$ for every block. Therefore, the validators have to report the details of every block header to the smart contract. If the reported block is within the most recent 256 blocks of the observed chain, then the smart contract can verify its correctness by accessing the corresponding block hash. If the validators fall behind more than 256 blocks in reporting, they can report more than one block per new block in order to catch up. The smart contract will record all reports, but only mark them as trustworthy if they build a chain that ends within the most recent 256 blocks.
+
+Tracking of $T^A$ begins at the genesis checkpoint. For the genesis checkpoint, the accumulated transaction root is defined as the transaction root of the block, the accumulated gas consumed equals the gas consumed in the block, and the current dynasty number is 0.
+For all subsequent blocks, the accumulated transaction root $r^a_i$ at block height $i$ is $\text{keccak256}(r^a_{i-1}, r_i)$, where $r_i$ is the transaction root of the block at height $i$.
+The accumulated gas consumed $g^a_i$ at block height $i$ is $g^a_{i-1} + g_i$, where $g_i$ is the gas consumed in the block at height $i$.
+The dynasty number equals the number of finalised checkpoints in the chain from the root checkpoint to the parent block, as per \cite{casperffg}.
+
 \subsection{Dynamic set of validators}
 
 The set of Mosaic validators needs to be able to change.
