@@ -100,9 +100,10 @@ computational capacity at lower transaction cost.  In the simplest form a decent
 %%%%%%%%%%%%%%%%%%%%
 
 
+\newpage
 \section{Composing auxiliary systems into an origin}
 
-The meta-blockchain composes transactions executed on an auxiliary blockchain system into an origin blockchain, such that the capacity of the origin blockchain can be extended and the security properties of the origin blockchain can be inherited by the auxiliary blockchain.
+A meta-blockchain composes transactions executed on an auxiliary blockchain system into an origin blockchain, such that the capacity of the origin blockchain can be extended and the security properties of the origin blockchain can be inherited by the auxiliary blockchain.
 
 To this end consider two blockchain systems, an origin blockchain $O$ with state transition rules $t_O$ which progress the state $\Sigma_O$ 
 \begin{align*}
@@ -163,11 +164,11 @@ To achieve this the Mosaic validators can construct a justified chain and finali
 
 In case the origin blockchain is probabilistically finalised, then it is always possible that the Mosaic validators of a given meta-blockchain running on top of the origin blockchain, would economically finalise an observation of origin on the auxiliary system which is (later) reverted by the origin blockchain - even if they sufficiently trailed the head of origin. Note that the validators cannot revert their finalised observation, because they would be required to sign vote messages which would violate the slashing conditions.
 
-Under this scenario we must force the meta-blockchain to halt at the highest finalised checkpoint of the auxiliary system which was still consistent with its observation of the (now reverted) history of the origin blockchain.  This property can be enforced by including in the transition object of the justified chain of the auxiliary system the highest finalised block number and blockhash of the origin system as observed on the auxiliary system.
-
+Under this scenario we must force the meta-blockchain to halt at the highest finalised checkpoint of the auxiliary system which was still consistent with its observation of the (now reverted) history of the origin blockchain.  This property can be enforced by including in the transition object of a justified chain of the auxiliary system $T^A$ information about the finalisation of the observation of the origin blockchain $T^O$,
 \begin{align*}
-  T = (O, \dots)
+  T^A_i = (f(T^O), \dots),
 \end{align*}
+where $f(T^O)$ is the function that returns the highest finalised block number and blockhash of the origin system as observed on the auxiliary system.
 
 We will show later that a simple verification game can be constructed to ensure that no intermediary, contradictory branches would have been finalised as observations of origin on the auxiliary system.
 
