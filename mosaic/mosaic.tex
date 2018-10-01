@@ -154,6 +154,19 @@ We introduce a transition object hash $\tilde{T}$ in the vote message to externa
 
 Our final goal here is clear to see: by defining assets first on the origin blockchain before moving them onto the auxiliary blockchain economic finality as agreed upon by the validators staked on the origin blockchain is decisive.  The nodes participating in the layer-1 auxiliary blockchain are forcefully turned into block proposers if their rewards are also awarded in assets held by the origin blockchain.  By externalising all stake and all value of all assets, the auxiliary system is economically bound to follow the fork selection rule of the Mosaic validators.
 
+\subsection{Observing origin}
+
+Per construction the finalisation of the auxiliary system by the Mosaic validators economically binds the block proposers of the auxiliary system to the Mosaic fork selection. By finalising the auxiliary system the Mosaic validators reach consensus about the auxiliary system itself. However, to construct a meta-blockchain we will additionally require the Mosaic validators to reach consensus about their observation of the origin blockchain on the auxiliary system.
+
+To achieve this the Mosaic validators can construct a justified chain and finalise checkpoints along it for reported blocks of the origin blockchain on the auxiliary system. The incentive structure is now reversed and the origin blockchain is in no way incentivised (nor should it be) to follow the fork selection rule of how a meta-blockchain's validator set finalised its observation of the origin blockchain.
+
+In case the origin blockchain is probabilistically finalised, then it is always possible that the Mosaic validators of a given meta-blockchain running on top of the origin blockchain, would economically finalise an observation of origin on the auxiliary system which is (later) reverted by the origin blockchain - even if they sufficiently trailed the head of origin. Note that the validators cannot revert their finalised observation, because they would be required to sign vote messages which would violate the slashing conditions.
+
+Under this scenario we must force the meta-blockchain to halt at the highest finalised checkpoint of the auxiliary system which was still consistent with its observation of the (now reverted) history of the origin blockchain.  This property can be enforced by including in the transition object of the justified chain of the auxiliary system, the highest finalised block number and blockhash of the origin system as observed on the auxiliary system.  We will show later that a simple verification game can be constructed to ensure that no intermediary, contradictory branches would have been finalised as observations of origin on the auxiliary system.
+
+\subsection{Proposing meta-blocks on origin}
+
+
 
 %related work: cosmos and polkadot each introduce a cosmos hub or relay chain as a new 
 % historic background of Ethereum driven to decentralise the world wide web framework; Mosaic is driven to decentralise high-performance computation
@@ -545,7 +558,7 @@ Casper votes on auxiliary can only be carried out up to three months into the pa
 That leaves one month headroom to blame auxiliary's adversaries on origin and get its deposit slashed.
 \end{comment}
 
-
+\section{Gateway}
 
 
 %
