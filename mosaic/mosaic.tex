@@ -190,6 +190,16 @@ For all subsequent blocks, the accumulated transaction root $r^a_i$ at block hei
 The accumulated gas consumed $g^a_i$ at block height $i$ is $g^a_{i-1} + g_i$, where $g_i$ is the gas consumed in the block at height $i$.
 The dynasty number equals the number of finalised checkpoints in the chain from the root checkpoint to the parent block, as per \cite{casperffg}.
 
+When a meta-block has been committed on origin, the Kernel of the newly opening meta-block can be confirmed on auxiliary.
+The state root of origin is regularly transferred to auxiliary and finalised.
+By means of a Merkle proof against that known state root, the content of the Kernel can be made available to auxiliary.
+Auxiliary will note the update of the validator weights for the meta-block height of the opened meta-block plus one.
+The validator set changes on auxiliary at the time the kernel opening is confirmed.
+Even though the kernel opening retroactively opens the meta-block on auxiliary from the first block after the last finalised checkpoint in the meta-block that precedes the opening one, the validator set only changes at the point of the confirmation.
+When the Kernel at height $i$ is confirmed on auxiliary, the validator set $i+1$ becomes the active set of validators.
+The validators that logged out on origin before the opening of $K_i$ will be in the rear validator set of $K_{i+1}$ and leave the validator set when $K_{i+2}$ is confirmed.
+This way the Casper stitching of dynamic validators works.
+
 \subsection{Dynamic set of validators}
 
 The set of Mosaic validators needs to be able to change.
