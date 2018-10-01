@@ -139,7 +139,7 @@ Given a validator set $\mathcal{V}_\mathcal{B}$ staked for the meta-blockchain o
 \end{align}
 where $\tilde{T}$ is the \verb|Keccak256| hash of the transition object $T$. We introduce a transition object hash in the vote message to externalise otherwise intrinsic properties of the auxiliary system. This transition object allows the Mosaic validators to coarse-grain and abstract the auxiliary system into a meta-blockchain when proposing meta-blocks on origin.
 
-We require that any transition object is calculable by a smart contract on the auxiliary chain for any finalised checkpoint along the justified chain. For a given link, we define the transition object to refer to the state of the blockchain at source block height $h_s$. It then follows that for a given source blockhash $s$ $\tilde{T}$ is uniquely determined by $s$ and the same properties of accountable safety and plausible liveliness hold for a finalised checkpoint on a justified chain constructed by such \emph{externalised vote messages} (\ref{externalisedvote}), if we trivially extend the slashing conditions to accommodate for the transition object hash.
+We require that any transition object is calculable by a smart contract on the blockchain in question for any finalised checkpoint along a justified chain. For a given link, we define the transition object to refer to the state of the blockchain at source block height $h_s$. It then follows that for a given source blockhash $s$ $\tilde{T}$ is uniquely determined by $s$ and the same properties of accountable safety and plausible liveliness hold for a finalised checkpoint on a justified chain constructed by such \emph{externalised vote messages} (\ref{externalisedvote}), if we trivially extend the slashing conditions to accommodate for the transition object hash.
 
 A validator $v \in \mathcal{V}_\mathcal{B}$ must never sign two externalised vote messages $\langle \tilde{T}_1, s_1, t_1, h_{s_1}, h_{t_1}\rangle_v$ and $\langle \tilde{T}_2, s_2, t_2, h_{s_2}, h_{t_2}\rangle_v$ such that any of the following three conditions holds:
 \begin{enumerate}
@@ -162,15 +162,21 @@ Per construction the finalisation of the auxiliary system by the Mosaic validato
 
 To achieve this the Mosaic validators can construct a justified chain and finalise checkpoints along it for reported blocks of the origin blockchain on the auxiliary system. The incentive structure is now reversed and the origin blockchain is in no way incentivised (nor should it be) to follow the fork selection rule of how a meta-blockchain's validator set finalised its observation of the origin blockchain.
 
-In case the origin blockchain is probabilistically finalised, then it is always possible that the Mosaic validators of a given meta-blockchain running on top of the origin blockchain, would economically finalise an observation of origin on the auxiliary system which is (later) reverted by the origin blockchain - even if they sufficiently trailed the head of origin. Note that the validators cannot revert their finalised observation, because they would be required to sign vote messages which would violate the slashing conditions.
+In case the origin blockchain is probabilistically finalised, then it is always possible that the Mosaic validators of a given meta-blockchain running on top of the origin blockchain would economically finalise an observation of origin on the auxiliary system which is (later) reverted by the origin blockchain - even if they sufficiently trailed the head of origin. Note that the validators cannot revert their finalised observation, because they would be required to sign vote messages which would violate the slashing conditions.
 
 Under this scenario we must force the meta-blockchain to halt at the highest finalised checkpoint of the auxiliary system which was still consistent with its observation of the (now reverted) history of the origin blockchain.  This property can be enforced by including in the transition object of a justified chain of the auxiliary system $T^A$ information about the finalisation of the observation of the origin blockchain $T^O$,
 \begin{align*}
-  T^A_i = (f(T^O), \dots),
+  T^A_i = (f(T^O_j), \dots),
 \end{align*}
 where $f(T^O)$ is the function that returns the highest finalised block number and blockhash of the origin system as observed on the auxiliary system.
 
-We will show later that a simple verification game can be constructed to ensure that no intermediary, contradictory branches would have been finalised as observations of origin on the auxiliary system.
+The origin blockchain can inspect $T^A$ to assert that the highest finalised observation of itself on the auxiliary system is within its current history.  Should this not be the case, then the origin blockchain must reject meta-blocks containing contradictory observations.
+
+However, origin cannot directly assert that prior to the last finalised observation, there was no checkpoint finalised from a contradictory branch of its history, as the nodes on origin should not run full verification of the transactions executed on the auxiliary system. This is resolved by introducing a short verification game
+
+Assume an observed checkpoint $a$ was finalised on a contradictory branch of origin
+
+ We will show later that a simple verification game can be constructed to ensure that no intermediary, contradictory branches would have been finalised as observations of origin on the auxiliary system.
 
 \subsection{Proposing meta-blocks on origin}
 
