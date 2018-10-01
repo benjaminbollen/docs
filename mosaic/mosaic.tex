@@ -137,7 +137,7 @@ Given a validator set $\mathcal{V}_\mathcal{B}$ staked for the meta-blockchain o
 \begin{align}\label{externalisedvote}
   \langle \tilde{T}, s, t, h_s, h_t \rangle_v
 \end{align}
-where $\tilde{T}$ is the \verb|Keccak256| hash of the transition object $T$. We introduce a transition object hash in the vote message to externalise otherwise intrinsic properties of the auxiliary system. This transition object allows the Mosaic validators to coarse-grain and abstract the auxiliary system into a meta-blockchain when proposing meta-blocks on origin.
+where $\tilde{T}$ is the keccak256 hash of the transition object $T$. We introduce a transition object hash in the vote message to externalise otherwise intrinsic properties of the auxiliary system. This transition object allows the Mosaic validators to coarse-grain and abstract the auxiliary system into a meta-blockchain when proposing meta-blocks on origin.
 
 We require that any transition object is calculable by a smart contract on the blockchain in question for any finalised checkpoint along a justified chain. For a given link, we define the transition object to refer to the state of the blockchain at source block height $h_s$. It then follows that for a given source blockhash $s$ $\tilde{T}$ is uniquely determined by $s$ and the same properties of accountable safety and plausible liveliness hold for a finalised checkpoint on a justified chain constructed by such \emph{externalised vote messages} (\ref{externalisedvote}), if we trivially extend the slashing conditions to accommodate for the transition object hash.
 
@@ -172,13 +172,11 @@ where $f(T^O)$ is the function that returns the highest finalised block number a
 
 The origin blockchain can inspect $T^A$ to assert that the highest finalised observation of itself on the auxiliary system is within its current history.  Should this not be the case, then the origin blockchain must reject meta-blocks containing contradictory observations.
 
-However, origin cannot directly assert that prior to the last finalised observation, there was no checkpoint finalised from a contradictory branch of its history, as the nodes on origin should not run full verification of the transactions executed on the auxiliary system. This is resolved by introducing a short verification game
+However, origin cannot directly assert that prior to the last finalised observation, there was no checkpoint finalised from a contradictory branch of its history, as the nodes on origin should not fully verify the transactions executed on the auxiliary system. This is resolved by introducing an option to challenge a proposed finalised observation.
 
-Assume an observed checkpoint $a$ was finalised on a contradictory branch of origin
+Assume an observed checkpoint $a$ was finalised on a contradictory branch of origin relative to the last finalised observed checkpoint $b$ included in $T^A$. Any honest node can challenge the finalisation of $b$ on origin by presenting the finalisation of $a$ and demonstrating that $a \notin \text{history}(b)$. Note that if validators would want to alter the finalised observation from $o \rightarrow a \rightarrow b$ to $o \rightarrow b$ they would have to produce vote messages violating the slashing conditions given the already existing vote messages.
 
- We will show later that a simple verification game can be constructed to ensure that no intermediary, contradictory branches would have been finalised as observations of origin on the auxiliary system.
-
-\subsection{Proposing meta-blocks on origin}
+\subsection{Calculating the transition objects}
 
 In order to be able to verify the correct observation of auxiliary on origin, the transition object $T^A$ is part of the meta-block.
 $T^A$ is tracked on the auxiliary chain with every block and consists of the lates observed $f(T^O)$, the accumulated transaction root, the accumulated gas consumed, and the current dynasty on auxiliary.
@@ -190,15 +188,13 @@ For all subsequent blocks, the accumulated transaction root $r^a_i$ at block hei
 The accumulated gas consumed $g^a_i$ at block height $i$ is $g^a_{i-1} + g_i$, where $g_i$ is the gas consumed in the block at height $i$.
 The dynasty number equals the number of finalised checkpoints in the chain from the root checkpoint to the parent block, as per \cite{casperffg}.
 
-When a meta-block has been committed on origin, the Kernel of the newly opening meta-block can be confirmed on auxiliary.
-The state root of origin is regularly transferred to auxiliary and finalised.
-By means of a Merkle proof against that known state root, the content of the Kernel can be made available to auxiliary.
-Auxiliary will note the update of the validator weights for the meta-block height of the opened meta-block plus one.
-The validator set changes on auxiliary at the time the kernel opening is confirmed.
-Even though the kernel opening retroactively opens the meta-block on auxiliary from the first block after the last finalised checkpoint in the meta-block that precedes the opening one, the validator set only changes at the point of the confirmation.
-When the Kernel at height $i$ is confirmed on auxiliary, the validator set $i+1$ becomes the active set of validators.
-The validators that logged out on origin before the opening of $K_i$ will be in the rear validator set of $K_{i+1}$ and leave the validator set when $K_{i+2}$ is confirmed.
-This way the Casper stitching of dynamic validators works.
+% Note to self: follow up on the thinking that by externalising the transition object into the vote message allows the calculation to be done in the node, not in the contract.
+
+\subsection{Proposing meta-blocks on origin}
+
+For a meta-blockchain $\mathcal{B}$ the chain can be appended by proposing and committing new meta-blocks $B_i(K, T, S)$ in the core contract on the origin block\-chain. The genesis meta-block $B_0$ is considered committed.
+
+Given a committed meta-block $B_n$ at height $n$ a proposal for a meta-block $B_{n+1}(K_{n+1}, T_{n+1}, \cdot)$ at height $n+1$ is a valid proposal if the validity assertions for the kernel $K_{n+1}$ hold and the 
 
 \subsection{Dynamic set of validators}
 
@@ -230,10 +226,22 @@ When a validator sends a deposit or logout message at meta-block height $i$, the
 The auxiliary system will update the validator's weight with the opening of meta-block $i+2$ and the validator will join or leave the set of validators. We call that meta-block the start meta-block or end meta-block.
 Following this change, the forward and rear validator sets are based on the start meta-block and end meta-block, respectively, instead of the start dynasty and the end dynasty.
 
- In the same way, an ordered pair of checkpoints $(s_m, t_n)$, where $t_m$ is in meta-block $B_i$, has a supermajority link if both at least $\frac{2}{3}$ of the forward validator set and the rear validator set of $B_i$, respectively, have published vote $\langle \tilde{T_m}, s_m, t_n, h_{s_m}, h_{t_n}\rangle_v$.
+ In the same way, an ordered pair of checkpoints $(s, t)$, where $t$ is in meta-block $B_i$, has a supermajority link if both at least $\frac{2}{3}$ of the forward validator set and the rear validator set of $B_i$, respectively, have published vote $\langle \tilde{T}, s, t, h_{s}, h_{t}\rangle_v$.
 
 The same public key can only deposit and withdraw once.
 It cannot join the set of validators multiple times or change its stake.
+
+NOTE: weight = stake x reputation
+
+When a meta-block has been committed on origin, the Kernel of the newly opening meta-block can be confirmed on auxiliary.
+The state root of origin is regularly transferred to auxiliary and finalised.
+By means of a Merkle proof against that known state root, the content of the Kernel can be made available to auxiliary.
+Auxiliary will note the update of the validator weights for the meta-block height of the opened meta-block plus one.
+The validator set changes on auxiliary at the time the kernel opening is confirmed.
+Even though the kernel opening retroactively opens the meta-block on auxiliary from the first block after the last finalised checkpoint in the meta-block that precedes the opening one, the validator set only changes at the point of the confirmation.
+When the Kernel at height $i$ is confirmed on auxiliary, the validator set $i+1$ becomes the active set of validators.
+The validators that logged out on origin before the opening of $K_i$ will be in the rear validator set of $K_{i+1}$ and leave the validator set when $K_{i+2}$ is confirmed.
+This way the Casper stitching of dynamic validators works.
 
 %The logic is similar to that of Casper with the notable difference that, instead of dynasties, we use OSTblocks (described below).
 %When a potential validator sends a \emph{deposit message} on origin at OSTblock height $\alpha$,
