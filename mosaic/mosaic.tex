@@ -34,7 +34,7 @@
 %\graphicspath{{images/}}
 
 \title{Mosaic\\\sc\Large{Running Meta-Blockchains to Scale Decentralised Applications}}
-\author{\textbf{B. Bollen, P. Gevorgyan, S. Khedar,}\\ \textbf{D. Kumar Nath, M. Schenck}\\ for OpenST Foundation \\ working draft}
+\author{\textbf{B. Bollen, P. Gevorgyan, S. Khedar,}\\ \textbf{D. Kumar Nath, M. Schenck\footnote{corresponding author: martin@ost.com}}\\ for OpenST Foundation \\ working draft}
 \date{OpenST Mosaic v0.10 - September 2018}
 
 \begin{document}
@@ -79,10 +79,11 @@ of nodes that enables developers to write and deploy code which can be called by
 
 % Ethereum is leading network of nodes for decentralised execution.
 The Ethereum network achieves agreement on the collective state by constructing a blockchain.  A blockchain derives correctness from full replication of the computation by nodes and for Ethereum today the chain is appended through Proof-of-Work consensus.%{TODO: give short intro, start from satoshi}
-Proof-of-Work (PoW) introduces a block reward incentive for nodes to keep producing blocks and thereby securing the chain of historical blocks.  However, PoW produces a serial execution model and nodes cannot be collectively rewarded for the computation they all have to perform, which renders the system computationally inefficient\footnote{explain verifiers dilemma}.
+Proof-of-Work (PoW) introduces a block reward incentive for nodes to keep producing blocks and thereby securing the chain of historical blocks.  However, PoW produces a serial execution model and nodes cannot be collectively rewarded for the computation they all have to perform, which renders the system computationally inefficient\cite{verifiersdilemma}.
 
 % NOTE: Ethereumv2 still needs to serialise all execution; DFinity starts from scratch 
-Active research and implementation work is ongoing to scale Ethereum's transaction throughput by dividing the verification work into multiple sections, also referred to as \emph{shards}. At the same time Ethereum is committed to moving from the probabilistic Proof-of-Work consensus engine to a BFT based Proof-of-Stake (PoS) consensus engine\footnote{refer to Ethereum v2}.  The outset of a BFT consensus engine is to collectively produce a blockchain which provably - under certain honesty assumptions - cannot finalise conflicting blocks.
+Active research and implementation work is ongoing to scale Ethereum's transaction throughput by dividing the verification work into multiple sections, also referred to as \emph{shards}. At the same time Ethereum is committed to moving from the probabilistic Proof-of-Work consensus engine to a BFT based Proof-of-Stake (PoS) consensus engine.%\footnote{refer to Ethereum v2}. 
+The outset of a BFT consensus engine is to collectively produce a blockchain which provably - under certain honesty assumptions - cannot finalise conflicting blocks.
 
 % A second body of work constructs Proof-of-Stake blockchain systems by emulating Proof-of-Work's block proposal mechanism through pseudorandomly assigning to stakeholders the right to append new blocks\footnote{Peercoin, }.
 
@@ -120,7 +121,7 @@ We define a meta-block $B_i(K, T, S): \Sigma_A \rightarrow \Sigma_A'$ to progres
 we still require a supermajority, because the votes to commit a meta-block will be collected on the auxiliary system for which there is no assumption it is BFT, and we want Mosaic to be able to finalise transactions on the auxiliary system before they are committed to origin.}. We will detail later how the meta-block is constructed, but first we will describe the vote messages that together can combine to seal a meta-block.
 
 \subsection{Checkpoint finalisation - Casper FFG}
-The reader is assumed at this point to be familiar with the work presented in \textit{Casper the Friendly Finality Gadget}\footnote{ref: Casper the Friendly Finality Gadget by V. Buterin and V. Griffith, November 2017} (FFG), as we will build on the logic and proofs presented there.  We will intend to align with definitions and notations where possible and highlight deviations where appropriate. In this section we briefly (and incompletely) summarise core concepts from the paper, so that the shared concepts are established for the reader.
+The reader is assumed at this point to be familiar with the work presented in \textit{Casper the Friendly Finality Gadget}\cite{casperffg} (FFG), as we will build on the logic and proofs presented there.  We will intend to align with definitions and notations where possible and highlight deviations where appropriate. In this section we briefly (and incompletely) summarise core concepts from the paper, so that the shared concepts are established for the reader.
 
 Casper FFG presents an algorithm to build up an overlay network of vote messages presented to a smart contract about the blocks already produced by the underlying network of nodes running the blockchain.  The overlay network aims to repeatedly economically finalise a single branch of the underlying network.  It does so by allowing staked validators to cast votes which together can construct a \emph{justified chain}.
 
@@ -157,6 +158,7 @@ We will later in this work address a dynamic validator set $\mathcal{V}_\mathcal
 %Our final goal here is clear to see: by defining assets first on the origin blockchain before moving them onto the auxiliary blockchain economic finality as agreed upon by the validators staked on the origin blockchain is decisive.  The nodes participating in the layer-1 auxiliary blockchain are forcefully turned into block proposers if their rewards are also awarded in assets held by the origin blockchain.  By externalising all stake and all value of all assets, the auxiliary system is economically bound to follow the fork selection rule of the Mosaic validators.
 
 \subsection{Observing origin}
+\label{observing_origin}
 
 Per construction the finalisation of the auxiliary system by the Mosaic validators economically binds the block proposers of the auxiliary system to the Mosaic fork selection. By finalising the auxiliary system the Mosaic validators reach consensus about the auxiliary system itself. However, to construct a meta-blockchain we will additionally require the Mosaic validators to reach consensus about their observation of the origin blockchain on the auxiliary system.
 
@@ -179,22 +181,29 @@ Assume an observed checkpoint $a$ was finalised on a contradictory branch of ori
 \subsection{Calculating the transition objects}
 
 In order to be able to verify the correct observation of auxiliary on origin, the transition object $T^A$ is part of the meta-block.
-$T^A$ is tracked on the auxiliary chain with every block and consists of the lates observed $f(T^O)$, the accumulated transaction root, the accumulated gas consumed, and the current dynasty on auxiliary.
+$T^A$ is tracked on the auxiliary chain with every block and consists of the latest observed $f(T^O)$, the accumulated transaction root, the accumulated gas consumed, and the current dynasty number on auxiliary.
 
-An on-chain smart contract calculates $T^A$ for every block. Therefore, the validators have to report the details of every block header to the smart contract. If the reported block is within the most recent 256 blocks of the observed chain, then the smart contract can verify its correctness by accessing the corresponding block hash. If the validators fall behind more than 256 blocks in reporting, they can report more than one block per new block in order to catch up. The smart contract will record all reports, but only mark them as trustworthy if they build a chain that ends within the most recent 256 blocks.
+It also includes a constant \emph{core identifier}, a 256-bit string where the first 12 bytes are a constant specifying the origin blockchain and the rightmost 20 bytes are determined by the smart contract address of the core contract on the origin blockchain. Rather than storing the core identifier as a constant it can be included in the signing string for vote messages to ensure vote messages are valid only about the intended meta-blockchain.
+
+A smart contract calculates $T^A$ for every block. Therefore, the validators have to report the details of every block header to the smart contract. If the reported block is within the most recent 256 blocks of the observed chain\footnote{This is specific to the Ethereum virtual machine, but the logic can be applied for other blockchain systems as well.}, then the smart contract can verify its correctness by accessing the corresponding block hash. If the validators fall behind more than 256 blocks in reporting, they can report more than one block per new block in order to catch up. The smart contract will record all reports, but only mark them as trustworthy if they build a chain that ends within the most recent 256 blocks.
 
 Tracking of $T^A$ begins at the genesis checkpoint. For the genesis checkpoint, the accumulated transaction root is defined as the transaction root of the block, the accumulated gas consumed equals the gas consumed in the block, and the current dynasty number is 0.
 For all subsequent blocks, the accumulated transaction root $r^a_i$ at block height $i$ is $\text{keccak256}(r^a_{i-1}, r_i)$, where $r_i$ is the transaction root of the block at height $i$.
 The accumulated gas consumed $g^a_i$ at block height $i$ is $g^a_{i-1} + g_i$, where $g_i$ is the gas consumed in the block at height $i$.
-The dynasty number equals the number of finalised checkpoints in the chain from the root checkpoint to the parent block, as per \cite{casperffg}.
+The dynasty number equals the number of finalised checkpoints in the chain from the root checkpoint to the parent block, carrying over the definition of dynasty number as in Casper FFG \cite{casperffg}.
 
 % Note to self: follow up on the thinking that by externalising the transition object into the vote message allows the calculation to be done in the node, not in the contract.
 
 \subsection{Proposing meta-blocks on origin}
 
-For a meta-blockchain $\mathcal{B}$ the chain can be appended by proposing and committing new meta-blocks $B_i(K, T, S)$ in the core contract on the origin block\-chain. The genesis meta-block $B_0$ is considered committed.
+For a meta-blockchain $\mathcal{B}$ the chain can be appended by proposing and committing new meta-blocks $B_n(K_n, T^A_n, S_n)$ in the core contract on the origin block\-chain. The genesis meta-block $B_0$ is considered committed.
 
-Given a committed meta-block $B_n$ at height $n$ a proposal for a meta-block $B_{n+1}(K_{n+1}, T_{n+1}, \cdot)$ at height $n+1$ is a valid proposal if the validity assertions for the kernel $K_{n+1}$ hold and the 
+The kernel $K_n$ is a tuple $(n, p_n, \Delta\mathcal{V}_{\mathcal{B}_n}, gp_n)$ fully determined by and stored in the core contract on the origin blockchain. %The height $n$ strictly increases by one every time a meta-block is committed into the core contract.
+On a given branch of the origin blockchain a meta-blockchain cannot fork. The act of committing a meta-block $B_{n-1}(K_{n-1}, T^A_{n-1}, S_{n-1})$ activates the new kernel $K_n$ at height $n$ and \emph{opens} the core contract to accept proposals of the form $B_n(K_n, \cdot, \cdot)$. The kernel further specifies the \emph{parent hash} $p_n$, the \emph{updated validator weights} $\Delta\mathcal{V}_{\mathcal{B}_n}$ to declare new validators joining and existing validators logging out, and a voted-upon \emph{gas price} $gp_n$ for the gas that will be consumed in the upcoming meta-block $B_n$ as rewarded to the Mosaic validators\footnote{A meta-blockchain has a double gas market. First the known gas market exists where users set a gas price in the transaction that gets executed on the auxiliary blockchain and the gas rewards go to the block proposers of the auxiliary system.  A second, new gas market is created by requiring the block proposers to pre-deposit gas rewards for several meta-blocks in advance.  Mosaic validators are rewarded upon committing a meta-block on the origin blockchain for the total gas consumed in that meta-blockchain at the agreed-upon gas price $gp_n$ for that meta-block $B_n$.  Details in later section.}.
+
+Given a committed meta-block $B_{n-1}$ at height $n-1$ a proposal for a meta-block $B_{n}(K_{n}, T^A_{n}, \cdot)$ at height $n$ is a valid proposal if validity assertions for the transition object $T^A_n$ hold.  These validity assertions require that the dynasty number and the gas consumed are strictly increasing compared to the transition object committed $T^A_{n-1}$.  It must be checked that the latest finalised observation of origin is within the history of the current state. Furthermore  a brief challenge period exists where the transition object can be contested on the grounds that it contains a prior observation of origin that contradicts the current history of origin, as explained above in section (\ref{observing_origin}).
+
+It now follows that for a given active kernel $K_n$ multiple proposals $T^{A(i)}_n$ can be submitted to the core contract. 
 
 \subsection{Dynamic set of validators}
 
