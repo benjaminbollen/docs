@@ -173,7 +173,50 @@ We will show later that a simple verification game can be constructed to ensure 
 
 \subsection{Proposing meta-blocks on origin}
 
+\subsection{Dynamic set of validators}
 
+The set of Mosaic validators needs to be able to change.
+A validator can join the set of validators by sending a deposit transaction to the stakes contract on origin.
+The amount of stake of the validator is based on the amount of value that the validator sends with the deposit transaction.
+% TODO: should it say staking is done in OST, ERC-20, or just value?
+% TODO: will the rewards go to the stake? will they also go to the weight?
+
+When a validator wants to leave the set of validators, it sends a logout message to the stake contract on origin.
+The validator's weight is reduced to zero, therefore the validator leaves the set of validators.
+% TODO: is 4 months fixed or should it say something variable.
+
+When a validator casts a vote on auxiliary, the vote carries a specific weight.
+The initial weight of a new validator is equal to the stake on origin.
+When we say that a vote receives a $\frac{2}{3}$ majority, we mean that at least $\frac{2}{3}$ of the total voting weight on auxiliary have cast that vote.
+A validator's stake may be reduced to a non-zero value, e.g. by slashing.
+However, in any slashing case the weight will always go to zero immediately.
+
+We defend against long range revision attacks the same way casper does.
+Four months after the validator left the set of validators, the validator can withdraw its stake.
+
+Casper FFG\cite{casperffg} defines a stitching mechanism for a changing set of validators.
+It prevents a case where a significant change in validators from one dynasty to the next could result in conflicting finalised checkpoints on different forks.
+They define a forward validator set and a rear validator set based on the start dynasty and end dynasty of a validator.
+In the case of Mosaic, however, validators do not join and leave the set of validators within two dynasties, but rather two meta-blocks.
+When a validator sends a deposit or logout message at meta-block height $i$, the change is announced to auxiliary with the opening of meta-block $i+1$.
+% TODO: any existing notation for meta-block height?
+The auxiliary system will update the validator's weight with the opening of meta-block $i+2$ and the validator will join or leave the set of validators. We call that meta-block the start meta-block or end meta-block.
+Following this change, the forward and rear validator sets are based on the start meta-block and end meta-block, respectively, instead of the start dynasty and the end dynasty.
+
+ In the same way, an ordered pair of checkpoints $(s_m, t_n)$, where $t_m$ is in meta-block $B_i$, has a supermajority link if both at least $\frac{2}{3}$ of the forward validator set and the rear validator set of $B_i$, respectively, have published vote $\langle \tilde{T_m}, s_m, t_n, h_{s_m}, h_{t_n}\rangle_v$.
+
+The same public key can only deposit and withdraw once.
+It cannot join the set of validators multiple times or change its stake.
+
+%The logic is similar to that of Casper with the notable difference that, instead of dynasties, we use OSTblocks (described below).
+%When a potential validator sends a \emph{deposit message} on origin at OSTblock height $\alpha$,
+%then the validator will be announced as part of the next set of validators in the header of OSTblock $\alpha+1$ and 
+%the validator $\upnu$ will join the validator set at OSTblock height $\alpha+2$.
+%% TODO a lot copied from Casper. OK? Required?
+%Analogous to Casper, we call $\alpha+2$ the validator's \emph{start OSTblock}, $\BS(\upnu)$.
+%If a validator $\upnu$'s withdraw message is included on origin's blockchain during an open OSTblock $\B_\alpha$,
+%it similarly leaves the set of validators at OSTblock height $\alpha+2$.
+%We call $\alpha+2$ the validator $\upnu$'s \emph{end OSTblock} $\BE(\upnu)$.
 
 %related work: cosmos and polkadot each introduce a cosmos hub or relay chain as a new 
 % historic background of Ethereum driven to decentralise the world wide web framework; Mosaic is driven to decentralise high-performance computation
