@@ -228,19 +228,19 @@ where it is required that the supermajority link finalises the source $s$.  As s
 
 Following a similar argument as presented in section (\ref{observing_origin}) we can assert whether or not the finalised checkpoint was obtained through an unbroken justified chain leading up to the finalised checkpoint, by allowing for an additional challenge to be raised against a proposed transition object $T^A$. [continue] %Consider that if no checkpoints were finalised intermediary between the last committed meta-block and the proposed (claimed) finalised checkpoint, then the validators can always post-fact generate 
 
-\subsection{Dynamic set of validators [draft, contains errors]}
-
-\begin{figure}
+\begin{figure}[htb]
     \centering
 	\includegraphics[width=\textwidth]{transition}
-	\caption{\textbf{Dynamic set of validators.}
-		1) The validator sends a log out message (or a deposit message).
-		2) The change in the set of validators is transferred to auxiliary as part of the kernel that gets confirmed.
-		3) The validator does its last round in the rear set.
-		4) The validator's weight drops to zero when $K_{i+2}$ is confirmed (or the validator joins in the forward set of validators).
+	\caption{\textbf{Transition.}
+		After the transition object $T_i$ is committed on origin, the opening of the new kernel $K_{i+1}$ is confirmed on auxiliary.
+		On auxiliary, meta-block $B_{i+1}$ retroactively opens from the point where $B_i$ closed.
+		The set of validators, however, only changes at the time of confirmation.
+		The dashed line under auxiliary shows the active set of validators.
 	}
 	\label{fig:transition}
 \end{figure}
+
+\subsection{Dynamic set of validators [draft, contains errors]}
 
 The set of Mosaic validators needs to be able to change.
 A validator can join the set of validators by sending a deposit transaction to the stakes contract on origin.
@@ -285,6 +285,18 @@ The validator set changes on auxiliary at the time the kernel opening is confirm
 Even though the kernel opening retroactively opens the meta-block on auxiliary from the first block after the last finalised checkpoint in the meta-block that precedes the opening one, the validator set only changes at the point of the confirmation.
 When the Kernel at height $i$ is confirmed on auxiliary, the validator set $i+1$ becomes the active set of validators.
 The validators that logged out on origin before the opening of $K_i$ will be in the rear validator set of $K_{i+1}$ and leave the validator set when $K_{i+2}$ is confirmed.
+
+\begin{figure}[htb]
+    \centering
+	\includegraphics[width=\textwidth]{dynamic_validators}
+	\caption{\textbf{Dynamic set of validators.}
+		The validator sends a log out message (or a deposit message) in $B_i$.
+		The change in the set of validators is transferred to auxiliary as part of kernel $K_{i+1}$ that gets confirmed.
+		The validator does its last round in the rear validator set on auxiliary.
+		The validator's weight drops to zero when $K_{i+2}$ is confirmed (or the validator joins in the forward set of validators).
+	}
+	\label{fig:dynamic_validators}
+\end{figure}
 
 %The logic is similar to that of Casper with the notable difference that, instead of dynasties, we use OSTblocks (described below).
 %When a potential validator sends a \emph{deposit message} on origin at OSTblock height $\alpha$,
