@@ -220,13 +220,19 @@ It now follows that for a given active kernel $K_n$ multiple proposals $T^{A}_{n
 
 To commit a meta-block then requires selecting among the valid proposals a dynasty number $d_n$ for which the meta-block will be closed. This selection can occur naturally by verifying the vote messages on the origin blockchain.
 
-The meta-block $B_n(K_n, T^A_n, S_n)$ will be committed with such a seal $S_n$ which first asserts valid signatures for a $+\tfrac{2}{3}$ supermajority of the voting weight  of $\mathcal{V}_{\mathcal{B}_n}$ over the set of valid proposals
+The meta-block $B_n(K_n, T^A_n, S_n)$ will be committed with the seal $S_n$ which first asserts valid signatures for a $+\tfrac{2}{3}$ supermajority of the voting weight  of $\mathcal{V}_{\mathcal{B}_n}$ over the set of valid proposals
 \begin{align*}
   \{S_{n,d}\} = \left\{\left\{\langle\tilde{T}^A_{n,d}, s, t, h_s, h_t\rangle_v\right\}\right\}
 \end{align*}
 where it is required that the supermajority link finalises the source $s$.  As such we require that $h_t - h_s = 1$ and the source $s$ must have been justified.  
 
-Following a similar argument as presented in section (\ref{observing_origin}) we can assert whether or not the finalised checkpoint was obtained through an unbroken justified chain leading up to the finalised checkpoint, by allowing for an additional challenge to be raised against a proposed transition object $T^A$. [continue] %Consider that if no checkpoints were finalised intermediary between the last committed meta-block and the proposed (claimed) finalised checkpoint, then the validators can always post-fact generate 
+Following the same reasoning as presented in section (\ref{observing_origin}) we can assert whether or not the finalised checkpoint $s$ was obtained through an unbroken justified chain leading up to the finalised checkpoint, by allowing for a challenge to be raised against a proposed transition object $T^A$ included in a vote message $\langle\tilde{T}^A, s, t, h_s, h_t\rangle_v$.
+
+However, recall that in the case of verifying observations of origin (\ref{observing_origin}), origin itself can act as an arbiter because origin can rely on its own history. Our concern now is to assert that the state transition to $s$ from the last committed state $B_{n-1}$ is a valid state transition according to the state transition rules $t_A$ without finding recourse in full verification of these transactions on origin.
+
+Assume first no contradictory finalisation of the auxiliary system relative to $T^A$ exists...
+
+%Consider that if no checkpoints were finalised intermediary between the last committed meta-block and the proposed (claimed) finalised checkpoint, then the validators can always post-fact generate 
 
 \subsection{Dynamic set of validators [draft, contains errors]}
 
