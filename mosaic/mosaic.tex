@@ -30,11 +30,11 @@
 \newcommand{\OL}{\operatorname{OL}}
 
 
-%\input{eth_header}
-%\graphicspath{{images/}}
+\input{eth_header}
+\graphicspath{{images/}}
 
 \title{Mosaic\\\sc\Large{Running Meta-Blockchains to Scale Decentralised Applications}}
-\author{\textbf{B. Bollen, P. Gevorgyan, S. Khedar,}\\ \textbf{D. Kumar Nath, M. Schenck\footnote{corresponding author: martin@ost.com}}\\ for OpenST Foundation \\ working draft}
+\author{\textbf{B. Bollen, P. Gevorgyan, S. Khedar,}\\ \textbf{D. Kumar Nath, M. Schenck\footnote{corresponding author: martin@ost.com}}\\ for OpenST Foundation \\ incomplete working draft}
 \date{OpenST Mosaic v0.10 - September 2018}
 
 \begin{document}
@@ -43,7 +43,7 @@
 
 % TODO check bibliography
 \begin{abstract}
-This is a working draft summary of notes and whiteboard sessions as we have been iterating towards the implementation for Mosaic v0.10. This draft is shared for review and comments by the community. This is not the version intended for publication, and you are invited to review critically all content. The code is work in progress at \verb|github.com/openstfoundation/mosaic-contracts|.
+This is a working draft summary of notes and whiteboard sessions as we have been iterating towards the implementation for Mosaic v0.10. This is not the version intended for publication, and you are invited to review critically all content. The code is work in progress at \verb|github.com/openstfoundation/mosaic-contracts|.
 \end{abstract}
 
 %
@@ -101,15 +101,14 @@ computational capacity at lower transaction cost.  In the simplest form a decent
 %%%%%%%%%%%%%%%%%%%%
 
 
-\newpage
 \section{Composing auxiliary systems into an origin}
 
 A meta-blockchain composes transactions executed on an auxiliary blockchain system into an origin blockchain, such that the capacity of the origin blockchain can be extended and the security properties of the origin blockchain can be inherited by the auxiliary blockchain.
 
 To this end consider two blockchain systems, an origin blockchain $O$ with state transition rules $t_O$ which progress the state $\Sigma_O$ 
-\begin{align*}
+\begin{align} \label{state_transition_rules}
   t_O : \Sigma_O \rightarrow \Sigma_O'
-\end{align*}
+\end{align}
 and similarly consider an auxiliary system $A$ with state transition rules $t_A$ such that $t_A : \Sigma_A \rightarrow \Sigma_A'$.
 
 Transition rules for the origin and auxiliary system can be similar but do not have to be. In our discussion, when we need an example, we will reference to the origin blockchain as Ethereum (Byzantium), running Proof-of-Work, and for the auxiliary system we consider Go-Ethereum, running ``clique'' Proof-of-Authority (PoA).  We deliberately use PoA for our considerations for the auxiliary system to emphasise that the security for the composed auxiliary system is not derived from the consensus engine of the auxiliary system. Rather the security properties of the composed system must rely only on the security properties of the consensus rules of the origin blockchain and on the Mosaic BFT consensus rules composing the auxiliary system into the origin system\footnote{The block proposers of the auxiliary system do have the ability to censor transactions from the auxiliary system if they have an ability to collude.}.
@@ -168,9 +167,9 @@ In case the origin blockchain is probabilistically finalised, then it is always 
 
 Under this scenario we must force the meta-blockchain to halt at the highest finalised checkpoint of the auxiliary system which was still consistent with its observation of the (now reverted) history of the origin blockchain.  This property can be enforced by including in the transition object of a justified chain of the auxiliary system $T^A$ information about the finalisation of the observation of the origin blockchain $T^O$,
 \begin{align*}
-  T^A_i = (f(T^O_j), \dots),
+  T^A_i = (O^j_f, \dots),
 \end{align*}
-where $f(T^O)$ is the function that returns the highest finalised block number and blockhash of the origin system as observed on the auxiliary system.
+where $O^j_f = f(T^O)$ is the function that returns the highest finalised block number $j$ and blockhash of the origin system as observed by the Mosaic validators for this meta-blockchain.
 
 The origin blockchain can inspect $T^A$ to assert that the highest finalised observation of itself on the auxiliary system is within its current history.  Should this not be the case, then the origin blockchain must reject meta-blocks containing contradictory observations.
 
@@ -180,32 +179,47 @@ Assume an observed checkpoint $a$ was finalised on a contradictory branch of ori
 
 \subsection{Calculating the transition objects}
 
-In order to be able to verify the correct observation of auxiliary on origin, the transition object $T^A$ is part of the meta-block.
-$T^A$ is tracked on the auxiliary chain with every block and consists of the latest observed $f(T^O)$, the accumulated transaction root, the accumulated gas consumed, and the current dynasty number on auxiliary.
+We construct a transition object $T^A$ to coarse-grain a vast amount of transactions processed on the auxiliary system under the state transition rules $t_A$ into a single, abstracted state transition that can be validated by the core contract on the origin blockchain (under the state transition rules of the origin blockchain $t_O$, eq. \ref{state_transition_rules}).
 
-It also includes a constant \emph{core identifier}, a 256-bit string where the first 12 bytes are a constant specifying the origin blockchain and the rightmost 20 bytes are determined by the smart contract address of the core contract on the origin blockchain. Rather than storing the core identifier as a constant it can be included in the signing string for vote messages to ensure vote messages are valid only about the intended meta-blockchain.
+On the auxiliary chain with every block running parameters are tracked and these consist of the latest finalised observation of the origin blockchain $O^j_f= f(T^O)$, the \emph{accumulated transaction root} $r_i$, the \emph{accumulated gas} $g_i$ consumed, and the current \emph{dynasty number} $d$ on auxiliary.  The transition object $T^A$, however, is updated at every justified checkpoint $s$ with height $h_s$ and we write for a given meta-block height $n$:
+\begin{align*}
+  T^A_{n,d}(s) = (d, O^{j_d}_f, r_, g_d, \tilde{K}_n)
+\end{align*}
+where $\tilde{K}_n$ is the keccak256 hash of the kernel $K_n$.
 
-A smart contract calculates $T^A$ for every block. Therefore, the validators have to report the details of every block header to the smart contract. If the reported block is within the most recent 256 blocks of the observed chain\footnote{This is specific to the Ethereum virtual machine, but the logic can be applied for other blockchain systems as well.}, then the smart contract can verify its correctness by accessing the corresponding block hash. If the validators fall behind more than 256 blocks in reporting, they can report more than one block per new block in order to catch up. The smart contract will record all reports, but only mark them as trustworthy if they build a chain that ends within the most recent 256 blocks.
+A smart contract calculates the parameters that go into $T^A$ for every block. Therefore, the validators have to report the block header of every block to the smart contract. If the reported block is within the most recent 256 blocks of the auxiliary blockchain\footnote{This is specific to the Ethereum virtual machine, but the logic can be applied for other blockchain systems as well.}, then the smart contract can verify its correctness by accessing the corresponding block hash. If the validators fall behind more than 256 blocks in reporting, they can report more than one block per new block in order to catch up. The smart contract will record all reports, but only mark them as valid if they build a chain that reconnects to a block hash within the most recent 256 blocks of the current branch.
 
 Tracking of $T^A$ begins at the genesis checkpoint. For the genesis checkpoint, the accumulated transaction root is defined as the transaction root of the block, the accumulated gas consumed equals the gas consumed in the block, and the current dynasty number is 0.
-For all subsequent blocks, the accumulated transaction root $r^a_i$ at block height $i$ is $\text{keccak256}(r^a_{i-1}, r_i)$, where $r_i$ is the transaction root of the block at height $i$.
-The accumulated gas consumed $g^a_i$ at block height $i$ is $g^a_{i-1} + g_i$, where $g_i$ is the gas consumed in the block at height $i$.
+For all subsequent blocks, the accumulated transaction root $r_i$ at block height $i$ is $\text{keccak256}(r_{i-1}, R_i)$, where $R_i$ is the transaction root of the block at height $i$.
+The accumulated gas consumed $g_i$ at block height $i$ is $g_{i-1} + G_i$, where $G_i$ is the gas consumed in the block at height $i$.
 The dynasty number equals the number of finalised checkpoints in the chain from the root checkpoint to the parent block, carrying over the definition of dynasty number as in Casper FFG \cite{casperffg}.
+
+Further, we introduce a constant \emph{core identifier}, a 256-bit string where the first 12 bytes are a constant specifying the origin blockchain and the rightmost 20 bytes are determined by the smart contract address of the core contract on the origin blockchain. Rather than storing the core identifier in the transaction object, it can be included as a constant in the signing string for vote messages to ensure vote messages are valid only about the intended meta-blockchain.
 
 % Note to self: follow up on the thinking that by externalising the transition object into the vote message allows the calculation to be done in the node, not in the contract.
 
 \subsection{Proposing meta-blocks on origin}
 
-For a meta-blockchain $\mathcal{B}$ the chain can be appended by proposing and committing new meta-blocks $B_n(K_n, T^A_n, S_n)$ in the core contract on the origin block\-chain. The genesis meta-block $B_0$ is considered committed.
+For a meta-blockchain $\mathcal{B}$ the chain can be appended by proposing and committing new meta-blocks $B_n(K_n, T^A_n, S_n)$ in the core contract on the origin block\-chain. The genesis meta-block $B_0$ is considered committed per definition.
 
 The kernel $K_n$ is a tuple $(n, p_n, \Delta\mathcal{V}_{\mathcal{B}_n}, gp_n)$ fully determined by and stored in the core contract on the origin blockchain. %The height $n$ strictly increases by one every time a meta-block is committed into the core contract.
 On a given branch of the origin blockchain a meta-blockchain cannot fork. The act of committing a meta-block $B_{n-1}(K_{n-1}, T^A_{n-1}, S_{n-1})$ activates the new kernel $K_n$ at height $n$ and \emph{opens} the core contract to accept proposals of the form $B_n(K_n, \cdot, \cdot)$. The kernel further specifies the \emph{parent hash} $p_n$, the \emph{updated validator weights} $\Delta\mathcal{V}_{\mathcal{B}_n}$ to declare new validators joining and existing validators logging out, and a voted-upon \emph{gas price} $gp_n$ for the gas that will be consumed in the upcoming meta-block $B_n$ as rewarded to the Mosaic validators\footnote{A meta-blockchain has a double gas market. First the known gas market exists where users set a gas price in the transaction that gets executed on the auxiliary blockchain and the gas rewards go to the block proposers of the auxiliary system.  A second, new gas market is created by requiring the block proposers to pre-deposit gas rewards for several meta-blocks in advance.  Mosaic validators are rewarded upon committing a meta-block on the origin blockchain for the total gas consumed in that meta-blockchain at the agreed-upon gas price $gp_n$ for that meta-block $B_n$.  Details in later section.}.
 
-Given a committed meta-block $B_{n-1}$ at height $n-1$ a proposal for a meta-block $B_{n}(K_{n}, T^A_{n}, \cdot)$ at height $n$ is a valid proposal if validity assertions for the transition object $T^A_n$ hold.  These validity assertions require that the dynasty number and the gas consumed are strictly increasing compared to the transition object committed $T^A_{n-1}$.  It must be checked that the latest finalised observation of origin is within the history of the current state. Furthermore  a brief challenge period exists where the transition object can be contested on the grounds that it contains a prior observation of origin that contradicts the current history of origin, as explained above in section (\ref{observing_origin}).
+Given a committed meta-block $B_{n-1}$ at height $n-1$ a proposal for a meta-block $B_{n}(K_{n}, T^A_{n}, \cdot)$ at height $n$ is a valid proposal if validity assertions for the transition object $T^A_n$ hold.  These validity assertions require that the dynasty number and the gas consumed are strictly increasing compared to the transition object committed $T^A_{n-1}$. The transition object $T^A_n$ must reference the correct kernel $\tilde{K_n}$. It must be checked that the latest finalised observation of origin is within the history of the current state. Furthermore  a brief challenge period exists where the transition object can be contested on the grounds that it contains a prior observation of origin that contradicts the current history of origin, as explained above in section (\ref{observing_origin}).
 
-It now follows that for a given active kernel $K_n$ multiple proposals $T^{A(i)}_n$ can be submitted to the core contract. 
+It now follows that for a given active kernel $K_n$ multiple proposals $T^{A}_{n,d}$ can be submitted to the core contract for different dynasty numbers $d$.  These proposals are no longer contradicting versions of the history, rather they are ordered, sequenced snapshots of possible state transitions $B_{n,d_{n}}(\Sigma_{A,d_{n-1}})$ that can be committed onto origin as a new meta-block.
 
-\subsection{Dynamic set of validators}
+To commit a meta-block then requires selecting among the valid proposals a dynasty number $d_n$ for which the meta-block will be closed. This selection can occur naturally by verifying the vote messages on the origin blockchain.
+
+The meta-block $B_n(K_n, T^A_n, S_n)$ will be committed with such a seal $S_n$ which first asserts valid signatures for a $+\tfrac{2}{3}$ supermajority of the voting weight  of $\mathcal{V}_{\mathcal{B}_n}$ over the set of valid proposals
+\begin{align*}
+  \{S_{n,d}\} = \left\{\left\{\langle\tilde{T}^A_{n,d}, s, t, h_s, h_t\rangle_v\right\}\right\}
+\end{align*}
+where it is required that the supermajority link finalises the source $s$.  As such we require that $h_t - h_s = 1$ and the source $s$ must have been justified.  
+
+Following a similar argument as presented in section (\ref{observing_origin}) we can assert whether or not the finalised checkpoint was obtained through an unbroken justified chain leading up to the finalised checkpoint, by allowing for an additional challenge to be raised against a proposed transition object $T^A$. [continue] %Consider that if no checkpoints were finalised intermediary between the last committed meta-block and the proposed (claimed) finalised checkpoint, then the validators can always post-fact generate 
+
+\subsection{Dynamic set of validators [draft, contains errors]}
 
 The set of Mosaic validators needs to be able to change.
 A validator can join the set of validators by sending a deposit transaction to the stakes contract on origin.
@@ -250,7 +264,6 @@ The validator set changes on auxiliary at the time the kernel opening is confirm
 Even though the kernel opening retroactively opens the meta-block on auxiliary from the first block after the last finalised checkpoint in the meta-block that precedes the opening one, the validator set only changes at the point of the confirmation.
 When the Kernel at height $i$ is confirmed on auxiliary, the validator set $i+1$ becomes the active set of validators.
 The validators that logged out on origin before the opening of $K_i$ will be in the rear validator set of $K_{i+1}$ and leave the validator set when $K_{i+2}$ is confirmed.
-This way the Casper stitching of dynamic validators works.
 
 %The logic is similar to that of Casper with the notable difference that, instead of dynasties, we use OSTblocks (described below).
 %When a potential validator sends a \emph{deposit message} on origin at OSTblock height $\alpha$,
@@ -290,11 +303,14 @@ This way the Casper stitching of dynamic validators works.
 % counterfactual/L4 "build state-channels into their application"
 % plasma: root contains "state-transition rules" <-> Mosaic Core does not have specific transition rules; split chain from 
 
+\subsection{gas markets}
+
 %
 % Section
 %
 \section{A mosaic of cores}
 
+summary: by constructing asynchronous BFT consensus rules to compose a heterogeneous auxiliary blockchain into the origin blockchain, we leverage the security of the origin blockchain to asynchronously finalise the transactions on the auxiliary blockchain.  As there are no time constraints or time-outs in the Mosaic consensus rules, the limited processing capacity of the origin blockchain does not undercut the ability to compose many auxiliary systems into the same origin blockchain.  This enables Mosaic to run many meta-blockchains in parallel, additively improving the total transaction capacity, but keeping a bound on the cost imposed on the origin blockchain.
 %% 
 %A blockchain relies on each full node replicating all transactions to obtain and verify independently the correctness of the current state. Full replication at the same time impedes scalability.
 %
@@ -654,6 +670,9 @@ That leaves one month headroom to blame auxiliary's adversaries on origin and ge
 
 \section{Gateway}
 
+abstract: the gateway protocol allows decentralised applications to deploy a message bus to send asynchronous messages between the state space of the origin blockchain and the state space of the auxiliary system supporting a specific meta-blockchain.  This allows tokens (ERC20, later non-fungible tokens) declared on the origin blockchain (Ethereum) to be locked and moved into the meta-blockchain where transactions can be finalised faster, and at a lower transaction cost. 
+
+The gateway protocol is code-complete at github.com/openstfoundation/mosaic-contracts
 
 %
 % Section
@@ -665,7 +684,7 @@ That leaves one month headroom to blame auxiliary's adversaries on origin and ge
 %
 \section{Conclusion}
 
-\section{Appendix}
+%\section{Appendix}
 
 
 
