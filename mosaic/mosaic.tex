@@ -198,6 +198,15 @@ Further, we introduce a constant \emph{core identifier}, a 256-bit string where 
 
 % Note to self: follow up on the thinking that by externalising the transition object into the vote message allows the calculation to be done in the node, not in the contract.
 
+\begin{figure}
+    \centering
+	\includegraphics[width=\textwidth]{meta_block}
+	\caption{\textbf{Anatomy of a meta-block.}
+		The meta-block consists of a kernel, a transition object, and a seal.
+	}
+	\label{fig:meta_block}
+\end{figure}
+
 \subsection{Proposing meta-blocks on origin}
 
 For a meta-blockchain $\mathcal{B}$ the chain can be appended by proposing and committing new meta-blocks $B_n(K_n, T^A_n, S_n)$ in the core contract on the origin block\-chain. The genesis meta-block $B_0$ is considered committed per definition.
