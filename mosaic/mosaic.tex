@@ -221,6 +221,18 @@ Following a similar argument as presented in section (\ref{observing_origin}) we
 
 \subsection{Dynamic set of validators [draft, contains errors]}
 
+\begin{figure}
+    \centering
+	\includegraphics[width=\textwidth]{transition}
+	\caption{\textbf{Dynamic set of validators.}
+		1) The validator sends a log out message (or a deposit message).
+		2) The change in the set of validators is transferred to auxiliary as part of the kernel that gets confirmed.
+		3) The validator does its last round in the rear set.
+		4) The validator's weight drops to zero when $K_{i+2}$ is confirmed (or the validator joins in the forward set of validators).
+	}
+	\label{fig:transition}
+\end{figure}
+
 The set of Mosaic validators needs to be able to change.
 A validator can join the set of validators by sending a deposit transaction to the stakes contract on origin.
 The amount of stake of the validator is based on the amount of value that the validator sends with the deposit transaction.
