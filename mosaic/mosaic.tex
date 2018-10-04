@@ -286,16 +286,26 @@ Rather than storing the core identifier in the transaction object, it can be inc
 For a meta-blockchain $\mathcal{B}$ the chain can be appended by proposing and committing new meta-blocks $B_n(K_n, T^A_n, S_n)$ in the core contract on the origin block\-chain.
 The genesis meta-block $B_0$ is considered committed per definition.
 
-The kernel $K_n$ is a tuple $(n, p_n, \Delta\mathcal{V}_{\mathcal{B}_n}, gp_n)$ fully determined by and stored in the core contract on the origin blockchain. %The height $n$ strictly increases by one every time a meta-block is committed into the core contract.
+The kernel $K_n$ is a tuple $(n, p_n, \Delta\mathcal{V}_{\mathcal{B}_n}, gp_n, gt_n)$ fully determined by and stored in the core contract on the origin blockchain. %The height $n$ strictly increases by one every time a meta-block is committed into the core contract.
 On a given branch of the origin blockchain a meta-blockchain cannot fork.
 The act of committing a meta-block $B_{n-1}(K_{n-1}, T^A_{n-1}, S_{n-1})$ activates the new kernel $K_n$ at height $n$ and \emph{opens} the core contract to accept proposals of the form $B_n(K_n, \cdot, \cdot)$.
-The kernel further specifies the \emph{parent hash} $p_n$, the \emph{updated validator weights} $\Delta\mathcal{V}_{\mathcal{B}_n}$ to declare new validators joining and existing validators logging out, and a voted-upon \emph{gas price} $gp_n$ for the gas that will be consumed in the upcoming meta-block $B_n$ as rewarded to the Mosaic validators.\footnote{A meta-blockchain has a double gas market.
-First the known gas market exists where users set a gas price in the transaction that gets executed on the auxiliary blockchain and the gas rewards go to the block proposers of the auxiliary system.
-A second, new gas market is created by requiring the block proposers to pre-deposit gas rewards for several meta-blocks in advance.
-Mosaic validators are rewarded upon committing a meta-block on the origin blockchain for the total gas consumed in that meta-blockchain at the agreed-upon gas price $gp_n$ for that meta-block $B_n$.
-Details in later section.}
+The kernel further specifies the \emph{parent hash} $p_n$, the \emph{updated validator weights} $\Delta\mathcal{V}_{\mathcal{B}_n}$ to declare new validators joining and existing validators logging out. The kernel includes a voted-upon \emph{gas price} $gp_n$ for the gas that will be consumed in the upcoming meta-block $B_n$ as rewarded to the Mosaic validators.\footnote{
+  A meta-blockchain has a double gas market.
+  First the known gas market exists where users set a gas price in the transaction that gets executed on the auxiliary blockchain and the gas rewards go to the block proposers of the auxiliary system.
+  A second, new gas market is created by requiring the block proposers to pre-deposit gas rewards for several meta-blocks in advance.
+  Mosaic validators are rewarded upon committing a meta-block on the origin blockchain for the total gas consumed in that meta-blockchain at the agreed-upon gas price $gp_n$ for that meta-block $B_n$.
+  Details in later section.
+}
 
-Given a committed meta-block $B_{n-1}$ at height $n-1$ a proposal for a meta-block $B_{n}(K_{n}, T^A_{n}, \cdot)$ at height $n$ is a valid proposal if validity assertions for the transition object $T^A_n$ hold.  These validity assertions require that the dynasty number and the gas consumed are strictly increasing compared to the transition object committed $T^A_{n-1}$. The transition object $T^A_n$ must reference the correct kernel $\tilde{K_n}$. It must be checked that the latest finalised observation of origin is within the history of the current state. Furthermore  a brief challenge period exists where the transition object can be contested on the grounds that it contains a prior observation of origin that contradicts the current history of origin, as explained above in section (\ref{observing_origin}).
+\paragraph{gas target} Lastly $gt_n$ is the \emph{gas target} which introduces a forcing function on the total amount of gas that can be consumed in the meta-block $B_n$.
+The earliest finalised checkpoint at which the gas target has been consumed by the meta-block must be committed to the origin blockchain by the validators.
+We highlight that this is not a maximum gas limit, because it cannot be guaranteed that a checkpoint can be finalised before a hard gas limit would be surpassed. Rather validators would gradually lose part of their stake as a function of the number of finalised checkpoints they failed to commit after the gas target has been surpassed.
+
+To show that validators can be held accountable, assume the finalised checkpoint $s_d$ has been committed which surpassed the gas target and has dynasty number $d$.
+Now assume there exists a finalised checkpoint $s_{d'}$ which also has surpassed the gas target but has a lower dynasty number $d' < d$, but was not committed before $s_d$.
+Any honest node can present the $s_{d'}$ and the core contract can assert the gas target had been consumed at a lower dynasty number than what is committed and reward the challenger.
+
+\paragraph{committing a meta-block} Given a committed meta-block $B_{n-1}$ at height $n-1$ a proposal for a meta-block $B_{n}(K_{n}, T^A_{n}, \cdot)$ at height $n$ is a valid proposal if validity assertions for the transition object $T^A_n$ hold.  These validity assertions require that the dynasty number and the gas consumed are strictly increasing compared to the transition object committed $T^A_{n-1}$. The transition object $T^A_n$ must reference the correct kernel $\tilde{K_n}$. It must be checked that the latest finalised observation of origin is within the history of the current state. Furthermore  a brief challenge period exists where the transition object can be contested on the grounds that it contains a prior observation of origin that contradicts the current history of origin, as explained above in section (\ref{observing_origin}).
 
 It now follows that for a given active kernel $K_n$ multiple proposals $T^{A}_{n,d}$ can be submitted to the core contract for different dynasty numbers $d$.  These proposals are no longer contradicting versions of the history, rather they are ordered, sequenced snapshots of possible state transitions $B_{n,d_{n}}(\Sigma_{A,d_{n-1}})$ that can be committed onto origin as a new meta-block.
 
