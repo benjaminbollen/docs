@@ -117,7 +117,7 @@ Transition rules for the origin and auxiliary system can be similar but do not h
 On the origin blockchain we define a meta-blockchain $\mathcal{B}$ with a staked validator set $\mathcal{V}_\mathcal{B}$. The blocks $B_i$ of $\mathcal{B}$ are committed to a \emph{core} contract on origin $O$. For a given history of $O$\footnote{The origin blockchain $O$ might be probabilistically finalised, in which case it is easy to observe that a transaction to a contract can always assert that it is valid only on the intended branch of history by referencing a historical blockhash.} the meta-blockchain cannot fork if we enforce that block $B_{n+1}$ can only be (proposed and) committed after block $B_n$ has been committed.
 
 % metablockchain
-We define a meta-block $B_i(K, T, S): \Sigma_A \rightarrow \Sigma_A'$ to progress the state of the auxiliary system $A$, where we call $K$ the \emph{kernel}, $T$ the \emph{transition object} and $S$ the \emph{seal}.  A block $B_i$ at height $i$ is committed with a seal $S$ when a $+\tfrac{2}{3}$ supermajority of the weighted votes has been verified\footnote{While a vote counted on a BFT system itself is already BFT for a normal majority, %TODO : reference
+We define a meta-block $B_i(K, T, S): \Sigma_A \rightarrow \Sigma_A'$ to progress the state of the auxiliary system $A$, where we call $K$ the \emph{kernel}, $T$ the \emph{transition object} and $S$ the \emph{seal}.  A block $B_i$ at height $i$ is committed with a seal $S$ when a $\texttt{+}\sfrac{2}{3}$ supermajority of the weighted votes has been verified\footnote{While a vote counted on a BFT system itself is already BFT for a normal majority, %TODO : reference
 we still require a supermajority, because the votes to commit a meta-block will be collected on the auxiliary system for which there is no assumption it is BFT, and we want Mosaic to be able to finalise transactions on the auxiliary system before they are committed to origin.}. We will detail later how the meta-block is constructed, but first we will describe the vote messages that together can combine to seal a meta-block.
 
 \subsection{Checkpoint finalisation - Casper FFG}
@@ -125,9 +125,9 @@ The reader is assumed at this point to be familiar with the work presented in \t
 
 Casper FFG presents an algorithm to build up an overlay network of vote messages presented to a smart contract about the blocks already produced by the underlying network of nodes running the blockchain.  The overlay network aims to repeatedly economically finalise a single branch of the underlying network.  It does so by allowing staked validators to cast votes which together can construct a \emph{justified chain}.
 
-A justified chain is formed by a sequence of \emph{supermajority links}, where a link identifies a \emph{source} blockhash $s$ and height $h_s$, and a \emph{target} blockhash $t$ and height $h_t$. A vote message in Casper FFG is a signed link $\langle s, t, h_s, h_t\rangle_v$ by a validator $v$. A $+\tfrac{2}{3}$ supermajority of the same link signed is a supermajority link which justifies the target block if the source block is itself already justified\footnote{The genesis block of the auxiliary blockchain is considered justified by definition.}.
+A justified chain is formed by a sequence of \emph{supermajority links}, where a link identifies a \emph{source} blockhash $s$ and height $h_s$, and a \emph{target} blockhash $t$ and height $h_t$. A vote message in Casper FFG is a signed link $\langle s, t, h_s, h_t\rangle_v$ by a validator $v$. A $\texttt{+}\sfrac{2}{3}$ supermajority of the same link signed is a supermajority link which justifies the target block if the source block is itself already justified\footnote{The genesis block of the auxiliary blockchain is considered justified by definition.}.
 
-In the work it is shown that checkpoints along a justified chain can additionally be considered \emph{finalised}, if and only if they are justified themselves and their direct child is justified.  It is then shown that should validators finalise a checkpoint on a contradicting branch of the history of the underlying blockchain, then minimally $\tfrac{1}{3}$ of the validator weight must have signed vote messages  that violate either one of two rules, \emph{the Casper slashing conditions}.
+In the work it is shown that checkpoints along a justified chain can additionally be considered \emph{finalised}, if and only if they are justified themselves and their direct child is justified.  It is then shown that should validators finalise a checkpoint on a contradicting branch of the history of the underlying blockchain, then minimally $\sfrac{1}{3}$ of the validator weight must have signed vote messages  that violate either one of two rules, \emph{the Casper slashing conditions}.
 
 These slashing conditions can be intrinsically validated given two signed vote messages from a validator $v$.  As such a validator must never sign two vote messages $\langle s_1, t_1, h_{s_1}, h_{t_1}\rangle_v$ and $\langle s_2, t_2, h_{s_2}, h_{t_2}\rangle_v$ for which either $h_{t_1} = h_{t_2}$ or $h_{s_1} < h_{s_2} < h_{t_2} < h_{t_1}$ holds.
 
@@ -234,7 +234,7 @@ Given a committed meta-block $B_{n-1}$ at height $n-1$ a proposal for a meta-blo
 It now follows that for a given active kernel $K_n$ multiple proposals $T^{A}_{n,d}$ can be submitted to the core contract for different dynasty numbers $d$.  These proposals are no longer contradicting versions of the history, rather they are ordered, sequenced snapshots of possible state transitions $B_{n,d_{n}}(\Sigma_{A,d_{n-1}})$ that can be committed onto origin as a new meta-block.
 
 To commit a meta-block then requires selecting among the valid proposals a dynasty number $d_n$ for which the meta-block will be closed. This selection occurs automatically by sequentially verifying the vote messages on the origin blockchain.
-The meta-block $B_n(K_n, T^A_n, S_n)$ will be committed with the seal $S_n$ which first asserts a $+\tfrac{2}{3}$ supermajority of the voting weight $\mathcal{V}_{\mathcal{B}_n}$ for a valid proposal in the set of valid proposals
+The meta-block $B_n(K_n, T^A_n, S_n)$ will be committed with the seal $S_n$ which first asserts a $\texttt{+}\sfrac{2}{3}$ supermajority of the voting weight $\mathcal{V}_{\mathcal{B}_n}$ for a valid proposal in the set of valid proposals
 \begin{align*}
   \{S_{n,d}\} = \left\{\left\{\langle\tilde{T}^A_{n,d}, s, t, h_s, h_t\rangle_v\right\}\right\}
 \end{align*}
@@ -245,11 +245,11 @@ Following the same reasoning as presented in section (\ref{observing_origin}) we
 However, recall that in the case of verifying observations of origin (\ref{observing_origin}), origin itself can act as an arbiter because origin can rely on its own history.
 Our concern now is to assert that the state transition to $s$ from the last committed state $B_{n-1}$ is a valid state transition according to the state transition rules $t_A$ of the auxiliary system.
 
-\paragraph{proof} Assume first a contradictory finalisation $s'$ of the auxiliary system relative to $s$ exists. This implies that more than $\tfrac{1}{3}$ of the validator weight can be slashed.
+\paragraph{proof} Assume first a contradictory finalisation $s'$ of the auxiliary system relative to $s$ exists. This implies that more than $\sfrac{1}{3}$ of the validator weight can be slashed.
 The core contract on origin must declare the meta-blockchain halted when it can slash more than the safety threshold of $\mathcal{V}_{\mathcal{B}_i}$ at a single meta-blockchain height $i$.\footnote{When a meta-blockchain has been halted, assets and stateful objects can be recovered on the origin blockchain at any later time with Merkle proofs against the last committed state root of the meta-blockchain.
 We will detail the conditions under which a meta-blockchain must halt and how the recovery processes can work later in this writing.}
 
-Alternatively no contradictory finalisation $s'$ of the auxiliary system relative to $s$ exists. Under the security model assuming a $+\tfrac{2}{3}$ supermajority of the validator weight is honest, it follows that the proposed state transition to $s$ has been obtained through honest verification of all transactions under the state transition rules $t_A$.
+Alternatively no contradictory finalisation $s'$ of the auxiliary system relative to $s$ exists. Under the security model assuming a $\texttt{+}\sfrac{2}{3}$ supermajority of the validator weight is honest, it follows that the proposed state transition to $s$ has been obtained through honest verification of all transactions under the state transition rules $t_A$.
 
 While the origin blockchain protects assets from being double-spent, users in a meta-blockchain could see their funds stolen if more than a supermajority of the open validator set would collude to violate the transition rules $t_A$. 
 
@@ -262,10 +262,9 @@ A second worthwhile path is to apply the \textit{TrueBit}\cite{truebit} protocol
 The validators $\{v\}$ who have signed vote messages $\langle\tilde{T}^A, s, t, h_s, h_t\rangle_v$ can be seen as the (collective) \emph{solvers} of the off-(of-origin-)chain computation to transition the state $B_{n-1}$ to the proposed solution $s$ given the set of transactions specified by the accumulated transaction root $r_{h_s}$.
 The computation at hand is the execution of the virtual machine that implements the state transition rules $t_A$.
 
-%%% ALL sfrac
-If less than $\tfrac{1}{3}$ of the validator weight loses the verification game to a challenger, their stake can be taken as the reward for the challenger, on top of the shared interest of all participants in the meta-blockchain for only correct proposals to be committed to the origin chain - removing the need for a jackpot and a \emph{forced-error}.  The verification game can be seen as an extension to the slashing conditions strengthening the accountable safety of the meta-blockchain to hold a minority of the validators accountable for violating the state transition rules $t_A$. This is made possible because the validator stake has been externalised on the origin blockchain with an independent (assumed correct) consensus mechanism.
+If less than $\sfrac{1}{3}$ of the validator weight loses the verification game to a challenger, their stake can be taken as the reward for the challenger, on top of the shared interest of all participants in the meta-blockchain for only correct proposals to be committed to the origin chain - removing the need for a jackpot and a \emph{forced-error}.  The verification game can be seen as an extension to the slashing conditions strengthening the accountable safety of the meta-blockchain to hold a minority of the validators accountable for violating the state transition rules $t_A$. This is made possible because the validator stake has been externalised on the origin blockchain with an independent (assumed correct) consensus mechanism.
 
-If more than $\tfrac{2}{3}$ of the validator weight signed the vote message which was challenged and lost the verification game, their stake is the reward for the challenger, and the meta-blockchain must be declared halted by the core contract.
+If more than $\sfrac{2}{3}$ of the validator weight signed the vote message which was challenged and lost the verification game, their stake is the reward for the challenger, and the meta-blockchain must be declared halted by the core contract.
 
 A third strategy can be constructed by requiring any of the challenged validators of a proposal $T^A$ to present an \emph{argument of knowledge}, eg. using \mbox{zkSNARKs} generated after being challenged, to cryptographically prove that the block $s$ has been obtained by correctly applying the state transition rules $t_A$ recursively on each parent block building up from the committed block found in $B_{n-1}$.
 
@@ -307,7 +306,7 @@ The validator's weight is reduced to zero, therefore the validator leaves the se
 
 When a validator casts a vote on auxiliary, the vote carries a specific weight.
 The initial weight of a new validator is equal to the stake on origin.
-When we say that a vote receives a $\frac{2}{3}$ majority, we mean that at least $\frac{2}{3}$ of the total voting weight on auxiliary have cast that vote.
+When we say that a vote receives a $\sfrac{2}{3}$ majority, we mean that at least $\sfrac{2}{3}$ of the total voting weight on auxiliary have cast that vote.
 A validator's stake may be reduced to a non-zero value, e.g. by slashing.
 However, in any slashing case the weight will always go to zero immediately.
 
@@ -323,7 +322,7 @@ When a validator sends a deposit or logout message at meta-block height $i$, the
 The auxiliary system will update the validator's weight with the opening of meta-block $i+2$ and the validator will join or leave the set of validators. We call that meta-block the start meta-block or end meta-block.
 Following this change, the forward and rear validator sets are based on the start meta-block and end meta-block, respectively, instead of the start dynasty and the end dynasty.
 
- In the same way, an ordered pair of checkpoints $(s, t)$, where $t$ is in meta-block $B_i$, has a supermajority link if both at least $\frac{2}{3}$ of the forward validator set and the rear validator set of $B_i$, respectively, have published vote $\langle \tilde{T}, s, t, h_{s}, h_{t}\rangle_v$.
+ In the same way, an ordered pair of checkpoints $(s, t)$, where $t$ is in meta-block $B_i$, has a supermajority link if both at least $\sfrac{2}{3}$ of the forward validator set and the rear validator set of $B_i$, respectively, have published vote $\langle \tilde{T}, s, t, h_{s}, h_{t}\rangle_v$.
 
 The same public key can only deposit and withdraw once.
 It cannot join the set of validators multiple times or change its stake.
