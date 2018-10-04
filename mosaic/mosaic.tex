@@ -210,13 +210,12 @@ However, already with a static validator set, we can observe that the finality g
 \subsection{Observing origin}
 \label{observing_origin}
 
-% From here on I only added line breaks to improve diff readability in the future
-
 Per construction the finalisation of the auxiliary system by the Mosaic validators economically binds the block proposers of the auxiliary system to the Mosaic fork selection.
 By finalising the auxiliary system the Mosaic validators reach consensus about the auxiliary system itself.
 However, to construct a meta-blockchain we will additionally require the Mosaic validators to reach consensus about their observation of the origin blockchain on the auxiliary system.
+This is required so that message can pass bidirectionally between the chains.
 
-To achieve this the Mosaic validators can construct a justified chain and finalise checkpoints along it for reported blocks of the origin blockchain on the auxiliary system.
+To achieve it, the Mosaic validators construct a justified chain and finalise checkpoints along it for reported blocks of the origin blockchain on the auxiliary system.
 The incentive structure is now reversed and the origin blockchain is in no way incentivised (nor should it be) to follow the fork selection rule of how a meta-blockchain's validator set finalised its observation of the origin blockchain.
 
 In case the origin blockchain is probabilistically finalised, then it is always possible that the Mosaic validators of a given meta-blockchain running on top of the origin blockchain would economically finalise an observation of origin on the auxiliary system which is (later) reverted by the origin blockchain - even if they sufficiently trailed the head of origin.
@@ -238,11 +237,8 @@ This is resolved by introducing an option to challenge a proposed finalised obse
 Assume an observed checkpoint $a$ was finalised on a contradictory branch of origin relative to the last finalised observed checkpoint $b$ included in $T^A$.
 Any honest node can challenge the finalisation of $b$ on origin by presenting the finalisation of $a$ and demonstrating that $a \notin \text{history}(b)$.
 Note that if validators would want to alter the finalised observation from $o \rightarrow a \rightarrow b$ to $o \rightarrow b$ they would have to produce vote messages violating the slashing conditions given the already existing vote messages.
-<<<<<<< HEAD
-=======
 
 Upon success the challenger is rewarded from the stake of the offending validators and the core contract must declare the meta-blockchain halted.
->>>>>>> develop
 
 \subsection{Calculating the transition objects}
 
@@ -289,33 +285,6 @@ Rather than storing the core identifier in the transaction object, it can be inc
 For a meta-blockchain $\mathcal{B}$ the chain can be appended by proposing and committing new meta-blocks $B_n(K_n, T^A_n, S_n)$ in the core contract on the origin block\-chain.
 The genesis meta-block $B_0$ is considered committed per definition.
 
-<<<<<<< HEAD
-The kernel $K_n$ is a tuple $(n, p_n, \Delta\mathcal{V}_{\mathcal{B}_n}, gp_n)$ fully determined by and stored in the core contract on the origin blockchain.
-%The height $n$ strictly increases by one every time a meta-block is committed into the core contract.
-On a given branch of the origin blockchain a meta-blockchain cannot fork.
-The act of committing a meta-block $B_{n-1}(K_{n-1}, T^A_{n-1}, S_{n-1})$ activates the new kernel $K_n$ at height $n$ and \emph{opens} the core contract to accept proposals of the form $B_n(K_n, \cdot, \cdot)$.
-The kernel further specifies the \emph{parent hash} $p_n$, the \emph{updated validator weights} $\Delta\mathcal{V}_{\mathcal{B}_n}$ to declare new validators joining and existing validators logging out, and a voted-upon \emph{gas price} $gp_n$ for the gas that will be consumed in the upcoming meta-block $B_n$ as rewarded to the Mosaic validators.\footnote{
-	A meta-blockchain has a double gas market.
-	First the known gas market exists where users set a gas price in the transaction that gets executed on the auxiliary blockchain and the gas rewards go to the block proposers of the auxiliary system.
-	A second, new gas market is created by requiring the block proposers to pre-deposit gas rewards for several meta-blocks in advance.
-	Mosaic validators are rewarded upon committing a meta-block on the origin blockchain for the total gas consumed in that meta-blockchain at the agreed-upon gas price $gp_n$ for that meta-block $B_n$. 
-	Details in later section.
-}
-
-Given a committed meta-block $B_{n-1}$ at height $n-1$ a proposal for a meta-block $B_{n}(K_{n}, T^A_{n}, \cdot)$ at height $n$ is a valid proposal if validity assertions for the transition object $T^A_n$ hold.
-These validity assertions require that the dynasty number and the gas consumed are strictly increasing compared to the transition object committed $T^A_{n-1}$.
-The transition object $T^A_n$ must reference the correct kernel $\tilde{K_n}$.
-It must be checked that the latest finalised observation of origin is within the history of the current state.
-Furthermore a brief challenge period exists where the transition object can be contested on the grounds that it contains a prior observation of origin that contradicts the current history of origin, as explained above in section (\ref{observing_origin}).
-
-It now follows that for a given active kernel $K_n$ multiple proposals $T^{A}_{n,d}$ can be submitted to the core contract for different dynasty numbers $d$.
-These proposals are no longer contradicting versions of the history, rather they are ordered, sequenced snapshots of possible state transitions $B_{n,d_{n}}(\Sigma_{A,d_{n-1}})$ that can be committed onto origin as a new meta-block.
-
-To commit a meta-block then requires selecting among the valid proposals a dynasty number $d_n$ for which the meta-block will be closed.
-This selection can occur naturally by verifying the vote messages on the origin blockchain.
-
-The meta-block $B_n(K_n, T^A_n, S_n)$ will be committed with the seal $S_n$ which first asserts valid signatures for a $+\tfrac{2}{3}$ supermajority of the voting weight of $\mathcal{V}_{\mathcal{B}_n}$ over the set of valid proposals
-=======
 The kernel $K_n$ is a tuple $(n, p_n, \Delta\mathcal{V}_{\mathcal{B}_n}, gp_n)$ fully determined by and stored in the core contract on the origin blockchain. %The height $n$ strictly increases by one every time a meta-block is committed into the core contract.
 On a given branch of the origin blockchain a meta-blockchain cannot fork.
 The act of committing a meta-block $B_{n-1}(K_{n-1}, T^A_{n-1}, S_{n-1})$ activates the new kernel $K_n$ at height $n$ and \emph{opens} the core contract to accept proposals of the form $B_n(K_n, \cdot, \cdot)$.
@@ -332,7 +301,6 @@ It now follows that for a given active kernel $K_n$ multiple proposals $T^{A}_{n
 To commit a meta-block then requires selecting among the valid proposals a dynasty number $d_n$ for which the meta-block will be closed. This selection can occur naturally by verifying the vote messages on the origin blockchain.
 
 The meta-block $B_n(K_n, T^A_n, S_n)$ will be committed with the seal $S_n$ which first asserts valid signatures for a $+\tfrac{2}{3}$ supermajority of the voting weight  of $\mathcal{V}_{\mathcal{B}_n}$ over the set of valid proposals
->>>>>>> develop
 \begin{align*}
   \{S_{n,d}\} = \left\{\left\{\langle\tilde{T}^A_{n,d}, s, t, h_s, h_t\rangle_v\right\}\right\}
 \end{align*}
@@ -373,12 +341,10 @@ The transition object $T^A$ to commit this meta-block tracks the gas consumed, s
 There are open considerations regarding the (economic) feasibility of requiring all validators to be able to generate such a proof on commodity hardware.
 The task of generating these proofs could be designated to a specialised node, but an incentive problem arises when it is economically unattractive to run such a node considering it is unlikely that a proposal would be challenged.
 
-<<<<<<< HEAD
 However, recall that in the case of verifying observations of origin (\ref{observing_origin}), origin itself can act as an arbiter because origin can rely on its own history.
 Our concern now is to assert that the state transition to $s$ from the last committed state $B_{n-1}$ is a valid state transition according to the state transition rules $t_A$ without finding recourse in full verification of these transactions on origin.
-=======
+
 Before continuing we summarise that the proposal mechanism to commit a meta-block is asynchronous, requires no leadership-selection and is proven to be Byzantine fault-tolerant under the security model of an honest supermajority.
->>>>>>> develop
 
 We have gone further by considering three strategies discussed in the community to radically improve the security model beyond the assumption of an honest supermajority of validators; up to the point where a single honest observer can cost-effectively challenge the validator set on the origin blockchain.
 
