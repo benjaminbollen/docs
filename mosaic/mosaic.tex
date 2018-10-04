@@ -475,6 +475,48 @@ The validators that logged out on origin before the opening of $K_i$ will be in 
 
 \subsection{gas markets}
 
+Users of the auxiliary system pay gas fees to the block proposers of the auxiliary system for every transaction.
+Similarly, users of the origin blockchain pay gas fees for their transactions on origin.
+Due to the limit on the number of transactions included in each block, the gas price is determined in a system of supply and demand.
+When many users want to include many transactions in blocks, possibly above the limit, the average gas price will naturally rise and vice versa.
+
+The meta-blockchain includes transactions from auxiliary.
+Users of the auxiliary system already paid a gas fee for when the transactions were included in an auxiliary block and cannot be expected to pay another fee later on.
+Still, it is desired that the validators have an incentive to commit meta-blocks on origin, as it is a pre-requisite for anyone to transfer value from auxiliary to origin.
+
+Mosaic provides two incentives for the validators to do so:
+
+\begin{enumerate}
+	\item The validators receive a gas fee for a committed meta-block, based on the gas that auxiliary consumed for all auxiliary transactions that exist within that meta-block.
+	\item The validators get rewarded on auxiliary. In order for them to move the rewards to origin, they must first commit a meta-block.
+\end{enumerate}
+% TODO: do we even need the gas fee or is "2." plus the gas target sufficient?
+
+\paragraph{Gas fees.}
+For every meta-block, validators get rewards based on the amount of gas that was consumed on auxiliary within that meta-block.
+
+The amount paid out to a single validator address on auxiliary equals
+\begin{align*}
+  \frac{w_v}{w} \cdot g \cdot gp
+\end{align*}
+where $w_v$ is the weight of the validator, $w$ is the total weight of all validators, $g$ is the accumulated gas of the meta-block, and $gp$ is the agreed upon gas price.
+
+However, this amount increases with increasing size of a meta-block.
+% TODO: agree on gas price (who, when, where).
+
+\paragraph{Validator rewards.}
+Whenever someone commits a meta-block on origin, the meta-block closes, a new meta-block opens, and someone confirms the kernel of the newly opened meta-block on auxiliary.
+The auxiliary system tracks the total gas consumption per checkpoint and can therefore calculate the amount of gas consumed in the closed meta-block on-chain.
+The gas consumed of a meta-block is merely a mirror of the gas that all auxiliary transactions within that meta-block consumed on auxiliary.
+
+A smart contract on auxiliary pays out a fee to the validators based on the gas consumed in the closed meta-block.
+In order for the auxiliary smart contract to be able to do the pay-out, the block proposers of auxiliary must deposit sufficient value for multiple future meta-blocks in said contract.
+Block proposers have an interest in confirmed meta-blocks on origin.
+They earn on auxiliary for proposing blocks and they can only transfer their value to origin after a meta-block is committed.
+Furthermore, an auxiliary system with more frequent meta-block commits could be more interesting to users and therefore produce more gas rewards for the block proposers.
+
+If block proposers would fail to produce a sufficient deposit for validator rewards, validators would most likely switch to a more profitable auxiliary chain.
+
 %
 % Section
 %
