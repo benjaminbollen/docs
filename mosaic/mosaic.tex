@@ -34,7 +34,7 @@
 \input{eth_header}
 \graphicspath{{images/}}
 
-\title{Mosaic\\\sc\Large{Running Meta-Blockchains to Scale Decentralised Applications}}
+\title{Mosaic\\\sc\Large{Running Meta-Blockchains to \\ Scale Decentralized Applications}}
 \author{\textbf{B. Bollen, P. Gevorgyan, S. Khedar,}\\ \textbf{D. Kumar Nath, M. Schenck}\\ for OpenST Foundation \\ incomplete working draft}
 \date{OpenST Mosaic v0.10 - September 2018}
 
@@ -63,29 +63,29 @@ The code is work in progress at \verb|github.com/openstfoundation/mosaic-contrac
 %The desired outcome of dividing the verification work into shards across nodes, is to parallelise the work load across nodes. When parallelising computations an orchestration % TODO: is "orchestration" the right word?
 % strategy is required to avoid race conditions. One model to structure parallelised computation is by enforcing a strict ownership model on data and only a single thread can own and write to the data.
 % 
-% A blockchain naturally has a natural ownership model in the form of tokens. In Bitcoin unspent transaction outputs (UTXO) are an inherent ownership structure. In Ethereum's account model, any account can call on any other account, and there is not a direct ownership model. However, decentralised applications are often built around a token contract or use Ether to design the crypto-economic rules to interact with the decentralised application. Furthermore, non-fungible tokens create an ownership model for stateful data objects. % shit paragraph, but something
+% A blockchain naturally has a natural ownership model in the form of tokens. In Bitcoin unspent transaction outputs (UTXO) are an inherent ownership structure. In Ethereum's account model, any account can call on any other account, and there is not a direct ownership model. However, decentralized applications are often built around a token contract or use Ether to design the crypto-economic rules to interact with the decentralized application. Furthermore, non-fungible tokens create an ownership model for stateful data objects. % shit paragraph, but something
 % 
-% So at layer2 as tokens form the access-right to interact with a decentralised application, by the token-ownership model can be used to parallelise the execution of the decentralised application.
+% So at layer2 as tokens form the access-right to interact with a decentralized application, by the token-ownership model can be used to parallelise the execution of the decentralized application.
 % 
-% We define a \emph{shardable} application as a decentralised application that allows modification of its state based on ownership of tokens, or embeds state it computes on into non-fungible tokens. %rewrite
+% We define a \emph{shardable} application as a decentralized application that allows modification of its state based on ownership of tokens, or embeds state it computes on into non-fungible tokens. %rewrite
 % \begin{align*}
 %  A(t; x) \rightarrow A'
 % \end{align*}
 %
 %-----
 
-% Mosaic is parallelisation schema for decentralised applications.
-Mosaic is a parallelisation schema for decentralised applications.
+% Mosaic is parallelisation schema for decentralized applications.
+Mosaic is a parallelisation schema for decentralized applications.
 Mosaic introduces a set of Byzantine fault-tolerant (BFT) consensus rules to compose heterogeneous blockchain systems into one another.
-Decentralised application can use Mosaic to compute over a composed network of multiple blockchain systems in parallel.
+Decentralized applications can use Mosaic to compute over a composed network of multiple blockchain systems in parallel.
 
-A decentralised application is an application for which the computation is requested, performed, and paid for by independent actors.
-To ensure correct execution of decentralised computations first an order on the inputs of execution must be determinable.
+A decentralized application is an application for which the computation is requested, performed, and paid for by independent actors.
+To ensure correct execution of decentralized computations first an order on the inputs of execution must be determinable.
 To date Ethereum is the leading network
 % {TODO: quantify and reference; also define Ethereum as an instruction set, a mainnet network}
 of nodes that enables developers to write and deploy code which can be called by independent users to collectively construct a shared state of the application.
 
-% Ethereum is leading network of nodes for decentralised execution.
+% Ethereum is leading network of nodes for decentralized execution.
 The Ethereum network achieves agreement on the collective state by constructing a blockchain.
 A blockchain derives correctness from full replication of the computation by nodes and for Ethereum today the chain is appended through Proof-of-Work consensus.
 %{TODO: give short intro, start from satoshi}
@@ -101,19 +101,19 @@ The outset of a BFT consensus engine is to collectively produce a blockchain whi
 
 % A second body of work constructs Proof-of-Stake blockchain systems by emulating Proof-of-Work's block proposal mechanism through pseudorandomly assigning to stakeholders the right to append new blocks\footnote{Peercoin, }.
 
-% Bitcoin's arrival in 2009 is widely accepted as a turning-point, proving by demonstration, that a network can be constructed that balances economic interests of independent actors to collectively secure digital assets against double-spending. Ethereum innovates on Bitcoin by introducing a generalised scripting language, enabling a broad developer community for decentralised applications to grow.
+% Bitcoin's arrival in 2009 is widely accepted as a turning-point, proving by demonstration, that a network can be constructed that balances economic interests of independent actors to collectively secure digital assets against double-spending. Ethereum innovates on Bitcoin by introducing a generalised scripting language, enabling a broad developer community for decentralized applications to grow.
 
-Thus far a vision for a decentralised web has been a major driver of innovation.
-However, to power global networks of billions of users and decentralised computation on vast decentralised data stores, it is reasonable to assume no single blockchain network will suffice as a backbone for all types of applications.
-Much like the internet is a composed network of networks, we can conceive decentralised applications to transcend any single blockchain and execute across a network of blockchain networks.
+Thus far a vision for a decentralized web has been a major driver of innovation.
+However, to power global networks of billions of users and decentralized computation on vast decentralized data stores, it is reasonable to assume no single blockchain network will suffice as a backbone for all types of applications.
+Much like the internet is a composed network of networks, we can conceive decentralized applications to transcend any single blockchain and execute across a network of blockchain networks.
 
 In this work we detail two protocols.
 The first, a layer-2 protocol, constructs \emph{meta-blockchains} on top of existing blockchain networks to extend their state space and transaction throughput capacity.
 The second protocol, called a \emph{gateway}, acts as a message bus to send typed messages atomically between the underlying layer-1 blockchain and the meta-blockchain running on top of it.
 
-Together these two building blocks can be used by decentralised applications to construct a parallelisation schema to increase %on-chain
+Together these two building blocks can be used by decentralized applications to construct a parallelisation schema to increase %on-chain
 computational capacity at lower transaction cost.
-In its simplest form, a decentralised application can offload transaction processing to a single meta-blockchain.
+In its simplest form, a decentralized application can offload transaction processing to a single meta-blockchain.
 More advanced applications can deploy logic across many meta-blockchains and process transactions in parallel while they can send asynchronous messages across meta-blockchains.
 
 %%%%%%%%%%%%%%%%%%%%
@@ -361,12 +361,14 @@ The transition object $T^A$ to commit this meta-block tracks the gas consumed, s
 There are open considerations regarding the (economic) feasibility of requiring all validators to be able to generate such a proof on commodity hardware.
 The task of generating these proofs could be designated to a specialised node, but an incentive problem arises when it is economically unattractive to run such a node considering it is unlikely that a proposal would be challenged.
 
-We have gone beyond the assumption of an honest supermajority of validators by considering three strategies discussed in the community to radically improve the security model; up to the point where a single honest observer can cost-effectively challenge the validator set on the origin blockchain.
+We have gone beyond the assumption of an honest supermajority of validators by considering three strategies discussed in the field to radically improve the security model; up to the point where a single honest observer can cost-effectively challenge the validator set on the origin blockchain.
 
 %We welcome other teams to explore and collaborate with their implementations and improvements to test these and more strategies to tighten the security model.
 
-\subsection{Dynamic set of validators [draft, contains errors]}
+\subsection{Dynamic set of validators}
 
+The set of validators for the meta-blockchain $\mathcal{B}$ must be dynamic to allow new validators to join and for validators to safely exit from their responsibilities. It is defined for each meta-block height $i$ and we note $\mathcal{V}_{\mathcal{B}_i}$.
+ 
 The set of Mosaic validators needs to be able to change.
 A validator can join the set of validators by sending a deposit transaction to the stakes contract on origin.
 The amount of stake of the validator is based on the amount of value that the validator sends with the deposit transaction.
@@ -887,7 +889,7 @@ That leaves one month headroom to blame auxiliary's adversaries on origin and ge
 \section{Gateway}
 
 abstract:
-the gateway protocol allows decentralised applications to deploy a message bus to send asynchronous messages between the state space of the origin blockchain and the state space of the auxiliary system supporting a specific meta-blockchain.
+the gateway protocol allows decentralized applications to deploy a message bus to send asynchronous messages between the state space of the origin blockchain and the state space of the auxiliary system supporting a specific meta-blockchain.
 This allows tokens (ERC20, later non-fungible tokens) declared on the origin blockchain (Ethereum) to be locked and moved into the meta-blockchain where transactions can be finalised faster, and at a lower transaction cost. 
 
 The gateway protocol is code-complete at github.com/openstfoundation/mosaic-contracts
