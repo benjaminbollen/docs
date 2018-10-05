@@ -283,6 +283,7 @@ Rather than storing the core identifier in the transaction object, it can be inc
 \end{figure}
 
 \subsection{Proposing meta-blocks on origin}
+\label{proposing_metablocks}
 
 For a meta-blockchain $\mathcal{B}$ the chain can be appended by proposing and committing new meta-blocks $B_n(K_n, T^A_n, S_n)$ in the core contract on the origin block\-chain.
 The genesis meta-block $B_0$ is considered committed per definition.
@@ -368,24 +369,24 @@ We have gone beyond the assumption of an honest supermajority of validators by c
 \subsection{Dynamic set of validators}
 
 The set of validators for the meta-blockchain $\mathcal{B}$ must be dynamic to allow new validators to join and for validators to safely exit from their responsibilities.
-It is defined for each meta-block height $i$ and we note $\mathcal{V}_{\mathcal{B}_i}$.
+It is defined for each meta-block height $n$ and we note $\mathcal{V}_{\mathcal{B}_n}$.
 
 A validator $v$ is a defined as an address which has a strictly-positive validator weight $w_v$ associated with it on the origin blockchain.
 A validator can join the set of validators by sending a \emph{deposit message} to the origin blockchain and putting forward a stake.
 A validator can initiate log out by sending a \emph{logout message} to origin.
 
-The weight of a validator $v$ at meta-block height $n$ is the product of the stake of the validator at that height $s_v(n)$ multiplied with a reputation function $R(n_0, n; v)$
+The weight of a validator $w_v$ at meta-block height $n$ is the product of the stake of the validator at that height $s_v(n)$ multiplied with a \emph{reputation function} $R(n_0, n; v)$
 \begin{align}
   w_v(n) = s_v(n) \cdot R(n_0, n; v)
 \end{align}
 where the reputation function $R$ has values in the range $[0,1]$ and $n_0$ is the meta-block height where the validator $v$ sent the deposit message.
 
-Changing the reputation function allows for different security models to mitigate collusion attempts of malicious actors within the validator set of the meta-blockchain.
+The reputation function allows for different security models to mitigate collusion attempts of malicious actors within the validator set of the meta-blockchain.
 As examples, the reputation function can require initial work by the validator before obtaining a non-zero reputation.
 The reputation function can also enforce a finite (probabilistic) lifetime for all validators, honest and dishonest alike.
 Inducing churn in the (honest) validator set adds an important stochastic tool to prevent collusion of more than $\sfrac{1}{3}$ of the validator weight.
 
-Changes to the validator weights $w_v(n)$ are included in the kernel $K_n$ as $\Delta\mathcal{V}_{\mathcal{B}_n}$.  When tallying votes both the origin blockchain must use the \emph{effective weight} $W_v(n)$,
+Changes to the validator weights $w_v(n)$ are included in the kernel $K_n$ as $\Delta\mathcal{V}_{\mathcal{B}_n}$.  When tallying votes both the origin blockchain and the auxiliary system must use the \emph{effective weight} $W_v(n)$,
 \begin{align*}
   W_v(n) = w_v(n) \cdot \theta_v
 \end{align*}
@@ -397,11 +398,13 @@ The \emph{loss function} $L$ recalculates the stake of a validator for the new m
 \begin{align}
   s_v(n) = L(s_v(n-1); v).
 \end{align}
-The loss function reduces the actual value the validator can possibly withdraw in the future.  The loss function can reward challengers for presenting proofs of bad behaviour by the validator from his stake and can burn the remaining reduction.
+The loss function reduces the actual value the validator can possibly withdraw in the future.  The loss function can reward challengers for presenting proofs of bad behaviour by the validator from his stake and it can burn the remaining reduction.
 
-When a validator violates any slashing condition the loss function returns zero.
+When a validator violates any slashing condition the loss function returns the validator stake to zero.
 
-Validators can see their stake reduced when they become inactive in the voting process (\emph{inactivity leak}), or when they fail to commit a meta-block back to origin according to the gas target requirements (see above).
+Validators can see their stake reduced when they become inactive in the voting process (\emph{inactivity leak}\footnote{
+  The inactivity leak forces validators to participate in the voting process and be available.  The stake of inactive validators can gradually be diluted if they fail to verify their vote on a committed meta-block.  We credit the term to Casper FFG\cite{casperffg} for the original argument.
+}), or when they fail to commit a meta-block back to origin according to the gas target requirements (see  \ref{proposing_metablocks}).
 
 When a validator successfully logs out his reputation is set to zero, but his stake remains locked in the contract for a fixed amount of time to protect against long range revision attacks.\footnote{
   By holding on to the stake the validator can still be held accountable for evidence of wrong doing that may surface later or new attempts of revising the history.
@@ -409,12 +412,7 @@ When a validator successfully logs out his reputation is set to zero, but his st
 After this time the validator can withdraw his stake (and remaining rewards).
 
 ---
-%The amount of stake of the validator is based on the amount of value that the validator sends with the deposit transaction.
-% TODO: should it say staking is done in OST, ERC-20, or just value?
-% TODO: will the rewards go to the stake? will they also go to the weight?
 
-When a validator wants to leave the set of validators, it sends a logout message to the stake contract on origin.
-The validator's weight is reduced to zero, therefore the validator leaves the set of validators.
 % TODO: is 4 months fixed or should it say something variable.
 
 \begin{figure}[htb]
