@@ -81,7 +81,7 @@ Decentralized applications can use Mosaic to compute over a composed network of 
 
 A decentralized application is an application for which the computation is requested, performed, and paid for by independent actors.
 To ensure correct execution of decentralized computations first an order on the inputs of execution must be determinable.
-To date Ethereum is the leading network
+To date, Ethereum is the leading network
 % {TODO: quantify and reference; also define Ethereum as an instruction set, a mainnet network}
 of nodes that enables developers to write and deploy code which can be called by independent users to collectively construct a shared state of the application.
 
@@ -94,7 +94,7 @@ However, PoW produces a serial execution model and nodes cannot be collectively 
 
 % NOTE: Ethereumv2 still needs to serialise all execution; DFinity starts from scratch 
 Active research and implementation work is ongoing to scale Ethereum's transaction throughput by dividing the verification work into multiple sections, also referred to as \emph{shards}.
-At the same time Ethereum is committed to moving from the probabilistic Proof-of-Work consensus engine to a BFT based Proof-of-Stake (PoS) consensus engine.\footnote{
+At the same time, Ethereum is committed to moving from the probabilistic Proof-of-Work consensus engine to a BFT based Proof-of-Stake (PoS) consensus engine.\footnote{
 	\url{https://github.com/ethereum/eth2.0-specs/blob/master/specs/casper_sharding_v2.1.md}
 }
 The outset of a BFT consensus engine is to collectively produce a blockchain which provably -- under certain honesty assumptions -- cannot finalize conflicting blocks.
@@ -107,7 +107,7 @@ Thus far a vision for a decentralized web has been a major driver of innovation.
 However, to power global networks of billions of users and decentralized computation on vast decentralized data stores, it is reasonable to assume no single blockchain network will suffice as a backbone for all types of applications.
 Much like the internet is a composed network of networks, we can conceive decentralized applications to transcend any single blockchain and execute across a network of blockchain networks.
 
-In this work we detail two protocols.
+We detail two protocols in this work.
 The first, a layer-2 protocol, constructs \emph{meta-blockchains} on top of existing blockchain networks to extend their state space and transaction throughput capacity.
 The second protocol, called a \emph{gateway}, acts as a message bus to send typed messages atomically between the underlying layer-1 blockchain and the meta-blockchain running on top of it.
 
@@ -133,14 +133,14 @@ and similarly consider an auxiliary system $A$ with state transition rules $t_A$
 
 
 Transition rules for the origin and auxiliary system can be similar but do not have to be.
-In our discussion, when we need an example, we will reference to the origin blockchain as Ethereum (Byzantium), running Proof-of-Work, and for the auxiliary system we consider Go-Ethereum, running ``clique'' Proof-of-Authority (PoA).
+In our discussion, when we need an example, we will refer to the origin blockchain as Ethereum (Byzantium), running Proof-of-Work, and for the auxiliary system we consider Go-Ethereum, running ``clique'' Proof-of-Authority (PoA).
 We deliberately use PoA for our considerations for the auxiliary system to emphasize that the security for the composed auxiliary system is not derived from the consensus engine of the auxiliary system.
 Rather the security properties of the composed system must rely only on the security properties of the consensus rules of the origin blockchain and on the Mosaic BFT consensus rules composing the auxiliary system into the origin system.\footnote{
 	The block proposers of the auxiliary system do have the ability to censor transactions from the auxiliary system if they have an ability to collude.
 }
 
 
-On the origin blockchain we define a meta-blockchain $\mathcal{B}$ with a staked validator set $\mathcal{V}_\mathcal{B}$. The blocks $B_i$ of $\mathcal{B}$ are committed to a \emph{core} contract on origin $O$.
+We define a meta-blockchain $\mathcal{B}$ with a staked validator set $\mathcal{V}_\mathcal{B}$ on the origin blockchain. The blocks $B_i$ of $\mathcal{B}$ are committed to a \emph{core} contract on origin $O$.
 For a given history of $O$,\footnote{
 	The origin blockchain $O$ might be probabilistically finalized, in which case a transaction to a contract can always assert that it is valid only on the intended branch of history by referencing a historical blockhash.
 }
@@ -169,7 +169,7 @@ A $\texttt{+}\sfrac{2}{3}$ supermajority signing of the same link makes it a sup
 	The genesis block of the auxiliary blockchain is considered justified by definition.
 }
 
-In the work it is shown that checkpoints along a justified chain can additionally be considered \emph{finalized}, if and only if they are justified themselves and their direct child checkpoint is justified.
+In the work, it is shown that checkpoints along a justified chain can additionally be considered \emph{finalized}, if and only if they are justified themselves and their direct child checkpoint is justified.
 It is then shown that, should validators finalize a checkpoint on a contradicting branch of the history of the underlying blockchain, minimally $\sfrac{1}{3}$ of the validator weight must have signed vote messages that violate either one of two rules: \emph{the Casper slashing conditions}.
 
 These slashing conditions can be intrinsically validated given two signed vote messages from a validator $v$.
@@ -177,7 +177,7 @@ As such a validator must never sign two vote messages $\langle s_1, t_1, h_{s_1}
 
 It is additionally shown that validators can always finalize a new checkpoint, without being required to violate the slashing conditions, given that the block proposers propose blocks to append to the finalized fork, i.e. follow the fork selection rule of the overlay network.
 
-\subsection{Finalising auxiliary systems}
+\subsection{Finalizing auxiliary systems}
 Given a validator set $\mathcal{V}_\mathcal{B}$ staked for the meta-blockchain on origin, validators $v$ can submit, on the auxiliary system, vote messages about the auxiliary system of the form
 \begin{align}\label{externalizedvote}
   \langle \tilde{T}, s, t, h_s, h_t \rangle_v
@@ -199,7 +199,7 @@ A validator $v \in \mathcal{V}_\mathcal{B}$ must never sign two externalized vot
 \end{enumerate}
 
 As the slashing conditions can be intrinsically asserted to have been violated given two externalized vote messages by the same validator, there is no communication overhead to assert a possible violation of these conditions on the origin blockchain; even if the justified chain is being constructed on the auxiliary system.
-As a result the validators in $\mathcal{V}_\mathcal{B}$ can be held accountable on the origin blockchain for their voting actions on the auxiliary system.
+As a result, the validators in $\mathcal{V}_\mathcal{B}$ can be held accountable on the origin blockchain for their voting actions on the auxiliary system.
 The slashing condition can be asserted on both systems and there is a clear incentive for the honest validators to assert any violation without delay on both the origin and auxiliary system, naturally synchronising the validator weights when such an event occurs.
 
 We will later in this work address a dynamic validator set $\mathcal{V}_\mathcal{B}$, where validators can join and log out on the origin system.
@@ -212,7 +212,7 @@ However, already with a static validator set, we can observe that the finality g
 \subsection{Observing origin}
 \label{observing_origin}
 
-Per construction the finalization of the auxiliary system by the Mosaic validators economically binds the block proposers of the auxiliary system to the Mosaic fork selection.
+Per construction, the finalization of the auxiliary system by the Mosaic validators economically binds the block proposers of the auxiliary system to the Mosaic fork selection.
 By finalizing the auxiliary system the Mosaic validators reach consensus about the auxiliary system itself.
 However, to construct a meta-blockchain we will additionally require the Mosaic validators to reach consensus about their observation of the origin blockchain on the auxiliary system.
 This is required so that message can pass bidirectionally between the chains.
@@ -240,7 +240,7 @@ Assume an observed checkpoint $a$ was finalized on a contradictory branch of ori
 Any honest node can challenge the finalization of $b$ on origin by presenting the finalization of $a$ and demonstrating that $a \notin \text{history}(b)$.
 Note that if validators would want to alter the finalized observation from $o \rightarrow a \rightarrow b$ to $o \rightarrow b$ they would have to produce vote messages violating the slashing conditions given the already existing vote messages.
 
-Upon success the challenger is rewarded from the stake of the offending validators and the core contract must declare the meta-blockchain halted.
+Upon success, the challenger is rewarded from the stake of the offending validators and the core contract must declare the meta-blockchain halted.
 
 \subsection{Calculating the transition objects}
 
@@ -322,7 +322,7 @@ Our concern now is to assert that the state transition to $s$ from the last comm
 The core contract on origin must declare the meta-blockchain halted when it can slash more than the safety threshold of $\mathcal{V}_{\mathcal{B}_i}$ at a single meta-blockchain height $i$.\footnote{When a meta-blockchain has been halted, assets and stateful objects can be recovered on the origin blockchain at any later time with Merkle proofs against the last committed state root of the meta-blockchain.
 We will detail the conditions under which a meta-blockchain must halt and how the recovery processes can work later in this writing.}
 
-Alternatively no contradictory finalisation $s'$ of the auxiliary system relative to $s$ exists.
+Alternatively, no contradictory finalisation $s'$ of the auxiliary system relative to $s$ exists.
 Under the security model assuming a $\texttt{+}\sfrac{2}{3}$ supermajority of the validator weight is honest, it follows that the proposed state transition to $s$ has been obtained through honest verification of all transactions under the state transition rules $t_A$.
 
 Before continuing we summarize that the proposal mechanism to commit a meta-block is asynchronous, requires no leadership-selection and is proven to be Byzantine fault-tolerant under the security model of an honest supermajority.
@@ -425,9 +425,9 @@ When a validator casts a vote on auxiliary, the vote carries a specific weight.
 The initial weight of a new validator is equal to the stake on origin.
 When we say that a vote receives a $\sfrac{2}{3}$ majority, we mean that at least $\sfrac{2}{3}$ of the total voting weight on auxiliary have cast that vote.
 A validator's stake may be reduced to a non-zero value, e.g. by slashing.
-However, in any slashing case the weight will always go to zero immediately.
+However, the weight will always go to zero immediately in any slashing case.
 
-We defend against long range revision attacks the same way casper does.
+We defend against long-range revision attacks the same way Casper does.
 Four months after the validator left the set of validators, the validator can withdraw its stake.
 
 Casper FFG\cite{casperffg} defines a stitching mechanism for a changing set of validators.
@@ -552,13 +552,65 @@ Furthermore, an auxiliary system with more frequent meta-block commits could be 
 
 If block proposers would fail to produce a sufficient deposit for validator rewards, validators would most likely switch to a more profitable auxiliary chain.
 
+\subsection{Attacks and Defenses}
+
+We defend against the two main attacks against proof of stake systems the same way Casper FFG\cite{casperffg} does:
+\begin{itemize}
+    \item We defend against \emph{long-range revision} by introducing a \emph{withdrawal delay} and a \emph{maximum source block age} for votes.
+    \item We defend against \emph{catastrophic crashes} by introducing an \emph{inactivity leak}.
+\end{itemize}
+However, there are a number of new attack vectors introduced by the concepts of a meta-blockchain and decoupled systems:
+\begin{itemize}
+    \item Proposing invalid meta-blocks to origin. E.g. from another auxiliary system.
+    \item Delaying kernel confirmation.
+    \item Reporting invalid blocks to the auxiliary system.
+    \item Validators produce votes to commit on origin without actually voting on auxiliary.
+    \item Validators stop finalizing.
+\end{itemize}
+
+\paragraph{Invalid meta-block proposals.}
+Say a supermajority of validators uses the same private key on two auxiliary chains $A_1$ and $A_2$.
+When these validators sign a supermajority vote that finalizes a checkpoint on auxiliary chain $A_1$, an adversary could present a transition object from $A_1$, including the votes to commit it, to the core contract of $A_2$ on origin.
+The $A_2$ core contract would deem the transition object and the signatures as valid.
+For that reason we introduced the kernel hash to the transition object.
+This binds every transition object to a kernel and transitively to a specific core contract.
+
+\paragraph{Kernel delay.}
+The set of validators could have an interest in delaying the confirmation of a new kernel, e.g. to prevent a new validator from joining the set of validators.
+However, the system is designed in a way that anyone, even the new validator that is not yet part of the set of validators, can do the Merkle proof to confirm a new kernel on auxiliary.
+All that is required for that is a finalized checkpoint of origin on auxiliary that includes the state root that includes the commit of the previous kernel.
+If the validators delay origin block finalization to prevent the kernel opening, they would lose stake as the result of the inactivity leak.
+
+\paragraph{Invalid block reports.}
+Block reporting to auxiliary is not limited to any set of specific addresses.
+An adversary could report origin blocks that do not actually exist on origin.
+There is no way for auxiliary to check the validity of these reports.
+However, validators would ignore these reports and not vote on them, the adversary is only burning gas fees.
+
+\paragraph{Belated vote production.}
+Say someone proposes a transition object to origin for which a supermajority vote by the validators does not exist.
+Validators may produce votes to commit that proposal.
+There are two cases then to consider:
+
+\begin{enumerate}
+    \item The produced votes never violate any slashing condition.
+    \item The produced votes violate a slashing condition eventually.
+\end{enumerate}
+
+In the first case, the commit on origin is in-line with what is actually observed on auxiliary.
+In the second case, at least $\sfrac{1}{3}$ of the validators' stake can be slashed.
+
+\paragraph{Finalization breakdown.}
+If validators decided to stop finalization, they would lose stake due to the inactivity leak.
+
+
 %
 % Section
 %
 \section{A mosaic of cores}
 
 summary:
-by constructing asynchronous BFT consensus rules to compose a heterogeneous auxiliary blockchain into the origin blockchain, we leverage the security of the origin blockchain to asynchronously finalize the transactions on the auxiliary blockchain.
+By constructing asynchronous BFT consensus rules to compose a heterogeneous auxiliary blockchain into the origin blockchain, we leverage the security of the origin blockchain to asynchronously finalize the transactions on the auxiliary blockchain.
 As there are no time constraints or time-outs in the Mosaic consensus rules, the limited processing capacity of the origin blockchain does not undercut the ability to compose many auxiliary systems into the same origin blockchain.
 This enables Mosaic to run many meta-blockchains in parallel, additively improving the total transaction capacity, but keeping a bound on the cost imposed on the origin blockchain.
 %% 
