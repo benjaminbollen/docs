@@ -97,7 +97,7 @@ Active research and implementation work is ongoing to scale Ethereum's transacti
 At the same time, Ethereum is committed to moving from the probabilistic Proof-of-Work consensus engine to a BFT based Proof-of-Stake (PoS) consensus engine.\footnote{
 	\url{https://github.com/ethereum/eth2.0-specs/blob/master/specs/casper_sharding_v2.1.md}
 }
-The outset of a BFT consensus engine is to collectively produce a blockchain which provably -- under certain honesty assumptions -- cannot finalise conflicting blocks.
+The outset of a BFT consensus engine is to collectively produce a blockchain which provably -- under certain honesty assumptions -- cannot finalize conflicting blocks.
 
 % A second body of work constructs Proof-of-Stake blockchain systems by emulating Proof-of-Work's block proposal mechanism through pseudorandomly assigning to stakeholders the right to append new blocks\footnote{Peercoin, }.
 
@@ -134,7 +134,7 @@ and similarly consider an auxiliary system $A$ with state transition rules $t_A$
 
 Transition rules for the origin and auxiliary system can be similar but do not have to be.
 In our discussion, when we need an example, we will refer to the origin blockchain as Ethereum (Byzantium), running Proof-of-Work, and for the auxiliary system we consider Go-Ethereum, running ``clique'' Proof-of-Authority (PoA).
-We deliberately use PoA for our considerations for the auxiliary system to emphasise that the security for the composed auxiliary system is not derived from the consensus engine of the auxiliary system.
+We deliberately use PoA for our considerations for the auxiliary system to emphasize that the security for the composed auxiliary system is not derived from the consensus engine of the auxiliary system.
 Rather the security properties of the composed system must rely only on the security properties of the consensus rules of the origin blockchain and on the Mosaic BFT consensus rules composing the auxiliary system into the origin system.\footnote{
 	The block proposers of the auxiliary system do have the ability to censor transactions from the auxiliary system if they have an ability to collude.
 }
@@ -142,7 +142,7 @@ Rather the security properties of the composed system must rely only on the secu
 
 We define a meta-blockchain $\mathcal{B}$ with a staked validator set $\mathcal{V}_\mathcal{B}$ on the origin blockchain. The blocks $B_i$ of $\mathcal{B}$ are committed to a \emph{core} contract on origin $O$.
 For a given history of $O$,\footnote{
-	The origin blockchain $O$ might be probabilistically finalised, in which case a transaction to a contract can always assert that it is valid only on the intended branch of history by referencing a historical blockhash.
+	The origin blockchain $O$ might be probabilistically finalized, in which case a transaction to a contract can always assert that it is valid only on the intended branch of history by referencing a historical blockhash.
 }
 the meta-blockchain cannot fork if we enforce that block $B_{n+1}$ can only be (proposed and) committed after block $B_n$ has been committed.
 
@@ -150,17 +150,17 @@ the meta-blockchain cannot fork if we enforce that block $B_{n+1}$ can only be (
 We define a meta-block $B_i(K, T, S): \Sigma_A \rightarrow \Sigma_A'$ to progress the state of the auxiliary system $A$, where we call $K$ the \emph{kernel}, $T$ the \emph{transition object} and $S$ the \emph{seal}.
 A block $B_i$ at height $i$ of the meta-blockchain is committed with a seal $S$ when a $\texttt{+}\sfrac{2}{3}$ supermajority of the weighted votes has been verified.\footnote{
 	While a vote counted on a BFT system itself is already BFT for a simple majority, %TODO : reference
-	we still require a supermajority, because the votes to commit a meta-block will be collected on the auxiliary system for which there is no assumption it is BFT, and we want Mosaic to be able to finalise transactions on the auxiliary system before they are committed to origin.
+	we still require a supermajority, because the votes to commit a meta-block will be collected on the auxiliary system for which there is no assumption it is BFT, and we want Mosaic to be able to finalize transactions on the auxiliary system before they are committed to origin.
 }
 We will detail later how the meta-block is constructed, but first we will describe the vote messages which, combined, seal a meta-block.
 
 \subsection{Checkpoint finalisation - Casper FFG}
 The reader is assumed at this point to be familiar with the work presented in \textit{Casper the Friendly Finality Gadget}\cite{casperffg} (FFG), as we will build on the logic and proofs presented there.
 We will intend to align with definitions and notations where possible and highlight deviations where appropriate.
-This section briefly (and incompletely) summarises core concepts from the paper, so that the shared concepts are established for the reader.
+This section briefly (and incompletely) summarizes core concepts from the paper, so that the shared concepts are established for the reader.
 
 Casper FFG presents an algorithm to build up an overlay network of vote messages presented to a smart contract about the blocks already produced by the underlying network of nodes running the blockchain.
-The overlay network aims to repeatedly economically finalise a single branch of the underlying network.
+The overlay network aims to repeatedly economically finalize a single branch of the underlying network.
 It does so by allowing staked validators to cast votes which together can construct a \emph{justified chain}.
 
 A justified chain is formed by a sequence of \emph{supermajority links}, where a link identifies a \emph{source} blockhash $s$ and its height $h_s$ and a \emph{target} blockhash $t$ and its height $h_t$.
@@ -169,41 +169,41 @@ A $\texttt{+}\sfrac{2}{3}$ supermajority signing of the same link makes it a sup
 	The genesis block of the auxiliary blockchain is considered justified by definition.
 }
 
-In the work, it is shown that checkpoints along a justified chain can additionally be considered \emph{finalised}, if and only if they are justified themselves and their direct child checkpoint is justified.
-It is then shown that, should validators finalise a checkpoint on a contradicting branch of the history of the underlying blockchain, minimally $\sfrac{1}{3}$ of the validator weight must have signed vote messages that violate either one of two rules: \emph{the Casper slashing conditions}.
+In the work, it is shown that checkpoints along a justified chain can additionally be considered \emph{finalized}, if and only if they are justified themselves and their direct child checkpoint is justified.
+It is then shown that, should validators finalize a checkpoint on a contradicting branch of the history of the underlying blockchain, minimally $\sfrac{1}{3}$ of the validator weight must have signed vote messages that violate either one of two rules: \emph{the Casper slashing conditions}.
 
 These slashing conditions can be intrinsically validated given two signed vote messages from a validator $v$.
 As such a validator must never sign two vote messages $\langle s_1, t_1, h_{s_1}, h_{t_1}\rangle_v$ and $\langle s_2, t_2, h_{s_2}, h_{t_2}\rangle_v$ for which either $h_{t_1} = h_{t_2}$ or $h_{s_1} < h_{s_2} < h_{t_2} < h_{t_1}$ holds.
 
-It is additionally shown that validators can always finalise a new checkpoint, without being required to violate the slashing conditions, given that the block proposers propose blocks to append to the finalised fork, i.e. follow the fork selection rule of the overlay network.
+It is additionally shown that validators can always finalize a new checkpoint, without being required to violate the slashing conditions, given that the block proposers propose blocks to append to the finalized fork, i.e. follow the fork selection rule of the overlay network.
 
-\subsection{Finalising auxiliary systems}
+\subsection{Finalizing auxiliary systems}
 Given a validator set $\mathcal{V}_\mathcal{B}$ staked for the meta-blockchain on origin, validators $v$ can submit, on the auxiliary system, vote messages about the auxiliary system of the form
-\begin{align}\label{externalisedvote}
+\begin{align}\label{externalizedvote}
   \langle \tilde{T}, s, t, h_s, h_t \rangle_v
 \end{align}
 where $\tilde{T}$ is the keccak256 hash of the transition object $T$.
 
-We introduce a transition object hash in the vote message to externalise otherwise intrinsic properties of the auxiliary system.
+We introduce a transition object hash in the vote message to externalize otherwise intrinsic properties of the auxiliary system.
 This transition object allows the Mosaic validators to coarse-grain and abstract the auxiliary system into a meta-blockchain when proposing meta-blocks on origin.
 
-We require that any transition object is calculable by a smart contract on the blockchain in question for any finalised checkpoint along a justified chain.
+We require that any transition object is calculable by a smart contract on the blockchain in question for any finalized checkpoint along a justified chain.
 For a given link, we define the transition object to refer to the state of the blockchain at source block $s$. % there could be multiple blocks at height h_s.
-It then follows that for a given source blockhash $s$, $\tilde{T}$ is uniquely determined by $s$ and the same properties of accountable safety and plausible liveliness hold for a finalised checkpoint on a justified chain constructed by such \emph{externalised vote messages} (\ref{externalisedvote}), if we extend the slashing conditions to accommodate for the transition object hash.
+It then follows that for a given source blockhash $s$, $\tilde{T}$ is uniquely determined by $s$ and the same properties of accountable safety and plausible liveliness hold for a finalized checkpoint on a justified chain constructed by such \emph{externalized vote messages} (\ref{externalizedvote}), if we extend the slashing conditions to accommodate for the transition object hash.
 
-A validator $v \in \mathcal{V}_\mathcal{B}$ must never sign two externalised vote messages $\langle \tilde{T}_1, s_1, t_1, h_{s_1}, h_{t_1}\rangle_v$ and $\langle \tilde{T}_2, s_2, t_2, h_{s_2}, h_{t_2}\rangle_v$ such that any of the following three conditions holds:
+A validator $v \in \mathcal{V}_\mathcal{B}$ must never sign two externalized vote messages $\langle \tilde{T}_1, s_1, t_1, h_{s_1}, h_{t_1}\rangle_v$ and $\langle \tilde{T}_2, s_2, t_2, h_{s_2}, h_{t_2}\rangle_v$ such that any of the following three conditions holds:
 \begin{enumerate}
   \item $h_{t_1} = h_{t_2}$,
   \item $h_{s_1} < h_{s_2} < h_{t_2} < h_{t_1}$,
   \item $s_1 = s_2 \land T_1 \neq T_2$.
 \end{enumerate}
 
-As the slashing conditions can be intrinsically asserted to have been violated given two externalised vote messages by the same validator, there is no communication overhead to assert a possible violation of these conditions on the origin blockchain; even if the justified chain is being constructed on the auxiliary system.
+As the slashing conditions can be intrinsically asserted to have been violated given two externalized vote messages by the same validator, there is no communication overhead to assert a possible violation of these conditions on the origin blockchain; even if the justified chain is being constructed on the auxiliary system.
 As a result, the validators in $\mathcal{V}_\mathcal{B}$ can be held accountable on the origin blockchain for their voting actions on the auxiliary system.
 The slashing condition can be asserted on both systems and there is a clear incentive for the honest validators to assert any violation without delay on both the origin and auxiliary system, naturally synchronising the validator weights when such an event occurs.
 
 We will later in this work address a dynamic validator set $\mathcal{V}_\mathcal{B}$, where validators can join and log out on the origin system.
-However, already with a static validator set, we can observe that the finality gadget first introduced for (re)defining economic finality in layer-2 of Ethereum's PoW -- turning miners into mere block proposers and introducing a PoS (partial) consensus engine in the smart contract layer -- can also be applied to finalise an independent (auxiliary) system with a validator set whose stake is held on an external (origin) blockchain.
+However, already with a static validator set, we can observe that the finality gadget first introduced for (re)defining economic finality in layer-2 of Ethereum's PoW -- turning miners into mere block proposers and introducing a PoS (partial) consensus engine in the smart contract layer -- can also be applied to finalize an independent (auxiliary) system with a validator set whose stake is held on an external (origin) blockchain.
 
 % TODO: EXPAND into a full section later
 %\subsection{Expansion somewhere}
@@ -212,33 +212,33 @@ However, already with a static validator set, we can observe that the finality g
 \subsection{Observing origin}
 \label{observing_origin}
 
-Per construction, the finalisation of the auxiliary system by the Mosaic validators economically binds the block proposers of the auxiliary system to the Mosaic fork selection.
-By finalising the auxiliary system the Mosaic validators reach consensus about the auxiliary system itself.
+Per construction, the finalization of the auxiliary system by the Mosaic validators economically binds the block proposers of the auxiliary system to the Mosaic fork selection.
+By finalizing the auxiliary system the Mosaic validators reach consensus about the auxiliary system itself.
 However, to construct a meta-blockchain we will additionally require the Mosaic validators to reach consensus about their observation of the origin blockchain on the auxiliary system.
 This is required so that message can pass bidirectionally between the chains.
 
-To achieve it, the Mosaic validators construct a justified chain and finalise checkpoints along it for reported blocks of the origin blockchain on the auxiliary system.
-The incentive structure is now reversed and the origin blockchain is in no way incentivised (nor should it be) to follow the fork selection rule of how a meta-blockchain's validator set finalised its observation of the origin blockchain.
+To achieve it, the Mosaic validators construct a justified chain and finalize checkpoints along it for reported blocks of the origin blockchain on the auxiliary system.
+The incentive structure is now reversed and the origin blockchain is in no way incentivized (nor should it be) to follow the fork selection rule of how a meta-blockchain's validator set finalized its observation of the origin blockchain.
 
-In case the origin blockchain is probabilistically finalised, then it is always possible that the Mosaic validators of a given meta-blockchain running on top of the origin blockchain would economically finalise an observation of origin on the auxiliary system which is (later) reverted by the origin blockchain - even if they sufficiently trailed the head of origin.
-Note that the validators cannot revert their finalised observation, because they would be required to sign vote messages which would violate the slashing conditions.
+In case the origin blockchain is probabilistically finalized, then it is always possible that the Mosaic validators of a given meta-blockchain running on top of the origin blockchain would economically finalize an observation of origin on the auxiliary system which is (later) reverted by the origin blockchain - even if they sufficiently trailed the head of origin.
+Note that the validators cannot revert their finalized observation, because they would be required to sign vote messages which would violate the slashing conditions.
 
-Under this scenario we must force the meta-blockchain to halt at the highest finalised checkpoint of the auxiliary system which was still consistent with its observation of the (now reverted) history of the origin blockchain.
-This property can be enforced by including in the transition object of a justified chain of the auxiliary system $T^A$ information about the finalisation of the observation of the origin blockchain $T^O$,
+Under this scenario we must force the meta-blockchain to halt at the highest finalized checkpoint of the auxiliary system which was still consistent with its observation of the (now reverted) history of the origin blockchain.
+This property can be enforced by including in the transition object of a justified chain of the auxiliary system $T^A$ information about the finalization of the observation of the origin blockchain $T^O$,
 \begin{align*}
   T^A_i = (O^j_f, \dots),
 \end{align*}
-where $O^j_f = f(T^O)$ is the function that returns the highest finalised block number $j$ and blockhash of the origin system as observed by the Mosaic validators for this meta-blockchain.
+where $O^j_f = f(T^O)$ is the function that returns the highest finalized block number $j$ and blockhash of the origin system as observed by the Mosaic validators for this meta-blockchain.
 
-The origin blockchain can inspect $T^A$ to assert that the highest finalised observation of itself on the auxiliary system is within its current history.
+The origin blockchain can inspect $T^A$ to assert that the highest finalized observation of itself on the auxiliary system is within its current history.
 Should this not be the case, then the origin blockchain must reject meta-blocks containing contradictory observations.
 
-However, origin cannot directly assert that prior to the last finalised observation, there was no checkpoint finalised from a contradictory branch of its history, as the nodes on origin should not fully verify the transactions executed on the auxiliary system.
-This is resolved by introducing an option to challenge a proposed finalised observation.
+However, origin cannot directly assert that prior to the last finalized observation, there was no checkpoint finalized from a contradictory branch of its history, as the nodes on origin should not fully verify the transactions executed on the auxiliary system.
+This is resolved by introducing an option to challenge a proposed finalized observation.
 
-Assume an observed checkpoint $a$ was finalised on a contradictory branch of origin relative to the last finalised observed checkpoint $b$ included in $T^A$.
-Any honest node can challenge the finalisation of $b$ on origin by presenting the finalisation of $a$ and demonstrating that $a \notin \text{history}(b)$.
-Note that if validators would want to alter the finalised observation from $o \rightarrow a \rightarrow b$ to $o \rightarrow b$ they would have to produce vote messages violating the slashing conditions given the already existing vote messages.
+Assume an observed checkpoint $a$ was finalized on a contradictory branch of origin relative to the last finalized observed checkpoint $b$ included in $T^A$.
+Any honest node can challenge the finalization of $b$ on origin by presenting the finalization of $a$ and demonstrating that $a \notin \text{history}(b)$.
+Note that if validators would want to alter the finalized observation from $o \rightarrow a \rightarrow b$ to $o \rightarrow b$ they would have to produce vote messages violating the slashing conditions given the already existing vote messages.
 
 Upon success, the challenger is rewarded from the stake of the offending validators and the core contract must declare the meta-blockchain halted.
 
@@ -246,7 +246,7 @@ Upon success, the challenger is rewarded from the stake of the offending validat
 
 We construct a transition object $T^A$ to coarse-grain a vast amount of transactions processed on the auxiliary system under the state transition rules $t_A$ into a single, abstracted state transition that can be validated by the core contract on the origin blockchain (under the state transition rules of the origin blockchain $t_O$, eq. \ref{state_transition_rules}).
 
-On the auxiliary chain with every block running parameters are tracked and these consist of the latest finalised observation of the origin blockchain $O^j_f= f(T^O)$, the \emph{accumulated transaction root} $r_i$, the \emph{accumulated gas} $g_i$ consumed, and the current \emph{dynasty number} $d$ on auxiliary.
+On the auxiliary chain with every block running parameters are tracked and these consist of the latest finalized observation of the origin blockchain $O^j_f= f(T^O)$, the \emph{accumulated transaction root} $r_i$, the \emph{accumulated gas} $g_i$ consumed, and the current \emph{dynasty number} $d$ on auxiliary.
 The transition object $T^A$, however, is updated at every justified checkpoint $s$ with height $h_s$ and we write for a given meta-block height $n$:
 \begin{align*}
   T^A_{n,d}(s) = (d, O^{j_d}_f, r_d, g_d, \tilde{K}_n)
@@ -266,7 +266,7 @@ Tracking of $T^A$ begins at the genesis checkpoint.
 For the genesis checkpoint, the accumulated transaction root is defined as the transaction root of the block, the accumulated gas consumed equals the gas consumed in the block, and the current dynasty number is 0.
 For all subsequent blocks, the accumulated transaction root $r_i$ at block height $i$ is $\text{keccak256}(r_{i-1}, R_i)$, where $R_i$ is the transaction root of the block at height $i$.
 The accumulated gas consumed $g_i$ at block height $i$ is $g_{i-1} + G_i$, where $G_i$ is the gas consumed in the block at height $i$.
-The dynasty number equals the number of finalised checkpoints in the chain from the root checkpoint to the parent block, carrying over the definition of dynasty number as in Casper FFG \cite{casperffg}.
+The dynasty number equals the number of finalized checkpoints in the chain from the root checkpoint to the parent block, carrying over the definition of dynasty number as in Casper FFG \cite{casperffg}.
 
 Further, we introduce a constant \emph{core identifier}, a 256-bit string where the first 12 bytes are a constant specifying the origin blockchain and the rightmost 20 bytes are determined by the smart contract address of the core contract on the origin blockchain.
 Rather than storing the core identifier in the transaction object, it can be included as a constant in the signing string for vote messages to ensure vote messages are valid only about the intended meta-blockchain.
@@ -288,26 +288,20 @@ Rather than storing the core identifier in the transaction object, it can be inc
 For a meta-blockchain $\mathcal{B}$ the chain can be appended by proposing and committing new meta-blocks $B_n(K_n, T^A_n, S_n)$ in the core contract on the origin block\-chain.
 The genesis meta-block $B_0$ is considered committed per definition.
 
-The kernel $K_n$ is a tuple $(n, \tilde{p}_n, \Delta\mathcal{V}_{\mathcal{B}_n}, gp_n, gt_n)$ fully determined by and stored in the core contract on the origin blockchain. %The height $n$ strictly increases by one every time a meta-block is committed into the core contract.
+The kernel $K_n$ is a tuple $(n, \tilde{p}_n, \Delta\mathcal{V}_{\mathcal{B}_n}, gt_n)$ fully determined by and stored in the core contract on the origin blockchain. %The height $n$ strictly increases by one every time a meta-block is committed into the core contract.
 On a given branch of the origin blockchain a meta-blockchain cannot fork.
 The act of committing a meta-block $B_{n-1}(K_{n-1}, T^A_{n-1}, S_{n-1})$ activates the new kernel $K_n$ at height $n$ and \emph{opens} the core contract to accept proposals of the form $B_n(K_n, \cdot, \cdot)$.
-The kernel further specifies the \emph{parent hash} $\tilde{p}_n$, the \emph{updated validator weights} $\Delta\mathcal{V}_{\mathcal{B}_n}$ to declare new validators joining and existing validators logging out. The kernel includes a voted-upon \emph{gas price} $gp_n$ for the gas that will be consumed in the upcoming meta-block $B_n$ as rewarded to the Mosaic validators.\footnote{
-  A meta-blockchain has a double gas market.
-  First the known gas market exists where users set a gas price in the transaction that gets executed on the auxiliary blockchain and the gas rewards go to the block proposers of the auxiliary system.
-  A second, new gas market is created by requiring the block proposers to pre-deposit gas rewards for several meta-blocks in advance.
-  Mosaic validators are rewarded upon committing a meta-block on the origin blockchain for the total gas consumed in that meta-blockchain at the agreed-upon gas price $gp_n$ for that meta-block $B_n$.
-  Details in later section.
-}
+The kernel further specifies the \emph{parent hash} $\tilde{p}_n$, the \emph{updated validator weights} $\Delta\mathcal{V}_{\mathcal{B}_n}$ to declare new validators joining and existing validators logging out.
 
 \paragraph{gas target} Lastly $gt_n$ is the \emph{gas target} which introduces a forcing function on the total amount of gas that can be consumed in the meta-block $B_n$.
-The earliest finalised checkpoint at which the gas target has been consumed by the meta-block must be committed to the origin blockchain by the validators.
-We highlight that this is not a maximum gas limit, because it cannot be guaranteed that a checkpoint can be finalised before a hard gas limit would be surpassed. Rather validators would gradually lose part of their stake as a function of the number of finalised checkpoints they failed to commit after the gas target has been surpassed.
+The earliest finalized checkpoint at which the gas target has been consumed by the meta-block must be committed to the origin blockchain by the validators.
+We highlight that this is not a maximum gas limit, because it cannot be guaranteed that a checkpoint can be finalized before a hard gas limit would be surpassed. Rather validators would gradually lose part of their stake as a function of the number of finalized checkpoints they failed to commit after the gas target has been surpassed.
 
-To show that validators can be held accountable, assume the finalised checkpoint $s_d$ has been committed which surpassed the gas target and has dynasty number $d$.
-Now assume there exists a finalised checkpoint $s_{d'}$ which also has surpassed the gas target but has a lower dynasty number $d' < d$, but was not committed before $s_d$.
+To show that validators can be held accountable, assume the finalized checkpoint $s_d$ has been committed which surpassed the gas target and has dynasty number $d$.
+Now assume there exists a finalized checkpoint $s_{d'}$ which also has surpassed the gas target but has a lower dynasty number $d' < d$, but was not committed before $s_d$.
 Any honest node can present the $s_{d'}$ and the core contract can assert the gas target had been consumed at a lower dynasty number than what is committed and reward the challenger.
 
-\paragraph{committing a meta-block} Given a committed meta-block $B_{n-1}$ at height $n-1$ a proposal for a meta-block $B_{n}(K_{n}, T^A_{n}, \cdot)$ at height $n$ is a valid proposal if validity assertions for the transition object $T^A_n$ hold.  These validity assertions require that the dynasty number and the gas consumed are strictly increasing compared to the transition object committed $T^A_{n-1}$. The transition object $T^A_n$ must reference the correct kernel $\tilde{K_n}$. It must be checked that the latest finalised observation of origin is within the history of the current state. Furthermore  a brief challenge period exists where the transition object can be contested on the grounds that it contains a prior observation of origin that contradicts the current history of origin, as explained above in section (\ref{observing_origin}).
+\paragraph{committing a meta-block} Given a committed meta-block $B_{n-1}$ at height $n-1$ a proposal for a meta-block $B_{n}(K_{n}, T^A_{n}, \cdot)$ at height $n$ is a valid proposal if validity assertions for the transition object $T^A_n$ hold.  These validity assertions require that the dynasty number and the gas consumed are strictly increasing compared to the transition object committed $T^A_{n-1}$. The transition object $T^A_n$ must reference the correct kernel $\tilde{K_n}$. It must be checked that the latest finalized observation of origin is within the history of the current state. Furthermore  a brief challenge period exists where the transition object can be contested on the grounds that it contains a prior observation of origin that contradicts the current history of origin, as explained above in section (\ref{observing_origin}).
 
 It now follows that for a given active kernel $K_n$ multiple proposals $T^{A}_{n,d}$ can be submitted to the core contract for different dynasty numbers $d$.  These proposals are no longer contradicting versions of the history, rather they are ordered, sequenced snapshots of possible state transitions $B_{n,d_{n}}(\Sigma_{A,d_{n-1}})$ that can be committed onto origin as a new meta-block.
 
@@ -316,10 +310,10 @@ The meta-block $B_n(K_n, T^A_n, S_n)$ will be committed with the seal $S_n$ whic
 \begin{align*}
   \{S_{n,d}\} = \left\{\left\{\langle\tilde{T}^A_{n,d}, s, t, h_s, h_t\rangle_v\right\}\right\}
 \end{align*}
-where it is required that the supermajority link finalises the source $s$.
+where it is required that the supermajority link finalizes the source $s$.
 As such we require that $h_t - h_s = 1$ and the source $s$ must have been justified.
 
-Following the same reasoning as presented in section (\ref{observing_origin}) we can assert whether or not the finalised checkpoint $s$ was obtained through an unbroken justified chain leading up to the finalised checkpoint, by allowing for a challenge\footnote{A challenger must always put forward a sufficient stake to underwrite the cost implied by her challenge.} to be raised against a proposed transition object $T^A$ included in a vote message $\langle\tilde{T}^A, s, t, h_s, h_t\rangle_v$.
+Following the same reasoning as presented in section (\ref{observing_origin}) we can assert whether or not the finalized checkpoint $s$ was obtained through an unbroken justified chain leading up to the finalized checkpoint, by allowing for a challenge\footnote{A challenger must always put forward a sufficient stake to underwrite the cost implied by her challenge.} to be raised against a proposed transition object $T^A$ included in a vote message $\langle\tilde{T}^A, s, t, h_s, h_t\rangle_v$.
 
 However, recall that in the case of verifying observations of origin (\ref{observing_origin}), origin itself can act as an arbiter because origin can rely on its own history.
 Our concern now is to assert that the state transition to $s$ from the last committed state $B_{n-1}$ is a valid state transition according to the state transition rules $t_A$ of the auxiliary system.
@@ -331,7 +325,7 @@ We will detail the conditions under which a meta-blockchain must halt and how th
 Alternatively, no contradictory finalisation $s'$ of the auxiliary system relative to $s$ exists.
 Under the security model assuming a $\texttt{+}\sfrac{2}{3}$ supermajority of the validator weight is honest, it follows that the proposed state transition to $s$ has been obtained through honest verification of all transactions under the state transition rules $t_A$.
 
-Before continuing we summarise that the proposal mechanism to commit a meta-block is asynchronous, requires no leadership-selection and is proven to be Byzantine fault-tolerant under the security model of an honest supermajority.
+Before continuing we summarize that the proposal mechanism to commit a meta-block is asynchronous, requires no leadership-selection and is proven to be Byzantine fault-tolerant under the security model of an honest supermajority.
 
 \subsection{Beyond an honest supermajority}
 
@@ -340,7 +334,7 @@ While the origin blockchain protects assets from being double-spent, users in a 
 We identify at least three active research topics which can allow to push the security model radically further in an efficient way; namely that (up to) a \emph{single} honest observer can hold all validators accountable when a proposal for committing a meta-block to the origin blockchain would violate the state transition rules $t_A$.
 It is outside the scope of the current work to explore in-depth, but they are worth summarising below as future work paths.
 
-\paragraph{observer network} In \textit{A Guide to 99\% Fault Tolerant Consensus}\cite{honestobserver} V. Buterin recaptures an existing algorithm by L. Lamport (1982) to describe how a \emph{latency-dependent} network of observers can be retrofitted on top of a \emph{threshold-dependent} consensus algorithm - in casu our here work as derived from Casper FFG - to introduce a \emph{strong-finality} upon the finalised history constructed by the Mosaic validators arbitrarily pushing up the fault-tolerance at the cost of requiring more observers and a longer time to eventually commit (a strongly finalised proposal).
+\paragraph{observer network} In \textit{A Guide to 99\% Fault Tolerant Consensus}\cite{honestobserver} V. Buterin recaptures an existing algorithm by L. Lamport (1982) to describe how a \emph{latency-dependent} network of observers can be retrofitted on top of a \emph{threshold-dependent} consensus algorithm - in casu our here work as derived from Casper FFG - to introduce a \emph{strong-finality} upon the finalized history constructed by the Mosaic validators arbitrarily pushing up the fault-tolerance at the cost of requiring more observers and a longer time to eventually commit (a strongly finalized proposal).
 %We leave as an open question whether the origin blockchain can facilitate the global timing of the \emph{always-online} network of observers.
 
 \paragraph{truebit} A second worthwhile path is to apply the \textit{TrueBit}\cite{truebit} protocol to challenge a state transition $T^A$ proposed by a subset of the validators $\mathcal{V}_{\mathcal{B}_i}$.
@@ -349,7 +343,7 @@ The computation at hand is the execution of the virtual machine that implements 
 
 If less than $\sfrac{1}{3}$ of the validator weight loses the verification game to a challenger, their stake can be taken as the reward for the challenger, on top of the shared interest of all participants in the meta-blockchain for only correct proposals to be committed to the origin chain - removing the need for a jackpot and a \emph{forced-error}.
 The verification game can be seen as an extension to the slashing conditions strengthening the accountable safety of the meta-blockchain to hold a minority of the validators accountable for violating the state transition rules $t_A$.
-This is made possible because the validator stake has been externalised on the origin blockchain with an independent (assumed correct) consensus mechanism.
+This is made possible because the validator stake has been externalized on the origin blockchain with an independent (assumed correct) consensus mechanism.
 
 If more than $\sfrac{2}{3}$ of the validator weight signed the vote message which was challenged and lost the verification game, their stake is the reward for the challenger, and the meta-blockchain must be declared halted by the core contract.
 
@@ -360,7 +354,7 @@ The transition object $T^A$ to commit this meta-block tracks the gas consumed, s
 
 % TODO: research state of art on hardware requirements
 There are open considerations regarding the (economic) feasibility of requiring all validators to be able to generate such a proof on commodity hardware.
-The task of generating these proofs could be designated to a specialised node, but an incentive problem arises when it is economically unattractive to run such a node considering it is unlikely that a proposal would be challenged.
+The task of generating these proofs could be designated to a specialized node, but an incentive problem arises when it is economically unattractive to run such a node considering it is unlikely that a proposal would be challenged.
 
 We have gone beyond the assumption of an honest supermajority of validators by considering three strategies discussed in the field to radically improve the security model; up to the point where a single honest observer can cost-effectively challenge the validator set on the origin blockchain.
 
@@ -437,7 +431,7 @@ We defend against long-range revision attacks the same way Casper does.
 Four months after the validator left the set of validators, the validator can withdraw its stake.
 
 Casper FFG\cite{casperffg} defines a stitching mechanism for a changing set of validators.
-It prevents a case where a significant change in validators from one dynasty to the next could result in conflicting finalised checkpoints on different forks.
+It prevents a case where a significant change in validators from one dynasty to the next could result in conflicting finalized checkpoints on different forks.
 They define a forward validator set and a rear validator set based on the start dynasty and end dynasty of a validator.
 In the case of Mosaic, however, validators do not join and leave the set of validators within two dynasties, but rather two meta-blocks.
 When a validator sends a deposit or logout message at meta-block height $i$, the change is announced to auxiliary with the opening of meta-block $i+1$.
@@ -453,11 +447,11 @@ It cannot join the set of validators multiple times or change its stake.
 NOTE: weight = stake x reputation
 
 When a meta-block has been committed on origin, the Kernel of the newly opening meta-block can be confirmed on auxiliary.
-The state root of origin is regularly transferred to auxiliary and finalised.
+The state root of origin is regularly transferred to auxiliary and finalized.
 By means of a Merkle proof against that known state root, the content of the Kernel can be made available to auxiliary.
 Auxiliary will note the update of the validator weights for the meta-block height of the opened meta-block plus one.
 The validator set changes on auxiliary at the time the kernel opening is confirmed.
-Even though the kernel opening retroactively opens the meta-block on auxiliary from the first block after the last finalised checkpoint in the meta-block that precedes the opening one, the validator set only changes at the point of the confirmation.
+Even though the kernel opening retroactively opens the meta-block on auxiliary from the first block after the last finalized checkpoint in the meta-block that precedes the opening one, the validator set only changes at the point of the confirmation.
 When the Kernel at height $i$ is confirmed on auxiliary, the validator set $i+1$ becomes the active set of validators.
 The validators that logged out on origin before the opening of $K_i$ will be in the rear validator set of $K_{i+1}$ and leave the validator set when $K_{i+2}$ is confirmed.
 
@@ -513,10 +507,9 @@ The validators that logged out on origin before the opening of $K_i$ will be in 
 
 \subsection{gas markets}
 
-Users of the auxiliary system pay gas fees to the block proposers of the auxiliary system for every transaction.
-Similarly, users of the origin blockchain pay gas fees for their transactions on origin.
-Due to the limit on the number of transactions included in each block, the gas price is determined in a system of supply and demand.
-When many users want to include many transactions in blocks, possibly above the limit, the average gas price will naturally rise and vice versa.
+A meta-blockchain has a double gas market.
+First the known gas market exists where users of the auxiliary system pay gas fees to the block proposers of the auxiliary system for every transaction.
+A second, new gas market is created that rewards validators for their work.
 
 The meta-blockchain includes transactions from auxiliary.
 Users of the auxiliary system already paid a gas fee for when the transactions were included in an auxiliary block and cannot be expected to pay another fee later on.
@@ -528,22 +521,26 @@ Mosaic provides two incentives for the validators to do so:
 	\item The validators receive a gas fee for a committed meta-block, based on the gas that auxiliary consumed for all auxiliary transactions that exist within that meta-block.
 	\item The validators get rewarded on auxiliary. In order for them to move the rewards to origin, they must first commit a meta-block.
 \end{enumerate}
-% TODO: do we even need the gas fee or is "2." plus the gas target sufficient?
 
 \paragraph{Gas fees.}
-For every meta-block, validators get rewards based on the amount of gas that was consumed on auxiliary within that meta-block.
-
+A validators gets a reward for every vote.
+The amount depends on the relative weight of the validator, the amount of gas that was consumed on auxiliary, and the current gas price.
 The amount paid out to a single validator address on auxiliary equals
 \begin{align*}
-  \frac{w_v}{w} \cdot g \cdot gp
+    \frac{W_v}{w} \cdot g_{st} \cdot gp
 \end{align*}
-where $w_v$ is the weight of the validator, $w$ is the total weight of all validators, $g$ is the accumulated gas of the meta-block, and $gp$ is the agreed upon gas price.
+where $W_v$ is the effective weight of the validator, $w$ is the total weight of all validators, $g_{st}$ is the gas consumed from source to target, and $gp$ is the \emph{current} gas price.
 
-However, this amount increases with increasing size of a meta-block.
-% TODO: agree on gas price (who, when, where).
+Gas fees will be awarded in the base token of the auxiliary chain.
+The initial mosaic gas price $gp_0$ is set as part of the genesis block.
+With every checkpoint, the block proposer can change the gas price within a given limit.
+Block proposers want the gas price to be as low as possible while at the same time incentivizing validators to do their job.
+Validators could choose not to finalize a checkpoint when they deem the gas price too low.
 
 \paragraph{Validator rewards.}
 Whenever someone commits a meta-block on origin, the meta-block closes, a new meta-block opens, and someone confirms the kernel of the newly opened meta-block on auxiliary.
+The validators would usually carry out this duty, as they want to earn their rewards.
+
 The auxiliary system tracks the total gas consumption per checkpoint and can therefore calculate the amount of gas consumed in the closed meta-block on-chain.
 The gas consumed of a meta-block is merely a mirror of the gas that all auxiliary transactions within that meta-block consumed on auxiliary.
 
@@ -613,7 +610,7 @@ If validators decided to stop finalization, they would lose stake due to the ina
 \section{A mosaic of cores}
 
 summary:
-By constructing asynchronous BFT consensus rules to compose a heterogeneous auxiliary blockchain into the origin blockchain, we leverage the security of the origin blockchain to asynchronously finalise the transactions on the auxiliary blockchain.
+By constructing asynchronous BFT consensus rules to compose a heterogeneous auxiliary blockchain into the origin blockchain, we leverage the security of the origin blockchain to asynchronously finalize the transactions on the auxiliary blockchain.
 As there are no time constraints or time-outs in the Mosaic consensus rules, the limited processing capacity of the origin blockchain does not undercut the ability to compose many auxiliary systems into the same origin blockchain.
 This enables Mosaic to run many meta-blockchains in parallel, additively improving the total transaction capacity, but keeping a bound on the cost imposed on the origin blockchain.
 %% 
@@ -622,7 +619,7 @@ This enables Mosaic to run many meta-blockchains in parallel, additively improvi
 %% extend state space of origin
 %Mosaic sets out to leverage the security and liveliness properties of the origin blockchain. Mosaic allows to create a new state space and compose it into the origin state space so that it suffices to verify the origin state space and the extended state space the node is 
 %
-%Mosaic is a framework to increase the transaction throughput of an origin blockchain (e.g. Ethereum) by finalising transactions off of the origin blockchain. Finalised transactions can be committed asynchronously in bulk onto the origin blockchain. 
+%Mosaic is a framework to increase the transaction throughput of an origin blockchain (e.g. Ethereum) by finalising transactions off of the origin blockchain. finalized transactions can be committed asynchronously in bulk onto the origin blockchain. 
 
 \begin{comment}
 \section{the dry stuff}
@@ -761,21 +758,21 @@ On origin $v^O$ will always be held accountable for any signed message by $v^A$ 
 	\end{proof}
 \end{theorem}
 
-Reporting a finalised auxiliary checkpoint to Origin costs gas on Origin.
+Reporting a finalized auxiliary checkpoint to Origin costs gas on Origin.
 Therefore, validators do not have an incentive to copy the state root from Auxiliary to Origin.
 We present an asynchronous mechanism that forces validators to copy the state root.
 We define the amount of consumed gas since the last copied checkpoint $g$.
 We define a limit of consumed gas $l$.
-The finalised auxiliary checkpoint with the smallest dynasty where $g \geq l$ must be copied to Origin.
+The finalized auxiliary checkpoint with the smallest dynasty where $g \geq l$ must be copied to Origin.
 \begin{equation}
 	\neg\exists f : h(f') < h(f) \land g(f') \geq l
 \end{equation}
 
-If the validators fail to copy that finalised checkpoint,
+If the validators fail to copy that finalized checkpoint,
 they are still incentivised to copy a later checkpoint to get rewarded (see below).
-When a validator copies a state root of a later finalised checkpoint from Auxiliary to Origin,
-then it can be proven that there exists a finalised checkpoint with a lesser height that is also above the gas limit.
-To do that, a fisherman could present the earlier finalised checkpoint to Origin after the later one was committed.
+When a validator copies a state root of a later finalized checkpoint from Auxiliary to Origin,
+then it can be proven that there exists a finalized checkpoint with a lesser height that is also above the gas limit.
+To do that, a fisherman could present the earlier finalized checkpoint to Origin after the later one was committed.
 The height, consumed gas, and validator signatures can be proven.
 % TODO proof that they can be proven?
 When that happens, all validators in the validator set are punished and the fisherman is rewarded.
@@ -797,7 +794,7 @@ We must track the consumed gas on Auxiliary in order to for this proof to work.
 	An honest validator will not be punished by the gas limit rules.
 	\begin{proof}
 		All validators, including the honest ones,
-		would be punished if the lowest finalised auxiliary checkpoint above the gas limit were not reported to Origin.
+		would be punished if the lowest finalized auxiliary checkpoint above the gas limit were not reported to Origin.
 		If there is at least one honest validator, however, that validator would report the auxiliary checkpoint to Origin.
 		Thus, all validators get only punished if none of them is honest.
 	\end{proof}
@@ -837,7 +834,7 @@ an independent client software that observes both full nodes,
 and there is one smart contract per chain that makes up the Gateway.
 
 % TODO the following paragraph is misplaced, not all concepts are known
-It is required to move state from auxiliary to origin in order for the state to be finalised.
+It is required to move state from auxiliary to origin in order for the state to be finalized.
 State is only assumed to be final on origin,
 as we do not assume any security properties of auxiliary.
 On the other hand it is required to move state from origin to auxiliary,
@@ -873,12 +870,12 @@ Mosaic validators can vote on a number of events:
   	\item auxiliary state transfers to origin and
 	\item checkpoint justifications on auxiliary in the role of a Casper validator.
 \end{inparaenum}
-On auxiliary, checkpoints are justified and finalised by supermajority links as described in Casper.
+On auxiliary, checkpoints are justified and finalized by supermajority links as described in Casper.
 Origin's (economical) finality is assumed as a given.
 Thus, state is final on its respective chain and only the transfer must be must be approved on the other chain.
 When state is transferred between the two chains, in any direction,
 a simple $\frac{2}{3}$ majority vote on that state successfully commits it to the receiving chain.
-A committed state that is (economically) finalised is regarded as finalised on the receiving chain.
+A committed state that is (economically) finalized is regarded as finalized on the receiving chain.
 
 \emph{OSTblocks} are a compressed representation of auxiliary's transactions.
 % TODO are OSTblocks' transactions blocks or dynasties from auxiliary?
@@ -892,7 +889,7 @@ is OSTblock $\B_{\alpha+1}$ at height $\alpha+1$.
 Due to the aforementioned compression of blocks on auxiliary,
 $\B_\alpha$ may contain auxiliary blocks $b_{A{}i}$ to $b_{A{}i+m}$,
 which means any number $m$ of blocks,
-where $b_{A{}i+m}$ must be a Casper checkpoint that has been finalised on auxiliary.
+where $b_{A{}i+m}$ must be a Casper checkpoint that has been finalized on auxiliary.
 
 The OSTblock header of block $\B_alpha$ at height $\alpha$ contains:
 \begin{enumerate}
@@ -914,22 +911,22 @@ In order to be block proposal mechanism agnostic, we layer Casper~\cite{casperff
 Validators vote on supermajority links.
 Auxiliary must follow Casper's fork choice rule.
 % TODO missing context
-Checkpoints get finalised.
-The Mosaic validators can transfer the state of a finalised auxiliary checkpoint to origin.
+Checkpoints get finalized.
+The Mosaic validators can transfer the state of a finalized auxiliary checkpoint to origin.
 % TODO language
 A validator uses the Mosaic Gateway to transfer the state to origin.
 On origin, a $\frac{2}{3	}$ majority vote is required by the validators in order to commit the state to origin.
 % TODO how do we trigger this info back to aux?
-The state is regarded economically finalised when the block that contains the commit is considered economically final on origin.
+The state is regarded economically finalized when the block that contains the commit is considered economically final on origin.
 
 \begin{figure}[htb]
     \centering
 	\includegraphics[width=\textwidth]{mosaic}
 	\caption{\textbf{The Mosaic state transfer.}
-		The closing of $\B_{\alpha-1}$ means that the finalised checkpoint $b_{A{}i}$ is the last block of $\B_{\alpha-1}$.
+		The closing of $\B_{\alpha-1}$ means that the finalized checkpoint $b_{A{}i}$ is the last block of $\B_{\alpha-1}$.
 		Even though the details of $\B_\alpha$ will not be known until the opening is transferred to $A$,
 		the first block in $\B_\alpha$ will be $b_{A{}i+1}$.
-		Once a checkpoint is finalised after the OSTgas limit has been reached,
+		Once a checkpoint is finalized after the OSTgas limit has been reached,
 		% TODO V or a Mosaic node? where's the difference?
 		$\V$ will signal the closing of $\B_\alpha$ to $O$.
 	}
@@ -941,16 +938,16 @@ On the auxiliary chain, \emph{OSTgas} is the equivalent to gas on Ethereum.
 For transactions to be included in blocks on auxiliary, a fee is paid for the consumed OSTgas.
 
 % TODO possibly move this further up
-Mosaic validators are allowed to commit every finalised state from auxiliary to origin.
+Mosaic validators are allowed to commit every finalized state from auxiliary to origin.
 However, that may be infeasible from an economic viewpoint of the validators.
 Therefore, we propose points on the auxiliary chain where the validators must close the OSTblock.
 Whenever a certain fixed limit of OSTgas has been spent on auxiliary since the opening of the OSTblock,
-the validators \emph{must} close the OSTblock at the next finalised auxiliary checkpoint.
+the validators \emph{must} close the OSTblock at the next finalized auxiliary checkpoint.
 If a validator does not vote to commit that checkpoint,
 its deposit can be slashed.
 The OSTgas limit is marked in figure~\ref{fig:mosaic} by the dashed line.
 
-Actors on the auxiliary chain have an economic incentive to finalise their state on origin.
+Actors on the auxiliary chain have an economic incentive to finalize their state on origin.
 The block creators of auxiliary will pay a fraction of their earned OSTgas to the Mosaic validators as a fee when the validators move the state to origin.
 % TODO context and language
 % TODO why?
@@ -978,7 +975,7 @@ That leaves one month headroom to blame auxiliary's adversaries on origin and ge
 
 abstract:
 the gateway protocol allows decentralized applications to deploy a message bus to send asynchronous messages between the state space of the origin blockchain and the state space of the auxiliary system supporting a specific meta-blockchain.
-This allows tokens (ERC20, later non-fungible tokens) declared on the origin blockchain (Ethereum) to be locked and moved into the meta-blockchain where transactions can be finalised faster, and at a lower transaction cost. 
+This allows tokens (ERC20, later non-fungible tokens) declared on the origin blockchain (Ethereum) to be locked and moved into the meta-blockchain where transactions can be finalized faster, and at a lower transaction cost. 
 
 The gateway protocol is code-complete at github.com/openstfoundation/mosaic-contracts
 
