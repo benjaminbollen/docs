@@ -270,6 +270,11 @@ The dynasty number equals the number of finalized checkpoints in the chain from 
 
 Further, we introduce a constant \emph{core identifier}, a 256-bit string where the first 12 bytes are a constant specifying the origin blockchain and the rightmost 20 bytes are determined by the smart contract address of the core contract on the origin blockchain.
 Rather than storing the core identifier in the transaction object, it can be included as a constant in the signing string for vote messages to ensure vote messages are valid only about the intended meta-blockchain.
+An origin blockchain also has a core identifier to identify vote messages about origin.
+For core identifiers that identify an origin blockchain, the rightmost 20 bytes are all zero.
+
+The constant that specifies Ethereum main net as the origin blockchain is \texttt{bytes12(1)}.
+
 
 % Note to self: follow up on the thinking that by externalising the transition object into the vote message allows the calculation to be done in the node, not in the contract.
 
