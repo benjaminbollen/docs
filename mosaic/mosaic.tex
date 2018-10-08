@@ -178,7 +178,7 @@ As such a validator must never sign two vote messages $\langle s_1, t_1, h_{s_1}
 It is additionally shown that validators can always finalize a new checkpoint, without being required to violate the slashing conditions, given that the block proposers propose blocks to append to the finalized fork, i.e. follow the fork selection rule of the overlay network.
 
 \subsection{Finalizing auxiliary systems}
-Given a validator set $\mathcal{V}_\mathcal{B}$ staked for the meta-blockchain on origin, validators $v$ can submit, on the auxiliary system, vote messages about the auxiliary system of the form
+Given a validator set $\mathcal{V}_\mathcal{B}$ staked for the meta-blockchain on origin, validators $v$ of that set of validators can submit, on the auxiliary system, vote messages about the auxiliary system of the form
 \begin{align}\label{externalizedvote}
   \langle \tilde{T}, s, t, h_s, h_t \rangle_v
 \end{align}
