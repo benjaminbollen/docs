@@ -214,10 +214,9 @@ However, already with a static validator set, we can observe that the finality g
 
 Per construction, the finalization of the auxiliary system by the Mosaic validators economically binds the block proposers of the auxiliary system to the Mosaic fork selection.
 By finalizing the auxiliary system the Mosaic validators reach consensus about the auxiliary system itself.
-However, to construct a meta-blockchain we will additionally require the Mosaic validators to reach consensus about their observation of the origin blockchain on the auxiliary system.
-This is required so that message can pass bidirectionally between the chains.
+However, to be able to pass messages bidirectionally between chains, the Mosaic validators are additionally required to reach consensus about their observation of the origin blockchain on the auxiliary system.
 
-To achieve it, the Mosaic validators construct a justified chain and finalize checkpoints along it for reported blocks of the origin blockchain on the auxiliary system.
+To achieve this, the Mosaic validators construct a justified chain and finalize checkpoints along it for reported blocks of the origin blockchain on the auxiliary system.
 The incentive structure is now reversed and the origin blockchain is in no way incentivized (nor should it be) to follow the fork selection rule of how a meta-blockchain's validator set finalized its observation of the origin blockchain.
 
 In case the origin blockchain is probabilistically finalized, then it is always possible that the Mosaic validators of a given meta-blockchain running on top of the origin blockchain would economically finalize an observation of origin on the auxiliary system which is (later) reverted by the origin blockchain - even if they sufficiently trailed the head of origin.
