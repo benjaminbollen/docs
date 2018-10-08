@@ -94,10 +94,10 @@ However, PoW produces a serial execution model and nodes cannot be collectively 
 
 % NOTE: Ethereumv2 still needs to serialise all execution; DFinity starts from scratch 
 Active research and implementation work is ongoing to scale Ethereum's transaction throughput by dividing the verification work into multiple sections, also referred to as \emph{shards}.
-At the same time, Ethereum is committed to moving from the probabilistic Proof-of-Work consensus engine to a BFT based Proof-of-Stake (PoS) consensus engine.\footnote{
+At the same time, Ethereum is committed to moving from the probabilistic Proof-of-Work consensus engine to a BFT based Proof-of-Stake (PoS) consensus engine\footnote{
 	\url{https://github.com/ethereum/eth2.0-specs/blob/master/specs/casper_sharding_v2.1.md}
-}
-The outset of a BFT consensus engine is to collectively produce a blockchain which provably -- under certain honesty assumptions -- cannot finalize conflicting blocks.
+}.
+The outset of a BFT consensus engine is to collectively produce a blockchain which provably --- under certain honesty assumptions --- cannot finalize conflicting blocks.
 
 % A second body of work constructs Proof-of-Stake blockchain systems by emulating Proof-of-Work's block proposal mechanism through pseudorandomly assigning to stakeholders the right to append new blocks\footnote{Peercoin, }.
 
@@ -410,40 +410,42 @@ After this time the validator can withdraw his stake (and remaining rewards).
 
 \paragraph{asynchronous composition of blockchains} We refresh for the reader (section \ref{proposing_metablocks}) that a meta-block $B_i$ is committed on origin with a valid\footnote{
   A valid proposal is a transition object $T^A$ which satisfies the validity checks and has been unchallenged, or has been successfully proven upon being challenged.
-} transition object $T^A_i$ for which a seal $S_i$ was created on origin by verifying a supermajority of the voting weight $\mathcal{V}_{\mathcal{B}_i}$ on vote messages of the form $\langle \tilde{T}^A_i, s, t, h_s, h_t \rangle_v$.
+} transition object $T^A_i(\tilde{K}_i, \cdots)$ for which a seal $S_i$ was created on origin by verifying a supermajority of the voting weight $\mathcal{V}_{\mathcal{B}_i}$ on vote messages of the form $\langle \tilde{T}^A_i, s, t, h_s, h_t \rangle_v$. As the hash of the kernel $\tilde{K}_i$ is included in the transition object, and as the hash of the transition object $\tilde{T}^A_i$ is included in the vote messages, the order to construct a meta-block $B_i(K_i, T^A_i, S_i)$ is logically enforced.
+
+When a proposed transition object $T^A_i$ is committed as meta-block $B_i(K_i T^A_i, S_i)$ then the state root of the auxiliary system is immutably anchored into the origin blockchain under the blockhash $s$\footnote{
+  We assume here without loss of generality that the blockheader of the auxiliary system includes the state root of the system at height $h_s$ and that the blockhash is the hash of an encoding of the blockheader.}.
+It follows that the state of the meta-blockchain is first knowable on the auxiliary system and causally passed to the origin blockchain upon committing $B_i$ (see solid lines on figure \ref{fig:transition}).
 
 A new kernel $K_{i+1}$ is defined by the committed meta-block $B_i$, the deposit, logout and slashing messages\footnote{
   Slashing messages can concern both violations of slashing conditions reducing the stake of a validator to zero, or a proof of inactivity gradually reducing the validator stake.}
 that were included on origin during height $i$\footnote{
   We say a transaction on origin is included during height $i$ if it is included in the history of origin before $B_{i}$ is committed and after $B_{i-1}$ was committed.}
 and a new gas target $gt_{i+1}$ for closing $B_{i+1}$.
-These messages combined with the recalculation of the validator weights (eq. \ref{validator_weights}) updates the validator set
+These messages combined with the recalculation of the validator weights (eq. \ref{validator_weights}) update the validator set
 \begin{align}
   \mathcal{V}_{\mathcal{B}_{i+1}} = \Delta\mathcal{V}_{\mathcal{B}_{i+1}}(\mathcal{V}_{\mathcal{B}_{i}})
 \end{align}
-which is included in $K_{i+1}$ as the operator $\Delta\mathcal{V}_{\mathcal{B}_{i+1}}$.
+which is included in $K_{i+1}$ as the operator $\Delta\mathcal{V}_{\mathcal{B}_{i+1}}$. 
 
-----
-
-When a proposed transition object $T_i$ is committed as meta-block $B_i$ on origin (full red line), the new kernel $K_{i+1}$ is opened on origin.
-The validator set $\mathcal{V}_{\mathcal{B}_i}$ casts votes on the auxiliary system to finalise both the checkpoints of the auxiliary system and its observation of the origin blockchain (red dotted line).
-The commit of $B_i$ and opening of $K_{i+1}$ is observed by $\mathcal{V}_{\mathcal{B}_i}$ and $K_{i+1}$ is confirmed on the auxiliary system transitioning to the new validator set $\mathcal{V}_{\mathcal{B}_{i+1}}$ (blue dotted line).
+The validator set $\mathcal{V}_{\mathcal{B}_i}$ is activated on the auxiliary system when the kernel $K_i$ is confirmed with a Merkle proof against a finalised observation of (the state of) the origin blockchain by the validators set $\mathcal{V}_{\mathcal{B}_{i-1}}$ (see dashed lines on figure \ref{fig:transition}).
+% sentences identical from figure header; improve
 On the auxiliary system all processes continue uninterrupted.
 At each confirmation of a new kernel $K_j$ the changes to the validator set $\Delta\mathcal{V}_{\mathcal{B}_j}$, and the new gas target $gt_j$ are enacted on the auxiliary system.
+
 \begin{figure}[htb]
     \centering
 	\includegraphics[width=\textwidth]{transition}
 	\caption{\textbf{Transition.}
-		When a proposed transition object $T_i$ is committed as meta-block $B_i$ on origin (full red line), the new kernel $K_{i+1}$ is opened on origin.
-		The validator set $\mathcal{V}_{\mathcal{B}_i}$ casts votes on the auxiliary system to finalise both the checkpoints of the auxiliary system and its observation of the origin blockchain (red dotted line).
-		The commit of $B_i$ and opening of $K_{i+1}$ is observed by $\mathcal{V}_{\mathcal{B}_i}$ and $K_{i+1}$ is confirmed on the auxiliary system transitioning to the new validator set $\mathcal{V}_{\mathcal{B}_{i+1}}$ (blue dotted line).
+		When a proposed transition object $T_i$ is committed as meta-block $B_i$ on origin (solid red line), the new kernel $K_{i+1}$ is opened on origin.
+		The validator set $\mathcal{V}_{\mathcal{B}_i}$ casts votes on the auxiliary system to finalise both the checkpoints of the auxiliary system and its observation of the origin blockchain (dashed red line).
+		The commit of $B_i$ and opening of $K_{i+1}$ is observed by $\mathcal{V}_{\mathcal{B}_i}$ and $K_{i+1}$ is confirmed on the auxiliary system transitioning to the new validator set $\mathcal{V}_{\mathcal{B}_{i+1}}$ (dashed blue line).
 		On the auxiliary system all processes continue uninterrupted.
 		At each confirmation of a new kernel $K_j$ the changes to the validator set $\Delta\mathcal{V}_{\mathcal{B}_j}$, and the new gas target $gt_j$ are enacted on the auxiliary system.
 	}
 	\label{fig:transition}
 \end{figure}
 
-\paragraph{forward and rear validator set}
+\paragraph{forward and rear validator set} To ensure that a change to the validator set is 
 
 define forward validator set $\mathcal{V}_{\mathcal{B}_{f,n}}$
 \begin{align}
