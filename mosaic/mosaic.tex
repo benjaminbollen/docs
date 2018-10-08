@@ -410,7 +410,8 @@ After this time the validator can withdraw his stake (and remaining rewards).
 
 \paragraph{asynchronous composition of blockchains} We refresh for the reader (section \ref{proposing_metablocks}) that a meta-block $B_i$ is committed on origin with a valid\footnote{
   A valid proposal is a transition object $T^A$ which satisfies the validity checks and has been unchallenged, or has been successfully proven upon being challenged.
-} transition object $T^A_i(\tilde{K}_i, \cdots)$ for which a seal $S_i$ was created on origin by verifying a supermajority of the voting weight $\mathcal{V}_{\mathcal{B}_i}$ on vote messages of the form $\langle \tilde{T}^A_i, s, t, h_s, h_t \rangle_v$. As the hash of the kernel $\tilde{K}_i$ is included in the transition object, and as the hash of the transition object $\tilde{T}^A_i$ is included in the vote messages, the order to construct a meta-block $B_i(K_i, T^A_i, S_i)$ is logically enforced.
+} transition object $T^A_i(\tilde{K}_i, \cdots)$ for which a seal $S_i$ was created on origin by verifying a supermajority of the voting weight $\mathcal{V}_{\mathcal{B}_i}$ on vote messages of the form $\langle \tilde{T}^A_i, s, t, h_s, h_t \rangle_v$.
+As the hash of the kernel $\tilde{K}_i$ is included in the transition object, and as the hash of the transition object $\tilde{T}^A_i$ is included in the vote messages, the order to construct a meta-block $B_i(K_i, T^A_i, S_i)$ is logically enforced.
 
 When a proposed transition object $T^A_i$ is committed as meta-block $B_i(K_i T^A_i, S_i)$ then the state root of the auxiliary system is immutably anchored into the origin blockchain under the blockhash $s$\footnote{
   We assume here without loss of generality that the blockheader of the auxiliary system includes the state root of the system at height $h_s$ and that the blockhash is the hash of an encoding of the blockheader.}.
@@ -444,6 +445,10 @@ At each confirmation of a new kernel $K_j$ the changes to the validator set $\De
 	}
 	\label{fig:transition}
 \end{figure}
+
+On the origin blockchain the state for the meta-block $B_i$ is voted on by $\mathcal{V}_{\mathcal{B}_i}$ and the activity period of the validator set $\mathcal{V}_{\mathcal{B}_i}$ coincides with the duration of the meta-blockheight $i$ on origin.
+On the auxiliary system the activity period of the validator set $\mathcal{V}_{\mathcal{B}_i}$ is delayed relative to the state that will be included in the meta-block $B_i$, as $T_{i-1}$ must be committed on origin and $K_i$ confirmed.
+It is guaranteed that the confirmation of $K_i$ is included in the state transition of $B_i$ if $T_i$ is calculated by a smart contract on the auxiliary system.
 
 \paragraph{forward and rear validator set} To ensure that a change to the validator set is 
 
