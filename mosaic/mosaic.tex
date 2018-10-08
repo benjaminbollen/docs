@@ -551,12 +551,15 @@ The amount paid out to a single validator address on auxiliary equals
     \frac{W_v}{w} \cdot g_{st} \cdot gp
 \end{align*}
 where $W_v$ is the effective weight of the validator, $w$ is the total weight of all validators, $g_{st}$ is the gas consumed from source to target, and $gp$ is the \emph{current} gas price.
-
 Gas fees will be awarded in the base token of the auxiliary chain.
-The initial mosaic gas price $gp_0$ is set as part of the genesis block.
-With every checkpoint, the block proposer can change the gas price within a given limit.
-Block proposers want the gas price to be as low as possible while at the same time incentivizing validators to do their job.
-Validators could choose not to finalize a checkpoint when they deem the gas price too low.
+
+The block proposers decide on the gas price for every checkpoint, but they may not go below a minimum gas price set by the validators.
+The validators vote on the minimum gas price every $n$ checkpoints, in that way stabilizing the minimum gas price for a foreseeable future.
+This allows the block proposers to deposit sufficient rewards.
+
+The initial minimum gas price $gm_0$ is set as part of the genesis block.
+Every $n$ checkpoints, the validators can vote to either increase the minimum gas price, decrease it, or leave it as is.
+Based on the relative weights of the votes, the minimum gas price will change within a set limit in change.
 
 \paragraph{Validator rewards.}
 Whenever someone commits a meta-block on origin, the meta-block closes, a new meta-block opens, and someone confirms the kernel of the newly opened meta-block on auxiliary.
