@@ -347,10 +347,10 @@ A validator $v$ is a defined as an address which has a strictly-positive validat
 A validator can join the set of validators by sending a \emph{deposit message} to the origin blockchain and putting forward a stake.
 A validator can initiate log out by sending a \emph{logout message} to origin.
 
-The weight of a validator $w_v$ at meta-block height $n$ is the product of the stake of the validator at that height $s_v(n)$ multiplied with a \emph{reputation function} $R(n_0, n; v)$
+The weight of a validator $w_v$ at meta-block height $n$ is the product of the stake of the validator at that height $s_v(n)$ multiplied with a \emph{reputation function} $R(n; v, n_0)$
 \begin{align}
 \label{validator_weights}
-  w_v(n) = s_v(n) \cdot R(n_0, n; v)
+  w_v(n) = s_v(n) \cdot R(n; v, n_0)
 \end{align}
 where the reputation function $R$ has values in the range $[0,1]$ and $n_0$ is the meta-block height where the validator $v$ sent the deposit message.
 
