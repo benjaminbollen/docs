@@ -60,15 +60,16 @@ Mosaic introduces a set of Byzantine fault-tolerant (BFT) consensus rules to com
 Decentralized applications can use Mosaic to compute over a composed network of multiple blockchain systems in parallel.
 
 A decentralized application is an application for which the computation is requested, performed, and paid for by independent actors.
-To ensure correct execution of decentralized computations first an order on the inputs of execution must be determinable.
 To date, Ethereum is the leading network
 % {TODO: quantify and reference; also define Ethereum as an instruction set, a mainnet network}
 of nodes that enables developers to write and deploy code which can be called by independent users to collectively construct a shared state of the application.
 
 % Ethereum is leading network of nodes for decentralized execution.
 The Ethereum network achieves agreement on the collective state by constructing a blockchain.
-A blockchain derives correctness from full replication of the computation by nodes and for Ethereum today the chain is appended through Proof-of-Work consensus.
+A blockchain derives correctness from full replication of the computation by nodes.
+Furthermore, to ensure correct execution of blockchain computations, an order on the inputs of execution must be determinable.
 %{TODO: give short intro, start from satoshi}
+In its current implementation, the Ethereum chain is appended through Proof-of-Work consensus.
 Proof-of-Work (PoW) introduces a block reward incentive for nodes to keep producing blocks and thereby securing the chain of historical blocks.
 However, PoW produces a serial execution model and nodes cannot be collectively rewarded for the computation they all have to perform, which renders the system computationally inefficient\cite{verifiersdilemma}.
 
