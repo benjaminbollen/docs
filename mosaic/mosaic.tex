@@ -35,7 +35,7 @@
 \graphicspath{{images/}}
 
 \title{Mosaic\\\sc\Large{Running Meta-Blockchains to \\ Scale Decentralized Applications}}
-\author{\textbf{B. Bollen, P. Gevorgyan, S. Khedar,}\\ \textbf{D. Kumar Nath, M. Schenck}\\ for OpenST Foundation \\ incomplete working draft}
+\author{\textbf{M. Schenck, P. Gevorgyan, S. Jain,}\\ \textbf{D. Kumar Nath, S. Khedar, B. Bollen}\\ for OpenST Foundation \\ incomplete working draft}
 \date{OpenST Mosaic v0.10 - September 2018}
 
 \begin{document}
@@ -53,26 +53,6 @@ The code is work in progress at \verb|github.com/openstfoundation/mosaic-contrac
 % Section
 %
 \section{Introduction}
-
-%A blockchain derives correctness from full replication. Full replication is at the same time the strongest limitation to scaling a blockchain. Current proof-of-work, while secure has a transaction throughput that is constant with the number of (mining) nodes on the network. In order for blockchain networks to scale to billions of users, the network must at least scale (sub-)linear with the number of nodes contributing to the network.
-%
-%Three ingredients: divide the work up into shards, communicate between shards, and provide economic finality on each shard.
-%
-%These ingredients can be applied to layer1 blockchains, and then obtain blueprints like DFinity, Ethereum2.0. %TODO: which ones should we discuss in introduction? TON?
-%
-%The desired outcome of dividing the verification work into shards across nodes, is to parallelise the work load across nodes. When parallelising computations an orchestration % TODO: is "orchestration" the right word?
-% strategy is required to avoid race conditions. One model to structure parallelised computation is by enforcing a strict ownership model on data and only a single thread can own and write to the data.
-% 
-% A blockchain naturally has a natural ownership model in the form of tokens. In Bitcoin unspent transaction outputs (UTXO) are an inherent ownership structure. In Ethereum's account model, any account can call on any other account, and there is not a direct ownership model. However, decentralized applications are often built around a token contract or use Ether to design the crypto-economic rules to interact with the decentralized application. Furthermore, non-fungible tokens create an ownership model for stateful data objects. % shit paragraph, but something
-% 
-% So at layer2 as tokens form the access-right to interact with a decentralized application, by the token-ownership model can be used to parallelise the execution of the decentralized application.
-% 
-% We define a \emph{shardable} application as a decentralized application that allows modification of its state based on ownership of tokens, or embeds state it computes on into non-fungible tokens. %rewrite
-% \begin{align*}
-%  A(t; x) \rightarrow A'
-% \end{align*}
-%
-%-----
 
 % Mosaic is parallelisation schema for decentralized applications.
 Mosaic is a parallelisation schema for decentralized applications.
@@ -120,8 +100,7 @@ More advanced applications can deploy logic across many meta-blockchains and pro
 % describe sections
 %%%%%%%%%%%%%%%%%%%%
 
-
-\section{Composing auxiliary systems into an origin}
+\section{Composing meta-blockchains}
 
 A meta-blockchain composes transactions executed on an auxiliary blockchain system into an origin blockchain, such that the capacity of the origin blockchain extends and the auxiliary blockchain inherits the security properties of the origin blockchain.
 
@@ -138,7 +117,6 @@ We deliberately use PoA for our considerations for the auxiliary system to empha
 Rather the security properties of the composed system must rely only on the security properties of the consensus rules of the origin blockchain and on the Mosaic BFT consensus rules composing the auxiliary system into the origin system.\footnote{
 	The block proposers of the auxiliary system do have the ability to censor transactions from the auxiliary system if they have an ability to collude.
 }
-
 
 We define a meta-blockchain $\mathcal{B}$ with a staked validator set $\mathcal{V}_\mathcal{B}$ on the origin blockchain. The blocks $B_i$ of $\mathcal{B}$ are committed to a \emph{core} contract on origin $O$.
 For a given history of $O$,\footnote{
@@ -389,7 +367,7 @@ where $\theta_v$ is initially 1 for all validators, but irreversibly and immedia
 The effective weight allows for the voting power of an offending validator to be revoked on both blockchains instantaneously without waiting for the meta-block to be committed.
 
 The stake $s_v(n)$ of a validator can only be preserved or decrease for increasing $n$ when the validator does not fulfill its responsibilities.
-The \emph{loss function} $L$ recalculates the stake of a validator for the new meta-blockheight
+The \emph{loss function} $L$ recalculates the stake of a validator for the new meta-block height
 \begin{align}
   s_v(n) = L(s_v(n-1); v).
 \end{align}
@@ -415,7 +393,7 @@ As the hash of the kernel $\tilde{K}_i$ is included in the transition object, an
 
 When a proposed transition object $T^A_i$ is committed as meta-block $B_i(K_i T^A_i, S_i)$ then the state root of the auxiliary system is immutably anchored into the origin blockchain under the blockhash $s$\footnote{
   We assume here without loss of generality that the blockheader of the auxiliary system includes the state root of the system at height $h_s$ and that the blockhash is the hash of an encoding of the blockheader.}.
-It follows that the state of the meta-blockchain is first knowable on the auxiliary system and causally passed to the origin blockchain upon committing $B_i$ (see solid lines on figure \ref{fig:transition}).
+It follows that the state of the meta-blockchain is first knowable on the auxiliary system and causally passed to the origin blockchain upon committing $B_i$ (see solid lines on figure \ref{fig:asynccomp}).
 
 A new kernel $K_{i+1}$ is defined by the committed meta-block $B_i$, the deposit, logout and slashing messages\footnote{
   Slashing messages can concern both violations of slashing conditions reducing the stake of a validator to zero, or a proof of inactivity gradually reducing the validator stake.}
@@ -428,60 +406,51 @@ These messages combined with the recalculation of the validator weights (eq. \re
 \end{align}
 which is included in $K_{i+1}$ as the operator $\Delta\mathcal{V}_{\mathcal{B}_{i+1}}$. 
 
-The validator set $\mathcal{V}_{\mathcal{B}_i}$ is activated on the auxiliary system when the kernel $K_i$ is confirmed with a Merkle proof against a finalised observation of (the state of) the origin blockchain by the validators set $\mathcal{V}_{\mathcal{B}_{i-1}}$ (see dashed lines on figure \ref{fig:transition}).
-% sentences identical from figure header; improve
-On the auxiliary system all processes continue uninterrupted.
-At each confirmation of a new kernel $K_j$ the changes to the validator set $\Delta\mathcal{V}_{\mathcal{B}_j}$, and the new gas target $gt_j$ are enacted on the auxiliary system.
-
-\begin{figure}[htb]
+\begin{figure}[tb]
     \centering
 	\includegraphics[width=\textwidth]{transition}
-	\caption{\textbf{Transition.}
+	\caption{\textbf{Asynchronous composition.}
 		When a proposed transition object $T_i$ is committed as meta-block $B_i$ on origin (solid red line), the new kernel $K_{i+1}$ is opened on origin.
-		The validator set $\mathcal{V}_{\mathcal{B}_i}$ casts votes on the auxiliary system to finalise both the checkpoints of the auxiliary system and its observation of the origin blockchain (dashed red line).
-		The commit of $B_i$ and opening of $K_{i+1}$ is observed by $\mathcal{V}_{\mathcal{B}_i}$ and $K_{i+1}$ is confirmed on the auxiliary system transitioning to the new validator set $\mathcal{V}_{\mathcal{B}_{i+1}}$ (dashed blue line).
+		The validator set $\mathcal{V}_{\mathcal{B}_i}$ casts votes on the auxiliary system to finalise both the checkpoints of the auxiliary system and its observation of the origin blockchain on the auxiliary system (dashed red line on aux).
+		The commit of $B_i$ and opening of $K_{i+1}$ is observed by $\mathcal{V}_{\mathcal{B}_i}$ and $K_{i+1}$ is confirmed on the auxiliary system transitioning to the new validator set $\mathcal{V}_{\mathcal{B}_{i+1}}$ (dashed blue line on aux).
 		On the auxiliary system all processes continue uninterrupted.
 		At each confirmation of a new kernel $K_j$ the changes to the validator set $\Delta\mathcal{V}_{\mathcal{B}_j}$, and the new gas target $gt_j$ are enacted on the auxiliary system.
 	}
-	\label{fig:transition}
+	\label{fig:asynccomp}
 \end{figure}
 
-On the origin blockchain the state for the meta-block $B_i$ is voted on by $\mathcal{V}_{\mathcal{B}_i}$ and the activity period of the validator set $\mathcal{V}_{\mathcal{B}_i}$ coincides with the duration of the meta-blockheight $i$ on origin.
+The validator set $\mathcal{V}_{\mathcal{B}_i}$ is activated on the auxiliary system when the kernel $K_i$ is \emph{confirmed} on the auxiliary system.
+We define the confirmation of a kernel to require two conditions to be met.
+First, a Merkle proof that $K_i$ exists on the origin blockchain must be presented against a finalised observation of (the state of) the origin blockchain as finalised by the validators set $\mathcal{V}_{\mathcal{B}_{i-1}}$.
+Second, if this Merkle proof of the kernel $K_i$ was included on the auxiliary system at dynasty $d$ then we consider $K_i$ confirmed when this branch of history reaches dynasty $d+2$. The dashed lines on figure \ref{fig:asynccomp} indicate the activity period of $\mathcal{V}_{\mathcal{B}_i}$ and start at opening of $K_i$ on origin and the confirmation of $K_i$ on the auxiliary system.
+
+For the auxiliary system all other processes continue uninterrupted, such as the calculation of accumulated gas consumed and the accumulated transaction root.
+At each confirmation of a new kernel $K_j$ the changes to the validator set $\Delta\mathcal{V}_{\mathcal{B}_j}$, and the new gas target $gt_j$ are enacted on the auxiliary system.
+
+On the origin blockchain the state for the meta-block $B_i$ is voted on by $\mathcal{V}_{\mathcal{B}_i}$ and the activity period of the validator set $\mathcal{V}_{\mathcal{B}_i}$ coincides with the duration of the meta-block height $i$ on origin.
 On the auxiliary system the activity period of the validator set $\mathcal{V}_{\mathcal{B}_i}$ is delayed relative to the state that will be included in the meta-block $B_i$, as $T_{i-1}$ must be committed on origin and $K_i$ confirmed.
 It is guaranteed that the confirmation of $K_i$ is included in the state transition of $B_i$ if $T_i$ is calculated by a smart contract on the auxiliary system.
 
-\paragraph{forward and rear validator set} To ensure that a change to the validator set is 
+\paragraph{forward and rear validator set} To ensure that a major change to the validator set cannot introduce an attack vector, we apply an analogous defence strategy as described in Casper FFG\cite{casperffg} as the ``stitching mechanism''.
 
-define forward validator set $\mathcal{V}_{\mathcal{B}_{f,n}}$
+When a validator's deposit message is included on origin in meta-block height $i$, the \emph{start meta-block height} $n_0(v)$ is equal to $i+1$ and the validator joins in the next validator set $\mathcal{V}_{\mathcal{B}_{i+1}}$\footnote{
+  We note that in Casper FFG\cite{casperffg} the analogous \emph{start dynasty} of a validator is defined as $d+2$.
+  The confirmation of the kernel requires a full dynasty increase, i.e. $d+2$, for it to be confirmed on the auxiliary system, hence it is sufficient for validators to join in the validator set of the next meta-block, i.e. $\mathcal{V}_{\mathcal{B}_{i+1}}$}.
+When a validator $v$ sees its logout message included on origin in meta-block height $j \geq i + 1$, then the \emph{end meta-block height} $n_e(v)$ is equal to $j + 1$ and the validator participates for a last time in the validator set $\mathcal{V}_{\mathcal{B}_{j+1}}$. Before a logout message for a validator is included the end meta-block height is considered infinite.
+
+We use the start and end meta-block height of a validator to define two subsets of the validator set $\mathcal{V}_{\mathcal{B}_n}$.
+The \emph{forward validator set} $\mathcal{V}_{\mathcal{B}_{f,n}}$ includes all active validators, except those who are in their end meta-block height $n_e(v)$:
 \begin{align}
-  \mathcal{S}(\mathcal{V}_{\mathcal{B}_n}) = \mathcal{S}(\mathcal{V}_{\mathcal{B}_{f,n}}) \land \mathcal{S}(\mathcal{V}_{\mathcal{B}_{r,n}})
+  \mathcal{V}_{\mathcal{B}_{f,n}} = \left\{v \in \mathcal{V}_{\mathcal{B}_{n}}: n < n_e(v) \right\} = \mathcal{V}_{\mathcal{B}_{n}} \backslash \left\{v : n = n_e(v) \right\}
 \end{align}
-
-
-Casper FFG\cite{casperffg} defines a stitching mechanism for a changing set of validators.
-It prevents a case where a significant change in validators from one dynasty to the next could result in conflicting finalized checkpoints on different forks.
-They define a forward validator set and a rear validator set based on the start dynasty and end dynasty of a validator.
-In the case of Mosaic, however, validators do not join and leave the set of validators within two dynasties, but rather two meta-blocks.
-When a validator sends a deposit or logout message at meta-block height $i$, the change is announced to auxiliary with the opening of meta-block $i+1$.
-% TODO: any existing notation for meta-block height?
-The auxiliary system will update the validator's weight with the opening of meta-block $i+2$ and the validator will join or leave the set of validators. We call that meta-block the start meta-block or end meta-block.
-Following this change, the forward and rear validator sets are based on the start meta-block and end meta-block, respectively, instead of the start dynasty and the end dynasty.
-
- In the same way, an ordered pair of checkpoints $(s, t)$, where $t$ is in meta-block $B_i$, has a supermajority link if both at least $\sfrac{2}{3}$ of the forward validator set and the rear validator set of $B_i$, respectively, have published vote $\langle \tilde{T}, s, t, h_{s}, h_{t}\rangle_v$.
-
-The same public key can only deposit and withdraw once.
-It cannot join the set of validators multiple times or change its stake.
-
-NOTE: weight = stake x reputation
-
-When a meta-block has been committed on origin, the Kernel of the newly opening meta-block can be confirmed on auxiliary.
-The state root of origin is regularly transferred to auxiliary and finalized.
-By means of a Merkle proof against that known state root, the content of the Kernel can be made available to auxiliary.
-Auxiliary will note the update of the validator weights for the meta-block height of the opened meta-block plus one.
-The validator set changes on auxiliary at the time the kernel opening is confirmed.
-Even though the kernel opening retroactively opens the meta-block on auxiliary from the first block after the last finalized checkpoint in the meta-block that precedes the opening one, the validator set only changes at the point of the confirmation.
-When the Kernel at height $i$ is confirmed on auxiliary, the validator set $i+1$ becomes the active set of validators.
-The validators that logged out on origin before the opening of $K_i$ will be in the rear validator set of $K_{i+1}$ and leave the validator set when $K_{i+2}$ is confirmed.
+and \emph{the rear validator set} $\mathcal{V}_{\mathcal{B}_{r,n}}$ includes all active validators, except those who have commenced in their start meta-block height $n_0(v)$:
+\begin{align}
+  \mathcal{V}_{\mathcal{B}_{r,n}} = \left\{v \in \mathcal{V}_{\mathcal{B}_{n}}: n_0(v) < n \right\} = \mathcal{V}_{\mathcal{B}_{n}} \backslash \left\{v : n = n_0(v) \right\}.
+\end{align}
+We redefine that a supermajority link over the validator set $\mathcal{V}_{\mathcal{B}_n}$ henceforth means that a $\texttt{+}\sfrac{2}{3}$ supermajority of validator weight has voted for the link counted over both the rear and the forward validator set separately:
+\begin{align}
+  \mathcal{S}(\mathcal{V}_{\mathcal{B}_n}) \doteq \mathcal{S}(\mathcal{V}_{\mathcal{B}_{f,n}}) \land \mathcal{S}(\mathcal{V}_{\mathcal{B}_{r,n}}).
+\end{align}
 
 \begin{figure}[htb]
     \centering
