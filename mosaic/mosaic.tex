@@ -461,11 +461,9 @@ We redefine that a supermajority link over the validator set $\mathcal{V}_{\math
     \centering
 	\includegraphics[width=\textwidth]{dynamic_validators}
 	\caption{\textbf{Dynamic set of validators.}
-		The validator sends a log out message (or a deposit message) in $B_i$.
-		The change in the set of validators is transferred to auxiliary as part of kernel $K_{i+1}$ that gets confirmed.
-		The validator does its last round in the rear validator set on auxiliary.
-		The validator's weight drops to zero when $K_{i+2}$ is confirmed (or the validator joins in the forward set of validators).
-	}
+		The validator sends a log out (or deposit) message in $B_i$.
+		The change in the set of validators is transferred to auxiliary as part of kernel $K_{i+1}$ when it gets confirmed.
+		The validator does its last (first) round in the rear (forward) validator set of $\mathcal{V}_{\mathcal{B}_{i+1}}$ ($\mathcal{V}_{\mathcal{B}_{r,i+1}}$ or $\mathcal{V}_{\mathcal{B}_{f,i+1}}$ respectively).}
 	\label{fig:dynamic_validators}
 \end{figure}
 
