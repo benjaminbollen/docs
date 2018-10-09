@@ -508,26 +508,32 @@ A meta-blockchain has a double gas market.
 First the known gas market exists where users of the auxiliary system pay gas fees to the block proposers of the auxiliary system for every transaction.
 A second, new gas market is created that rewards validators for their work.
 
-The meta-blockchain includes transactions from auxiliary.
-Users of the auxiliary system already paid a gas fee for when the transactions were included in an auxiliary block and cannot be expected to pay another fee later on.
-Still, it is desired that the validators have an incentive to commit meta-blocks on origin, as it is a pre-requisite for anyone to transfer value from auxiliary to origin.
+Validators finalize checkpoints on origin and transfer information about meta-blocks back and forth.
+While the gas target is a forcing function on when to close a meta-block (compare section \ref{proposing_metablocks}), the new, second gas market rewards validators for their voting actions.
+Validators get a reward for every vote message they send to the auxiliary system.
+There is a hard limit to the number of valid vote messages: any validator cannot publish more than one vote per target height.
 
-Mosaic provides two incentives for the validators to do so:
-
-\begin{enumerate}
-	\item The validators receive a gas fee for a committed meta-block, based on the gas that auxiliary consumed for all auxiliary transactions that exist within that meta-block.
-	\item The validators get rewarded on auxiliary. In order for them to move the rewards to origin, they must first commit a meta-block.
-\end{enumerate}
-
-\paragraph{Gas fees.}
-A validators gets a reward for every vote.
-The amount depends on the relative weight of the validator, the amount of gas that was consumed on auxiliary, and the current gas price.
-The amount paid out to a single validator address on auxiliary equals
+The amount of the reward depends on the relative weight of the validator, the amount of gas that was consumed on auxiliary, and the current gas price.
+The amount rewarded to a single validator address on auxiliary for every vote message equals
 \begin{align*}
     \frac{W_v}{w} \cdot g_{st} \cdot gp
 \end{align*}
 where $W_v$ is the effective weight of the validator, $w$ is the total weight of all validators, $g_{st}$ is the gas consumed from source to target, and $gp$ is the \emph{current} gas price.
 Gas fees will be awarded in the base token of the auxiliary chain.
+
+A smart contract on auxiliary manages the validator rewards.
+49\% of the rewards are paid out directly to the validator addresses.
+The remaining 51\% are locked in until after the withdrawal period ends after a validator logged out.
+If the validator violates a slashing condition, the withheld 51\% will be slashed along with the validator's stake.
+More than half of the rewards are kept so that the paid out rewards never outweigh the potential loss in case of a violated slashing condition.
+
+In order for the auxiliary smart contract to be able to handle these rewards, the block proposers of auxiliary must deposit sufficient value for multiple future meta-blocks in said contract.
+If block proposers would fail to produce a sufficient deposit for validator rewards, validators would most likely switch to a different auxiliary chain.
+
+Users of the auxiliary system paid a gas fee to the block proposers when their transactions were included in an auxiliary block.
+They cannot be expected to pay another, later fee to the validators.
+However, the block proposers have an interest in finalized checkpoints.
+The chain is more attractive to users if blocks get regularly finalized, resulting in potentially more rewards for the proposers.
 
 The block proposers decide on the gas price for every checkpoint, but they may not go below a minimum gas price set by the validators.
 The validators vote on the minimum gas price every $n$ checkpoints, in that way stabilizing the minimum gas price for a foreseeable future.
@@ -535,22 +541,7 @@ This allows the block proposers to deposit sufficient rewards.
 
 The initial minimum gas price $gm_0$ is set as part of the genesis block.
 Every $n$ checkpoints, the validators can vote to either increase the minimum gas price, decrease it, or leave it as is.
-Based on the relative weights of the votes, the minimum gas price will change within a set limit in change.
-
-\paragraph{Validator rewards.}
-Whenever someone commits a meta-block on origin, the meta-block closes, a new meta-block opens, and someone confirms the kernel of the newly opened meta-block on auxiliary.
-The validators would usually carry out this duty, as they want to earn their rewards.
-
-The auxiliary system tracks the total gas consumption per checkpoint and can therefore calculate the amount of gas consumed in the closed meta-block on-chain.
-The gas consumed of a meta-block is merely a mirror of the gas that all auxiliary transactions within that meta-block consumed on auxiliary.
-
-A smart contract on auxiliary pays out a fee to the validators based on the gas consumed in the closed meta-block.
-In order for the auxiliary smart contract to be able to do the pay-out, the block proposers of auxiliary must deposit sufficient value for multiple future meta-blocks in said contract.
-Block proposers have an interest in confirmed meta-blocks on origin.
-They earn on auxiliary for proposing blocks and they can only transfer their value to origin after a meta-block is committed.
-Furthermore, an auxiliary system with more frequent meta-block commits could be more interesting to users and therefore produce more gas rewards for the block proposers.
-
-If block proposers would fail to produce a sufficient deposit for validator rewards, validators would most likely switch to a more profitable auxiliary chain.
+Based on the relative weights of the votes, the minimum gas price will change within a set limit.
 
 \subsection{Attacks and Defenses}
 
