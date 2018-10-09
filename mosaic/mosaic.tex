@@ -467,136 +467,99 @@ We redefine that a supermajority link over the validator set $\mathcal{V}_{\math
 	\label{fig:dynamic_validators}
 \end{figure}
 
-%The logic is similar to that of Casper with the notable difference that, instead of dynasties, we use OSTblocks (described below).
-%When a potential validator sends a \emph{deposit message} on origin at OSTblock height $\alpha$,
-%then the validator will be announced as part of the next set of validators in the header of OSTblock $\alpha+1$ and 
-%the validator $\upnu$ will join the validator set at OSTblock height $\alpha+2$.
-%% TODO a lot copied from Casper. OK? Required?
-%Analogous to Casper, we call $\alpha+2$ the validator's \emph{start OSTblock}, $\BS(\upnu)$.
-%If a validator $\upnu$'s withdraw message is included on origin's blockchain during an open OSTblock $\B_\alpha$,
-%it similarly leaves the set of validators at OSTblock height $\alpha+2$.
-%We call $\alpha+2$ the validator $\upnu$'s \emph{end OSTblock} $\BE(\upnu)$.
-
-%related work: cosmos and polkadot each introduce a cosmos hub or relay chain as a new 
-% historic background of Ethereum driven to decentralise the world wide web framework; Mosaic is driven to decentralise high-performance computation
-% Mosaic 
-
-
-% design philosophy: heterogeneneous composition of systems; different applications have different optimal specifications/requirements;
-% allows collective innovation
-
-
-% related work: primea DFinity consensus-primea-VM concurrency in contracts; asynchronous message passing; partial ordering of messages (explicit in Mosaic; correct by construction); nonatomic by default...8-0; atomicity and reverts
-
-% Mosaic: async message passing between meta-blockchains; synchronous message passing within one blockchain
 %
-
-% communication semantics
-
-% locality of stateful data to compute on. move computation where the data already is; data in a shard is fully replicated
-
-% payment channels, and state channels are logic-specific; plasma chains logical continuation of state channels; but different applications cannot send synchronous messages to each other across state channels or plasma chains. off-chain layer2 solutions; closing always leads to challenge period; meta-blockchain moves block proposal off-chain
-% mosaic is an on-chain layer2 solution.
-% comparison to state-channels:
-% data-availability -> validator pool rewarded for keeping full copy of state; not required by end-users
-% cost opening-closing channel: meta-blockchain is permanently open, applications and users can move in- and out of meta-blockchains; cost updating in meta-blockchain higher than state channel, but lower than on mainnet
-% privacy: meta-blockchains are transparancy tool; lower cost for execution allows better substrate for homomorphic encryption, proxy-re-encryption and zk-proofs
-% fast asynchronous finality
-% counterfactual/L4 "build state-channels into their application"
-% plasma: root contains "state-transition rules" <-> Mosaic Core does not have specific transition rules; split chain from 
-
-\subsection{gas markets}
-
-A meta-blockchain has a double gas market.
-First the known gas market exists where users of the auxiliary system pay gas fees to the block proposers of the auxiliary system for every transaction.
-A second, new gas market is created that rewards validators for their work.
-
-Validators finalize checkpoints on origin and transfer information about meta-blocks back and forth.
-While the gas target is a forcing function on when to close a meta-block (compare section \ref{proposing_metablocks}), the new, second gas market rewards validators for their voting actions.
-Validators get a reward for every vote message they send to the auxiliary system.
-There is a hard limit to the number of valid vote messages: any validator cannot publish more than one vote per target height.
-
-The amount of the reward depends on the relative weight of the validator, the amount of gas that was consumed on auxiliary, and the current gas price.
-The amount rewarded to a single validator address on auxiliary for every vote message equals
-\begin{align*}
-    \frac{W_v}{w} \cdot g_{st} \cdot gp
-\end{align*}
-where $W_v$ is the effective weight of the validator, $w$ is the total weight of all validators, $g_{st}$ is the gas consumed from source to target, and $gp$ is the \emph{current} gas price.
-Gas fees will be awarded in the base token of the auxiliary chain.
-
-A smart contract on auxiliary manages the validator rewards.
-49\% of the rewards are paid out directly to the validator addresses.
-The remaining 51\% are locked in until after the withdrawal period ends after a validator logged out.
-If the validator violates a slashing condition, the withheld 51\% will be slashed along with the validator's stake.
-More than half of the rewards are kept so that the paid out rewards never outweigh the potential loss in case of a violated slashing condition.
-
-In order for the auxiliary smart contract to be able to handle these rewards, the block proposers of auxiliary must deposit sufficient value for multiple future meta-blocks in said contract.
-If block proposers would fail to produce a sufficient deposit for validator rewards, validators would most likely switch to a different auxiliary chain.
-
-Users of the auxiliary system paid a gas fee to the block proposers when their transactions were included in an auxiliary block.
-They cannot be expected to pay another, later fee to the validators.
-However, the block proposers have an interest in finalized checkpoints.
-The chain is more attractive to users if blocks get regularly finalized, resulting in potentially more rewards for the proposers.
-
-The block proposers decide on the gas price for every checkpoint, but they may not go below a minimum gas price set by the validators.
-The validators vote on the minimum gas price every $n$ checkpoints, in that way stabilizing the minimum gas price for a foreseeable future.
-This allows the block proposers to deposit sufficient rewards.
-
-The initial minimum gas price $gm_0$ is set as part of the genesis block.
-Every $n$ checkpoints, the validators can vote to either increase the minimum gas price, decrease it, or leave it as is.
-Based on the relative weights of the votes, the minimum gas price will change within a set limit.
-
-\subsection{Attacks and Defenses}
-
-We defend against the two main attacks against proof of stake systems the same way Casper FFG\cite{casperffg} does:
-\begin{itemize}
-    \item We defend against \emph{long-range revision} by introducing a \emph{withdrawal delay} and a \emph{maximum source block age} for votes.
-    \item We defend against \emph{catastrophic crashes} by introducing an \emph{inactivity leak}.
-\end{itemize}
-However, there are a number of new attack vectors introduced by the concepts of a meta-blockchain and decoupled systems:
-\begin{itemize}
-    \item Proposing invalid meta-blocks to origin. E.g. from another auxiliary system.
-    \item Delaying kernel confirmation.
-    \item Reporting invalid blocks to the auxiliary system.
-    \item Validators produce votes to commit on origin without actually voting on auxiliary.
-    \item Validators stop finalizing.
-\end{itemize}
-
-\paragraph{Invalid meta-block proposals.}
-Say a supermajority of validators uses the same private key on two auxiliary chains $A_1$ and $A_2$.
-When these validators sign a supermajority vote that finalizes a checkpoint on auxiliary chain $A_1$, an adversary could present a transition object from $A_1$, including the votes to commit it, to the core contract of $A_2$ on origin.
-The $A_2$ core contract would deem the transition object and the signatures as valid.
-For that reason we introduced the kernel hash to the transition object.
-This binds every transition object to a kernel and transitively to a specific core contract.
-
-\paragraph{Kernel delay.}
-The set of validators could have an interest in delaying the confirmation of a new kernel, e.g. to prevent a new validator from joining the set of validators.
-However, the system is designed in a way that anyone, even the new validator that is not yet part of the set of validators, can do the Merkle proof to confirm a new kernel on auxiliary.
-All that is required for that is a finalized checkpoint of origin on auxiliary that includes the state root that includes the commit of the previous kernel.
-If the validators delay origin block finalization to prevent the kernel opening, they would lose stake as the result of the inactivity leak.
-
-\paragraph{Invalid block reports.}
-Block reporting to auxiliary is not limited to any set of specific addresses.
-An adversary could report origin blocks that do not actually exist on origin.
-There is no way for auxiliary to check the validity of these reports.
-However, validators would ignore these reports and not vote on them, the adversary is only burning gas fees.
-
-\paragraph{Belated vote production.}
-Say someone proposes a transition object to origin for which a supermajority vote by the validators does not exist.
-Validators may produce votes to commit that proposal.
-There are two cases then to consider:
-
-\begin{enumerate}
-    \item The produced votes never violate any slashing condition.
-    \item The produced votes violate a slashing condition eventually.
-\end{enumerate}
-
-In the first case, the commit on origin is in-line with what is actually observed on auxiliary.
-In the second case, at least $\sfrac{1}{3}$ of the validators' stake can be slashed.
-
-\paragraph{Finalization breakdown.}
-If validators decided to stop finalization, they would lose stake due to the inactivity leak.
-
+%\subsection{gas markets}
+%
+%A meta-blockchain has a double gas market.
+%First the known gas market exists where users of the auxiliary system pay gas fees to the block proposers of the auxiliary system for every transaction.
+%A second, new gas market is created that rewards validators for their work.
+%
+%Validators finalize checkpoints on origin and transfer information about meta-blocks back and forth.
+%While the gas target is a forcing function on when to close a meta-block (compare section \ref{proposing_metablocks}), the new, second gas market rewards validators for their voting actions.
+%Validators get a reward for every vote message they send to the auxiliary system.
+%There is a hard limit to the number of valid vote messages: any validator cannot publish more than one vote per target height.
+%
+%The amount of the reward depends on the relative weight of the validator, the amount of gas that was consumed on auxiliary, and the current gas price.
+%The amount rewarded to a single validator address on auxiliary for every vote message equals
+%\begin{align*}
+%    \frac{W_v}{w} \cdot g_{st} \cdot gp
+%\end{align*}
+%where $W_v$ is the effective weight of the validator, $w$ is the total weight of all validators, $g_{st}$ is the gas consumed from source to target, and $gp$ is the \emph{current} gas price.
+%Gas fees will be awarded in the base token of the auxiliary chain.
+%
+%A smart contract on auxiliary manages the validator rewards.
+%49\% of the rewards are paid out directly to the validator addresses.
+%The remaining 51\% are locked in until after the withdrawal period ends after a validator logged out.
+%If the validator violates a slashing condition, the withheld 51\% will be slashed along with the validator's stake.
+%More than half of the rewards are kept so that the paid out rewards never outweigh the potential loss in case of a violated slashing condition.
+%
+%In order for the auxiliary smart contract to be able to handle these rewards, the block proposers of auxiliary must deposit sufficient value for multiple future meta-blocks in said contract.
+%If block proposers would fail to produce a sufficient deposit for validator rewards, validators would most likely switch to a different auxiliary chain.
+%
+%Users of the auxiliary system paid a gas fee to the block proposers when their transactions were included in an auxiliary block.
+%They cannot be expected to pay another, later fee to the validators.
+%However, the block proposers have an interest in finalized checkpoints.
+%The chain is more attractive to users if blocks get regularly finalized, resulting in potentially more rewards for the proposers.
+%
+%The block proposers decide on the gas price for every checkpoint, but they may not go below a minimum gas price set by the validators.
+%The validators vote on the minimum gas price every $n$ checkpoints, in that way stabilizing the minimum gas price for a foreseeable future.
+%This allows the block proposers to deposit sufficient rewards.
+%
+%The initial minimum gas price $gm_0$ is set as part of the genesis block.
+%Every $n$ checkpoints, the validators can vote to either increase the minimum gas price, decrease it, or leave it as is.
+%Based on the relative weights of the votes, the minimum gas price will change within a set limit.
+%
+%\subsection{Attacks and Defenses}
+%
+%We defend against the two main attacks against proof of stake systems the same way Casper FFG\cite{casperffg} does:
+%\begin{itemize}
+%    \item We defend against \emph{long-range revision} by introducing a \emph{withdrawal delay} and a \emph{maximum source block age} for votes.
+%    \item We defend against \emph{catastrophic crashes} by introducing an \emph{inactivity leak}.
+%\end{itemize}
+%However, there are a number of new attack vectors introduced by the concepts of a meta-blockchain and decoupled systems:
+%\begin{itemize}
+%    \item Proposing invalid meta-blocks to origin. E.g. from another auxiliary system.
+%    \item Delaying kernel confirmation.
+%    \item Reporting invalid blocks to the auxiliary system.
+%    \item Validators produce votes to commit on origin without actually voting on auxiliary.
+%    \item Validators stop finalizing.
+%\end{itemize}
+%
+%\paragraph{Invalid meta-block proposals.}
+%Say a supermajority of validators uses the same private key on two auxiliary chains $A_1$ and $A_2$.
+%When these validators sign a supermajority vote that finalizes a checkpoint on auxiliary chain $A_1$, an adversary could present a transition object from $A_1$, including the votes to commit it, to the core contract of $A_2$ on origin.
+%The $A_2$ core contract would deem the transition object and the signatures as valid.
+%For that reason we introduced the kernel hash to the transition object.
+%This binds every transition object to a kernel and transitively to a specific core contract.
+%
+%\paragraph{Kernel delay.}
+%The set of validators could have an interest in delaying the confirmation of a new kernel, e.g. to prevent a new validator from joining the set of validators.
+%However, the system is designed in a way that anyone, even the new validator that is not yet part of the set of validators, can do the Merkle proof to confirm a new kernel on auxiliary.
+%All that is required for that is a finalized checkpoint of origin on auxiliary that includes the state root that includes the commit of the previous kernel.
+%If the validators delay origin block finalization to prevent the kernel opening, they would lose stake as the result of the inactivity leak.
+%
+%\paragraph{Invalid block reports.}
+%Block reporting to auxiliary is not limited to any set of specific addresses.
+%An adversary could report origin blocks that do not actually exist on origin.
+%There is no way for auxiliary to check the validity of these reports.
+%However, validators would ignore these reports and not vote on them, the adversary is only burning gas fees.
+%
+%\paragraph{Belated vote production.}
+%Say someone proposes a transition object to origin for which a supermajority vote by the validators does not exist.
+%Validators may produce votes to commit that proposal.
+%There are two cases then to consider:
+%
+%\begin{enumerate}
+%    \item The produced votes never violate any slashing condition.
+%    \item The produced votes violate a slashing condition eventually.
+%\end{enumerate}
+%
+%In the first case, the commit on origin is in-line with what is actually observed on auxiliary.
+%In the second case, at least $\sfrac{1}{3}$ of the validators' stake can be slashed.
+%
+%\paragraph{Finalization breakdown.}
+%If validators decided to stop finalization, they would lose stake due to the inactivity leak.
+%
 
 %
 % Section
