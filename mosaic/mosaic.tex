@@ -979,6 +979,144 @@ This allows tokens (ERC20, later non-fungible tokens) declared on the origin blo
 
 The gateway protocol is code-complete at github.com/openstfoundation/mosaic-contracts
 
+\subsection{Message Bus}
+A Message Bus is a messaging framework that allows to atomically communicate typed messages between two homogeneous or heterogeneous blockchain system. 
+This communication is the two-phased commit on each blockchain to transpose a message from one system to another. 
+Message bus acts as a state machine where message state is changed from one state to another in response to the two-phased commit.
+ If message M is intended to move from blockchain A to blockchain B, then in this case the A is termed as the source and B is termed as target. 
+ The state of message M is stored in outbox in source blockchain and in inbox of target blockchain.
+
+\begin{figure}[htb]
+    \centering
+	\includegraphics[width=\textwidth]{messagebus}
+	\caption{\textbf{Message box.}
+	}
+	\label{fig:messagebus}
+\end{figure}
+
+Similarly if the message is intended to move form blockchain B to blockchain A, then the source will be B and target will be A.
+Throughout the paper the terms source and target blockchain will be used.
+
+\textbf{Message.}
+We introduce message object $M$ consists of intent hash $i$, nonce $n$, gas price $g_p$, gas limit $g_l$, sender $s$, hash lock $h_l$ , where intent hash $i$ represents the context specific message, example staking intent hash in context of stake and mint process, redemption intent hash in context of redeem and unstake process. 
+Nonce $n$ is the count of message moved across blockchain by the sender $s$. 
+Gas price $g_p$ and gas limit $g_l$  is the price at which the reward is calculated for facilitation of message transfer, refer 4.8.
+Hash lock $h_l$ is $keccak256$ of a secret key that is set by the facilitator\footnote{For more details of facilitator please refer section 4.5}, for more details refer progress with hashlock. 
+\begin{align*}
+    M = (i, n, g_p, g_l, s, h_l) 
+\end{align*}
+
+Message hash $m_h$ is an unique identifier of a message $M$.
+It can be calculated as the $keccak256$ of message type hash\footnote{Details of type hash can be referred to EIP 712.} $t$, intent hash $i$, nonce $n$, gas price $g_p$ , gas limit $g_l$ and sender $s$. 
+\begin{align*}
+    m_h = keccak256(t, i, n, g_p, g_l, s)
+\end{align*}
+
+The state of the message is in message box is stored against the message hash.
+
+\textbf{State machine.} 
+Message bus acts as a state machine, the transition of state of message is deterministic.
+The states of the message can be \emph{Undeclared}, \emph{Declared}, \emph{Progressed}, \emph{RevocationDeclared} and \emph{Revoked}. 
+Message $M$ can be moved from source blockchain to target blockchain in a two phased commit transactions.
+If the current state for $M$ in outbox of source blockchain is \emph{undeclared}, then first commit is to set the message status as \emph{declared} in outbox of source blockchain. 
+Once the state root of the source blockchain is committed to target blockchain, then the message $M$ can be presented to target blockchain along with the merkle proof specifying the existence of message in source blockchain with status as \emph{declared} in outbox, this is generally done by the facilitator $f$. 
+If the current state of $M$ in inbox of target blockchain is undeclared and merke proof is valid then the state of $M$ is changed to \emph{declared} in the target blockchain. 
+This completed the one of the two phased commit in both the blockchain. 
+The second commit to change the state to progressed can be done in two ways, firstly \textbf{progress with proof} or alternatively gas efficient \textbf{progress with hashlock}. 
+ 
+\begin{figure}[htb]
+    \centering
+	\includegraphics[width=\textwidth]{state_diagram}
+	\caption{\textbf{States of the message.}
+	}
+	\label{fig:state_diagram}
+\end{figure}
+
+\textbf{Progress with proof.} 
+Now the message $M$ exists in both the blockchains in declared state, to complete the atomic communication between the two blockchains it needs to be progressed. 
+The progressed state signifies the completion of transposition of message from source to target. 
+In the source blockchain the merkle proof can be presented for message $M$ specifying the status as \emph{declared} in the inbox of target blockchain. 
+If the merkle proof is valid and current state of message $M$ in outbox of source blockchain is \emph{declared}, then its state is changed to \emph{progressed}. 
+Similarly for the target blockchain, the merkle proof can be presented for message $M$ specifying the status as progressed in the outbox of source blockchain. 
+If the merkle proof is valid and current state of message $M$ in inbox of target blockchain is \emph{declared}, then its state is changed to \emph{progressed}. 
+
+\begin{figure}[htb]
+    \centering
+	\includegraphics[width=\textwidth]{progress_with_proof}
+	\caption{\textbf{Progress with proof.}
+	}
+	\label{fig:progress_with_proof}
+\end{figure}
+
+\textbf{Progress with HashLock.} 
+The gas consumption in verification of merkle proof is very high, so an alternative mechanism to complete the second commit is to progress with hash lock. 
+While declaring the message $M$, an hashlock $h_l$ can be provided in the message.
+Hashlock $h_l$ is $keccak256(secret)$. 
+As this hash lock is part of message this will be available in both the blockchains when its declared. 
+Now by presenting the secret in source blockchain the state of message $M$ can be changed to \emph{progressed} if the current state of message $M$ is declared in outbox. 
+Similarly the same secret can be provided in the target blockchain, the state of message $M$ can be changed to \emph{progressed} if the current state of message $M$ is \emph{declared} in inbox.
+\begin{figure}[htb]
+    \centering
+	\includegraphics[width=\textwidth]{progress_with_hashlock}
+	\caption{\textbf{Progress with hash lock.}
+	}
+	\label{fig:progress_with_hashlock}
+\end{figure}
+
+\textbf{Revocation.} 
+Any declared message $M$ can be revoked if its current state is not already progressed in any of the two blockchains. 
+In the source blockchain the only case to change the state to \emph{revocationDeclared} is that current state in the outbox should be \emph{declared}. 
+For the target blockchain if the current status of the message $M$ in inbox is \emph{declared} then a merkle proof can be presented specifying the status as \emph{revocationDeclared} in outbox of the source blockchain. 
+If the merkle proof is valid then the status can be changed to \emph{revoked} in the inbox of target blockchain. 
+Incase the message $M$ is not \emph{declared} in the inbox of target blockchain then it needs to be declared first. If the status if message $M$ is already \emph{progressed} in the inbox then state cannot be changed. 
+
+\begin{figure}[htb]
+    \centering
+	\includegraphics[width=\textwidth]{revocation}
+	\caption{\textbf{Revocation of message.}
+	}
+	\label{fig:revocation}
+\end{figure}
+
+On the source blockchain if the message state of message $M$ is revocation declared but the status of message in target blockchain is progressed, in this case the status on source blockchain can be changed only to progressed by presenting the merkle proof for message M specifying the state as progressed in inbox of target chain.
+
+\begin{figure}[htb]
+    \centering
+	\includegraphics[width=\textwidth]{revocation_progress}
+	\caption{\textbf{Progress after revocation declared.}
+	}
+	\label{fig:revocation_progress}
+\end{figure}
+
+\subsection{Linking of Gateway and Co-Gateway.}
+Gateway and Co-gateway belongs to different blockchain and can co-exists only in pair to be functional. 
+Both the contracts are inactive i.e both the contracts cannot perform any process except the linking.
+ Linking of Gateway and Co-gateway is a process where its cryptographically verified that both contracts have information about one another, are set up to transfer the same token and use the same version of the message bus.
+ 
+We define gateway linking intent hash $i_{gl}$ as a hash of gateway address $g_a$, cogateway address $c_a$, message bus code hash $m_{ch}$, ERC20 token name $t_n$, ERC20 token symbol $t_s$, ERC20 token decimal $t_d$, nonce $n$ and token address $t_a$ 
+ \begin{align*}
+i_{gl}  = keccak256(g_a, c_a, m_{ch}, t_n, t_s, t_d, n, t_a) 	
+ \end{align*}
+
+A  gateway linking message $M_{gl}$ can be created with intent hash as $i_{gl}$ as described in section 4.1.
+This message can be declared in the outbox of source blockchain in order to move the message to target. 
+When the corresponding block of meta-blockchain is committed on target, the message can be presented in target blockchain with merkle proof. 
+The gateway linking intent hash is calculated with the information available with target and it does not use the intent hash provided from the source blockchain. 
+This process will be completed as described in section 4.1
+ 
+After completion of the process the Gateway and Co-gateway are activated and can perform the other processes like stake \& mint or redeem \& unstake. 
+
+\subsection{Bounty}
+\subsection{Reward}
+\subsection{Redeem \& Unstake}
+\subsection{Protocol deactivating}
+Protocol deactivating is an ability of Gateway and Co-gateway to restrict the movement of messages from source blockchain to target blockchain. 
+If Gateway is deactivated then no new stake and mint process can be initiated, but this does not restrict the redeem and unstake flow. 
+Users can choose to redeem the tokens even if the Gateway is deactivated. 
+Similarly if a Co-gateway is deactivated then no new redemption process can be initiated, but the stake and mint flow can work. 
+If both the Gateway and Co-gateway is deactivated then this will cause the protocol to halt.
+
+
 %
 % Section
 %
