@@ -438,10 +438,10 @@ It is guaranteed that the confirmation of $K_i$ is included in the state transit
 
 \paragraph{forward and rear validator set} To ensure that a major change to the validator set cannot introduce an attack vector, we apply an analogous defence strategy as described in Casper FFG\cite{casperffg} as the ``stitching mechanism''.
 
-When a validator's deposit message is included on origin in meta-block height $i$, its \emph{start height} is $n_0$ and it starts in validator set $\mathcal{V}_{\mathcal{B}_{n_0}}$.\footnote{
+When a validator's deposit message is included on origin in meta-block height $i$, its \emph{start height} $n_0(v)$ is equal to $i+1$ and it starts in validator set $\mathcal{V}_{\mathcal{B}_{i+1}}$.\footnote{
   We note that in Casper FFG\cite{casperffg} the analogous \emph{start dynasty} of a validator is defined as $d+2$.
   The confirmation of the kernel requires a full dynasty increase, i.e. $d+2$, for it to be confirmed on the auxiliary system, hence it is sufficient for validators to join in the validator set of the next meta-block, i.e. $\mathcal{V}_{\mathcal{B}_{i+1}}$}
-When a validator $v$ sees its logout message included on origin in meta-block height $j \geq i + 1$, then its \emph{end height} is $n_e$ and it ends in validator set $\mathcal{V}_{\mathcal{B}_{n_e}}$.
+When a validator $v$ sees its logout message included on origin in meta-block height $j \geq i + 1$, then its \emph{end height} $n_e(v)$ is equal to $j+1$ and it ends in validator set $\mathcal{V}_{\mathcal{B}_{j+1}}$.
 Before a logout message for a validator is included the end height is considered to be $n_e = \infty$.
 
 We use the start and end heights of a validator to define two subsets of the validator set $\mathcal{V}_{\mathcal{B}_n}$: the \emph{forward validator set} and the \emph{rear validator set}.
