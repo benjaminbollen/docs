@@ -499,7 +499,7 @@ Through this split-out supermajority count over the two subsets of $\mathcal{V}_
 
 \section*{Conclusion}
 We have constructed Byzantine fault-tolerant consensus rules for an open, dynamic validator set to compose transactions executed on an auxiliary system asynchronously into an origin blockchain, e.g. Ethereum mainnet.
-Each commit on the origin blockchain by a supermajority of the validators can span an arbitrarily large measure of computation finalised on the auxiliary system. A working draft of additional logic, including the work on the gateway protocol, is appended to this document that will be included version 1 of this paper.
+Each commit on the origin blockchain by a supermajority of the validators can span an arbitrarily large measure of computation finalised on the auxiliary system. A working draft of logic, including the work on the gateway protocol, is appended to this document that will be included version 1 of this paper.
 
 \bibliographystyle{naturemag}
 \bibliography{mosaic.bib}
@@ -507,7 +507,7 @@ Each commit on the origin blockchain by a supermajority of the validators can sp
 \newpage
 
 \begin{versionhistory}
-  \vhEntry{0.0}{10.10.18}{BB|MS|DNK|SJ|PG|SK}{Asynchronous composition of blockchains (section 1 - 2.7)}
+  \vhEntry{0.0}{10.10.18}{BB|MS}{Asynchronous composition of blockchains (section 1 - 2.7)}
 \end{versionhistory}
 
 \newpage
@@ -962,7 +962,7 @@ That leaves one month headroom to blame auxiliary's adversaries on origin and ge
 \newpage
 \section{Gateway}\label{gateway}
 
-Gateway protocol allows decentralized applications to move tokens between two homogeneous or heterogeneous blockchain systems. 
+Gateway protocol allows decentralized applications to move tokens between two heterogeneous blockchain systems. 
 This protocol can be used to move token(ERC20, later non-fungible tokens) between origin blockchain and auxiliary system supporting a specific meta-blockchain where transactions can be finalized faster, and at a lower transaction cost. 
 Gateway protocol leverages the idea of message bus which defines a standard to asynchronously transfer typed messages between two chains.
  
@@ -982,8 +982,8 @@ Any facilitator can transfer messages between source and target blockchain by st
 Facilitator is rewarded by message initiator along with the bounty on successful completion of message transfers. 
 \subsection{Message Bus}\label{gateway:messagebus}
     
-The Message Bus is a messaging framework that allows to atomically communicate typed messages between two homogeneous or heterogeneous blockchain systems. 
-This communication is a two-phased commit on each blockchain to move a message between blockchains. 
+The Message Bus is a messaging framework that allows to atomically communicate typed messages between two heterogeneous blockchain systems. 
+This communication is a two-phase commit on each blockchain to move a message between blockchains. 
 Message bus acts as a state machine where message state is changed from one state to another in response to interaction with message bus. 
 If message $M$ is intended to move from blockchain $A$ to blockchain $B$, then in this case the $A$ is termed as the source and $B$ is termed as target.
 The state of message $M$ is stored in outbox of source blockchain and in the inbox of target blockchain.
@@ -1155,10 +1155,10 @@ When the correct unlock secret is presented on target blockchain during progress
 
 We define reward $r$ as following:
  \begin{align}
- 	r  = g_p  *  min(g_l, g_c) + K 
+ 	r  = g_p  *  min(g_l, g_c + K) 
  \end{align}
                          
-Where $g_p$ is gas price, $g_l$  is gas limit,  $K$ is constant and $g_c$  is total gas consumption. $g_c$ is the sum of gas spent in declaring inbox message $g_d$ and progressing inbox $g_p$ and can be defined as :
+Where $g_p$ is gas price, $g_l$  is gas limit,  $K$ is constant and $g_c$  is measured gas consumption over merkle proof verification. $g_c$ is the sum of gas spent in declaring inbox message $g_d$ and progressing inbox $g_p$ and can be defined as :
  \begin{align}
  	g_c  = g_d  + g_p
  \end{align}
@@ -1178,14 +1178,12 @@ Penalty P for message transfer revocation is:
  	P = n * b_f
  \end{align}
                                            
-Where $n$ > 1  and $b_f$ is bounty staked by facilitator. 
+Where $n > 1$  and $b_f$ is bounty staked by facilitator. 
 
 \subsection{Gateway deactivating}\label{gateway:deactivating}
 Gateway deactivating is an ability of Gateway and Co-gateway to restrict the movement of messages from source blockchain to target blockchain. 
 If Gateway is deactivated then no new stake and mint process can be initiated, but this does not restrict the redeem and unstake flow. 
-Users can choose to redeem the tokens even if the Gateway is deactivated. 
-Similarly if a Co-gateway is deactivated then no new redemption process can be initiated, but the stake and mint flow can work. 
-If both the Gateway and Co-gateway is deactivated then this will cause the Gateway to halt.
+Users can choose to redeem the tokens even if the gateway is deactivated.
 
 \subsection{Chain halting}
                                                             
