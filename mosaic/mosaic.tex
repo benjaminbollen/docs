@@ -35,8 +35,7 @@
 \graphicspath{{images/}}
 
 \title{Mosaic\\\sc\Large{Running Meta-Blockchains to \\ Scale Decentralized Applications}}
-\author{\textbf{M. Schenck, P. Gevorgyan, S. Jain,}\\ \textbf{D. Kumar Nath, S. Khedar, B. Bollen}\\ for OpenST Foundation \\ incomplete working draft}
-\date{OpenST Mosaic v0.10 - September 2018}
+\author{\textbf{M. Schenck, P. Gevorgyan, S. Jain,}\\ \textbf{D. Kumar Nath, S. Khedar, B. Bollen}\\ for OpenST Foundation \\ preliminary draft}
 
 \begin{document}
 
@@ -44,9 +43,30 @@
 
 % TODO check bibliography
 \begin{abstract}
-This is a working draft summary of notes and whiteboard sessions as we have been iterating towards the implementation for Mosaic v0.10.
-This is not the version intended for publication, and you are invited to review critically all content.
-The code is work in progress at \verb|github.com/openstfoundation/mosaic-contracts|.
+Mosaic is a parallelisation schema for decentralized applications.
+Mosaic introduces a set of Byzantine fault-tolerant (BFT) consensus rules to compose heterogeneous blockchain systems into one another.
+Decentralized applications can use Mosaic to compute over a composed network of multiple blockchain systems in parallel.
+In this work we build on existing work to construct an asynchronous, BFT algorithm for an open set of staked validators to finalise a history of transactions executed off of an \emph{origin} blockchain.
+
+Any actor can propose these finalised histories on the origin blockchain to commit them at any point. We detail how invalid proposals can be challenged under different security models, from an honest supermajority of validators up to a single honest observer.
+
+The resulting commits of state transitions form an unforkable chain of \emph{meta-blocks} in a smart contract on the origin blockchain, we call a \emph{meta-blockchain}.
+A meta-blockchain prioritises correctness over liveliness and halts if there is a consensus failure.
+We detail how state can be recovered on the origin blockchain for a halted meta-blockchain that was running on top of it.
+
+The Mosaic consensus rules are asynchronous and as a result the state transitions of the meta-blockchain can span an arbitrary time length and an arbitrary amount of computation.
+The computational effort required by the origin blockchain to (challenge and) commit a meta-block is constant in the computation executed and scales linearly in the number of validators.
+
+Validators are rewarded for the verification effort of the executed computation relative to their contribution to the finalised and committed meta-block.
+There is no leader-selection or race condition for rewards in the construction of a meta-block.
+As a result of the collaborative reward mechanism the transaction fee market for execution on a meta-block is expected to trend towards the physical hardware cost of redundant computation.
+
+We present 
+ 
+%A meta-blockchain has an open set of validators staked on Ethereum, and each block is committed by a super-majority vote. Mosaic introduces BFT consensus rules that allow validators to leverage more efficient auxiliary systems running in parallel for block production, while millions of transactions can be finalised before the header is asynchronously committed to Ethereum. Ethereum remains the sole source of truth by lockingtokens on Ethereum while minting a token representation on the auxiliary systems. Validators get rewarded collaboratively based on gas consumed thereby solving for the verifier's dilemma. As a result Mosaic can finalise thousands of transactions per second on Ethereum at a lower gas price. We have built an atomic gateway protocol that Ethereum DApps can deploy to leverage Mosaic to scale.
+
+You are invited to review critically all content and join discussions on \mbox{\url{discuss.openst.org}}.
+The code is open-source and work in progress at \url{github.com/openstfoundation/mosaic-contracts}.
 \end{abstract}
 
 %
@@ -54,7 +74,6 @@ The code is work in progress at \verb|github.com/openstfoundation/mosaic-contrac
 %
 \section{Introduction}
 
-% Mosaic is parallelisation schema for decentralized applications.
 Mosaic is a parallelisation schema for decentralized applications.
 Mosaic introduces a set of Byzantine fault-tolerant (BFT) consensus rules to compose heterogeneous blockchain systems into one another.
 Decentralized applications can use Mosaic to compute over a composed network of multiple blockchain systems in parallel.
@@ -284,9 +303,9 @@ To show that validators can be held accountable, assume the finalized checkpoint
 Now assume there exists a finalized checkpoint $s_{d'}$ which also has surpassed the gas target but has a lower dynasty number $d' < d$, but was not committed before $s_d$.
 Any honest node can present the $s_{d'}$ and the core contract can assert the gas target had been consumed at a lower dynasty number than what is committed and reward the challenger.
 
-\paragraph{committing a meta-block} Given a committed meta-block $B_{n-1}$ at height $n-1$ a proposal for a meta-block $B_{n}(K_{n}, T^A_{n}, \cdot)$ at height $n$ is a valid proposal if validity assertions for the transition object $T^A_n$ hold.  These validity assertions require that the dynasty number and the gas consumed are strictly increasing compared to the transition object committed $T^A_{n-1}$. The transition object $T^A_n$ must reference the correct kernel $\tilde{K}_n$. It must be checked that the latest finalized observation of origin is within the history of the current state. Furthermore  a brief challenge period exists where the transition object can be contested on the grounds that it contains a prior observation of origin that contradicts the current history of origin, as explained above in section (\ref{observing_origin}).
+\paragraph{committing a meta-block} Given a committed meta-block $B_{n-1}$ at height $n-1$ a proposal for a meta-block $B_{n}(K_{n}, T^A_{n}, \cdot)$ at height $n$ is a valid proposal if validity assertions for the transition object $T^A_n$ hold.  These validity assertions require that the dynasty number and the gas consumed are strictly increasing compared to the transition object committed $T^A_{n-1}$. The transition object $T^A_n$ must reference the correct kernel $\tilde{K}_n$. It must be checked that the latest finalized observation of origin is within the history of the current state. Furthermore a brief challenge period exists where the transition object can be contested on the grounds that it contains a prior observation of origin that contradicts the current history of origin, as explained above in section (\ref{observing_origin}).
 
-It now follows that for a given active kernel $K_n$ multiple proposals $T^{A}_{n,d}$ can be submitted to the core contract for different dynasty numbers $d$.  These proposals are no longer contradicting versions of the history, rather they are ordered, sequenced snapshots of possible state transitions $B_{n,d_{n}}(\Sigma_{A,d_{n-1}})$ that can be committed onto origin as a new meta-block.
+It now follows that for a given active kernel $K_n$ multiple proposals $T^{A}_{n,d}$ can be submitted to the core contract for different dynasty numbers $d$. These proposals are no longer contradicting versions of the history, rather they are ordered, sequenced snapshots of possible state transitions $B_{n,d_{n}}(\Sigma_{A,d_{n-1}})$ that can be committed onto origin as a new meta-block.
 
 To commit a meta-block then requires selecting among the valid proposals a dynasty number $d_n$ for which the meta-block will be closed. This selection occurs automatically by sequentially verifying the vote messages on the origin blockchain.
 The meta-block $B_n(K_n, T^A_n, S_n)$ will be committed with the seal $S_n$ which first asserts a $\texttt{+}\sfrac{2}{3}$ supermajority of the voting weight $\mathcal{V}_{\mathcal{B}_n}$ for a valid proposal in the set of valid proposals
@@ -348,7 +367,7 @@ We have gone beyond the assumption of an honest supermajority of validators by c
 The set of validators for the meta-blockchain $\mathcal{B}$ must be dynamic to allow new validators to join and for validators to safely exit from their responsibilities.
 It is defined for each meta-block height $n$ and we note $\mathcal{V}_{\mathcal{B}_n}$.
 
-A validator $v$ is a defined as an address which has a strictly-positive validator weight $w_v$ associated with it on the origin blockchain.
+A validator $v$ is defined as an address which has a strictly-positive validator weight $w_v$ associated with it on the origin blockchain.
 A validator can join the set of validators by sending a \emph{deposit message} to the origin blockchain and putting forward a stake.
 A validator can initiate log out by sending a \emph{logout message} to origin.
 
@@ -413,10 +432,10 @@ which is included in $K_{i+1}$ as the operator $\Delta\mathcal{V}_{\mathcal{B}_{
 
 \begin{figure}[tb]
     \centering
-	\includegraphics[width=\textwidth]{transition}
+	\includegraphics[width=0.8\textwidth]{transition}
 	\caption{\textbf{Asynchronous composition.}
 		When a proposed transition object $T_i$ is committed as meta-block $B_i$ on origin (solid red line), the new kernel $K_{i+1}$ is opened on origin.
-		The validator set $\mathcal{V}_{\mathcal{B}_i}$ casts votes on the auxiliary system to finalise both the checkpoints of the auxiliary system and its observation of the origin blockchain on the auxiliary system (dashed red line on aux).
+		The validator set $\mathcal{V}_{\mathcal{B}_i}$ (dashed red line on aux) casts votes on the auxiliary system to finalise both the checkpoints of the auxiliary system and its observation of the origin blockchain on the auxiliary system.
 		The commit of $B_i$ and opening of $K_{i+1}$ is observed by $\mathcal{V}_{\mathcal{B}_i}$ and $K_{i+1}$ is confirmed on the auxiliary system transitioning to the new validator set $\mathcal{V}_{\mathcal{B}_{i+1}}$ (dashed blue line on aux).
 		On the auxiliary system all processes continue uninterrupted.
 		At each confirmation of a new kernel $K_j$ the changes to the validator set $\Delta\mathcal{V}_{\mathcal{B}_j}$, and the new gas target $gt_j$ are enacted on the auxiliary system.
@@ -438,17 +457,19 @@ It is guaranteed that the confirmation of $K_i$ is included in the state transit
 
 \paragraph{forward and rear validator set} To ensure that a major change to the validator set cannot introduce an attack vector, we apply an analogous defence strategy as described in Casper FFG\cite{casperffg} as the ``stitching mechanism''.
 
-When a validator's deposit message is included on origin in meta-block height $i$, the \emph{start meta-block height} $n_0(v)$ is equal to $i+1$ and the validator joins in the next validator set $\mathcal{V}_{\mathcal{B}_{i+1}}$\footnote{
+When a validator's deposit message is included on origin in meta-block height $i$, its \emph{start height} $n_0(v)$ is equal to $i+1$ and it starts in validator set $\mathcal{V}_{\mathcal{B}_{i+1}}$.\footnote{
   We note that in Casper FFG\cite{casperffg} the analogous \emph{start dynasty} of a validator is defined as $d+2$.
-  The confirmation of the kernel requires a full dynasty increase, i.e. $d+2$, for it to be confirmed on the auxiliary system, hence it is sufficient for validators to join in the validator set of the next meta-block, i.e. $\mathcal{V}_{\mathcal{B}_{i+1}}$}.
-When a validator $v$ sees its logout message included on origin in meta-block height $j \geq i + 1$, then the \emph{end meta-block height} $n_e(v)$ is equal to $j + 1$ and the validator participates for a last time in the validator set $\mathcal{V}_{\mathcal{B}_{j+1}}$. Before a logout message for a validator is included the end meta-block height is considered infinite.
+  The confirmation of the kernel requires a full dynasty increase, i.e. $d+2$, for it to be confirmed on the auxiliary system, hence it is sufficient for validators to join in the validator set of the next meta-block, i.e. $\mathcal{V}_{\mathcal{B}_{i+1}}$}
+When a validator $v$ sees its logout message included on origin in meta-block height $j \geq i + 1$, then its \emph{end height} $n_e(v)$ is equal to $j+1$ and it ends in validator set $\mathcal{V}_{\mathcal{B}_{j+1}}$.
+Before a logout message for a validator is included the end height is considered to be $n_e = \infty$.
 
-We use the start and end meta-block height of a validator to define two subsets of the validator set $\mathcal{V}_{\mathcal{B}_n}$.
-The \emph{forward validator set} $\mathcal{V}_{\mathcal{B}_{f,n}}$ includes all active validators, except those who are in their end meta-block height $n_e(v)$:
+We use the start and end heights of a validator to define two subsets of the validator set $\mathcal{V}_{\mathcal{B}_n}$: the \emph{forward validator set} and the \emph{rear validator set}.
+
+The forward validator set $\mathcal{V}_{\mathcal{B}_{f,n}}$ includes all active validators, except those who are in their end height $n_e(v)$:
 \begin{align}
-  \mathcal{V}_{\mathcal{B}_{f,n}} = \left\{v \in \mathcal{V}_{\mathcal{B}_{n}}: n < n_e(v) \right\} = \mathcal{V}_{\mathcal{B}_{n}} \backslash \left\{v : n = n_e(v) \right\}
+  \mathcal{V}_{\mathcal{B}_{f,n}} = \left\{v \in \mathcal{V}_{\mathcal{B}_{n}}: n < n_e(v) \right\} = \mathcal{V}_{\mathcal{B}_{n}} \backslash \left\{v : n = n_e(v) \right\}.
 \end{align}
-and \emph{the rear validator set} $\mathcal{V}_{\mathcal{B}_{r,n}}$ includes all active validators, except those who have commenced in their start meta-block height $n_0(v)$:
+The rear validator set $\mathcal{V}_{\mathcal{B}_{r,n}}$ includes all active validators, except those who have commenced in their start height $n_0(v)$:
 \begin{align}
   \mathcal{V}_{\mathcal{B}_{r,n}} = \left\{v \in \mathcal{V}_{\mathcal{B}_{n}}: n_0(v) < n \right\} = \mathcal{V}_{\mathcal{B}_{n}} \backslash \left\{v : n = n_0(v) \right\}.
 \end{align}
@@ -459,7 +480,7 @@ We redefine that a supermajority link over the validator set $\mathcal{V}_{\math
 
 \begin{figure}[htb]
     \centering
-	\includegraphics[width=\textwidth]{dynamic_validators}
+	\includegraphics[width=0.8\textwidth]{dynamic_validators}
 	\caption{\textbf{Dynamic set of validators.}
 		The validator sends a log out (or deposit) message in $B_i$.
 		The change in the set of validators is transferred to auxiliary as part of kernel $K_{i+1}$ when it gets confirmed.
