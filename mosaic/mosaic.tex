@@ -35,8 +35,7 @@
 \graphicspath{{images/}}
 
 \title{Mosaic\\\sc\Large{Running Meta-Blockchains to \\ Scale Decentralized Applications}}
-\author{\textbf{M. Schenck, P. Gevorgyan, S. Jain,}\\ \textbf{D. Kumar Nath, S. Khedar, B. Bollen}\\ for OpenST Foundation \\ incomplete working draft}
-\date{OpenST Mosaic v0.10 - September 2018}
+\author{\textbf{M. Schenck, P. Gevorgyan, S. Jain,}\\ \textbf{D. Kumar Nath, S. Khedar, B. Bollen}\\ for OpenST Foundation \\ preliminary draft}
 
 \begin{document}
 
@@ -44,9 +43,30 @@
 
 % TODO check bibliography
 \begin{abstract}
-This is a working draft summary of notes and whiteboard sessions as we have been iterating towards the implementation for Mosaic v0.10.
-This is not the version intended for publication, and you are invited to review critically all content.
-The code is work in progress at \verb|github.com/openstfoundation/mosaic-contracts|.
+Mosaic is a parallelisation schema for decentralized applications.
+Mosaic introduces a set of Byzantine fault-tolerant (BFT) consensus rules to compose heterogeneous blockchain systems into one another.
+Decentralized applications can use Mosaic to compute over a composed network of multiple blockchain systems in parallel.
+In this work we build on existing work to construct an asynchronous, BFT algorithm for an open set of staked validators to finalise a history of transactions executed off of an \emph{origin} blockchain.
+
+Any actor can propose these finalised histories on the origin blockchain to commit them at any point. We detail how invalid proposals can be challenged under different security models, from an honest supermajority of validators up to a single honest observer.
+
+The resulting commits of state transitions form an unforkable chain of \emph{meta-blocks} in a smart contract on the origin blockchain, we call a \emph{meta-blockchain}.
+A meta-blockchain prioritises correctness over liveliness and halts if there is a consensus failure.
+We detail how state can be recovered on the origin blockchain for a halted meta-blockchain that was running on top of it.
+
+The Mosaic consensus rules are asynchronous and as a result the state transitions of the meta-blockchain can span an arbitrary time length and an arbitrary amount of computation.
+The computational effort required by the origin blockchain to (challenge and) commit a meta-block is constant in the computation executed and scales linearly in the number of validators.
+
+Validators are rewarded for the verification effort of the executed computation relative to their contribution to the finalised and committed meta-block.
+There is no leader-selection or race condition for rewards in the construction of a meta-block.
+As a result of the collaborative reward mechanism the transaction fee market for execution on a meta-block is expected to trend towards the physical hardware cost of redundant computation.
+
+We present 
+ 
+%A meta-blockchain has an open set of validators staked on Ethereum, and each block is committed by a super-majority vote. Mosaic introduces BFT consensus rules that allow validators to leverage more efficient auxiliary systems running in parallel for block production, while millions of transactions can be finalised before the header is asynchronously committed to Ethereum. Ethereum remains the sole source of truth by lockingtokens on Ethereum while minting a token representation on the auxiliary systems. Validators get rewarded collaboratively based on gas consumed thereby solving for the verifier's dilemma. As a result Mosaic can finalise thousands of transactions per second on Ethereum at a lower gas price. We have built an atomic gateway protocol that Ethereum DApps can deploy to leverage Mosaic to scale.
+
+You are invited to review critically all content and join discussions on \mbox{\url{discuss.openst.org}}.
+The code is open-source and work in progress at \url{github.com/openstfoundation/mosaic-contracts}.
 \end{abstract}
 
 %
@@ -54,7 +74,6 @@ The code is work in progress at \verb|github.com/openstfoundation/mosaic-contrac
 %
 \section{Introduction}
 
-% Mosaic is parallelisation schema for decentralized applications.
 Mosaic is a parallelisation schema for decentralized applications.
 Mosaic introduces a set of Byzantine fault-tolerant (BFT) consensus rules to compose heterogeneous blockchain systems into one another.
 Decentralized applications can use Mosaic to compute over a composed network of multiple blockchain systems in parallel.
@@ -284,9 +303,9 @@ To show that validators can be held accountable, assume the finalized checkpoint
 Now assume there exists a finalized checkpoint $s_{d'}$ which also has surpassed the gas target but has a lower dynasty number $d' < d$, but was not committed before $s_d$.
 Any honest node can present the $s_{d'}$ and the core contract can assert the gas target had been consumed at a lower dynasty number than what is committed and reward the challenger.
 
-\paragraph{committing a meta-block} Given a committed meta-block $B_{n-1}$ at height $n-1$ a proposal for a meta-block $B_{n}(K_{n}, T^A_{n}, \cdot)$ at height $n$ is a valid proposal if validity assertions for the transition object $T^A_n$ hold.  These validity assertions require that the dynasty number and the gas consumed are strictly increasing compared to the transition object committed $T^A_{n-1}$. The transition object $T^A_n$ must reference the correct kernel $\tilde{K}_n$. It must be checked that the latest finalized observation of origin is within the history of the current state. Furthermore  a brief challenge period exists where the transition object can be contested on the grounds that it contains a prior observation of origin that contradicts the current history of origin, as explained above in section (\ref{observing_origin}).
+\paragraph{committing a meta-block} Given a committed meta-block $B_{n-1}$ at height $n-1$ a proposal for a meta-block $B_{n}(K_{n}, T^A_{n}, \cdot)$ at height $n$ is a valid proposal if validity assertions for the transition object $T^A_n$ hold.  These validity assertions require that the dynasty number and the gas consumed are strictly increasing compared to the transition object committed $T^A_{n-1}$. The transition object $T^A_n$ must reference the correct kernel $\tilde{K}_n$. It must be checked that the latest finalized observation of origin is within the history of the current state. Furthermore a brief challenge period exists where the transition object can be contested on the grounds that it contains a prior observation of origin that contradicts the current history of origin, as explained above in section (\ref{observing_origin}).
 
-It now follows that for a given active kernel $K_n$ multiple proposals $T^{A}_{n,d}$ can be submitted to the core contract for different dynasty numbers $d$.  These proposals are no longer contradicting versions of the history, rather they are ordered, sequenced snapshots of possible state transitions $B_{n,d_{n}}(\Sigma_{A,d_{n-1}})$ that can be committed onto origin as a new meta-block.
+It now follows that for a given active kernel $K_n$ multiple proposals $T^{A}_{n,d}$ can be submitted to the core contract for different dynasty numbers $d$. These proposals are no longer contradicting versions of the history, rather they are ordered, sequenced snapshots of possible state transitions $B_{n,d_{n}}(\Sigma_{A,d_{n-1}})$ that can be committed onto origin as a new meta-block.
 
 To commit a meta-block then requires selecting among the valid proposals a dynasty number $d_n$ for which the meta-block will be closed. This selection occurs automatically by sequentially verifying the vote messages on the origin blockchain.
 The meta-block $B_n(K_n, T^A_n, S_n)$ will be committed with the seal $S_n$ which first asserts a $\texttt{+}\sfrac{2}{3}$ supermajority of the voting weight $\mathcal{V}_{\mathcal{B}_n}$ for a valid proposal in the set of valid proposals
