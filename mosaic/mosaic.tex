@@ -483,6 +483,7 @@ It follows that the forward validator set at height $n$ is the rear validator se
  
 We redefine that a supermajority link counted over the validator set $\mathcal{S}(\mathcal{V}_{\mathcal{B}_n})$ henceforth means that a $\texttt{+}\sfrac{2}{3}$ supermajority of validator weight has voted for the link counted over both the rear and the forward validator set separately:
 \begin{align}
+  \label{eq:supermajority}
   \mathcal{S}(\mathcal{V}_{\mathcal{B}_n}) \doteq \mathcal{S}(\mathcal{V}_{\mathcal{B}_{f,n}}) \land \mathcal{S}(\mathcal{V}_{\mathcal{B}_{r,n}}).
 \end{align}
 Through this split-out supermajority count over the two subsets of $\mathcal{V}_{\mathcal{B}_{n}}$, we ensure that there is always an explicit handover of the finalised chain by the ``up-to-now'' validators $\mathcal{V}_{\mathcal{B}_{r,n}}$ to the ``forward-going'' validator set $\mathcal{V}_{\mathcal{B}_{f,n}}$ (eq. \ref{eq:stitching}).
@@ -525,40 +526,43 @@ A meta-blockchain has a double gas market.
 First the known gas market exists where users of the auxiliary system pay gas fees to the block proposers of the auxiliary system for every transaction.
 A second, new gas market is created that rewards validators for their work.
 
-Validators finalize checkpoints on origin and transfer information about meta-blocks back and forth.
-While the gas target is a forcing function on when to close a meta-block (compare section \ref{proposing_metablocks}), the new, second gas market rewards validators for their voting actions.
-Validators get a reward for every vote message they send to the auxiliary system.
-There is a hard limit to the number of valid vote messages: any validator cannot publish more than one vote per target height.
+Validators must verify transactions of the origin blockchain and the auxiliary system.  They must cast vote messages to finalise checkpoints of the auxiliary system and observations of the origin blockchain on the auxiliary system.
+Validators propose transition objects to the origin blockchain and commit meta-blocks based on these proposals.
 
-The amount of the reward depends on the relative weight of the validator, the amount of gas that was consumed on auxiliary, and the current gas price.
-The amount rewarded to a single validator address on auxiliary for every vote message equals
-\begin{align*}
-    \frac{W_v}{w} \cdot g_{st} \cdot gp
-\end{align*}
-where $W_v$ is the effective weight of the validator, $w$ is the total weight of all validators, $g_{st}$ is the gas consumed from source to target, and $gp$ is the \emph{current} gas price.
+Validators earn reward for their contribution to the construction of a finalised history on the auxiliary system.  A meta-block must be committed for the rewards earned on the auxiliary system to be realised on the origin blockchain.
+
+We call $\{\sigma_i\}$ with $i \in [k_{1,n}, k_{N,n}]$ a \emph{segment} with $N$ supermajority links in a justified chain (in meta-block height $n$), when $\sigma_i = \langle T_i, s_i, t_i, h_{s_i}, h_{t_i} \rangle$ each have a supermajority $\mathcal{S}(\mathcal{V}_{\mathcal{B}_n})$ (eq. \ref{eq:supermajority}) and $\sigma_{i+1}$ connects\footnote{
+  Define $\sigma'$ connects to $\sigma$ if $t = s'$ and $h_{t} = h_{s'}$.}
+to $\sigma_i$ for $i \in [k_{1,n}, k_{N-1,n}]$.
+
+The reward a validator $v$ earns over a segment $\{\sigma_i\}$ is
+\begin{align}
+    \frac{W_v}{w}\sum_{i} \Delta g_{i} \cdot gp_{d(i)} \cdot \delta_{1, v(i)}
+\end{align}
+where $W_v$ is the effective weight of the validator, $w = \sum_v w_v$ is the total weight of all validators, $\Delta g_{i}$ is the gas consumed from source to target, $gp_{d(i)}$ is the gas price agreed upon by block proposers for dynasty $d(i)$, and $\delta_{1, v(i)}$ is one when the validator $v$ had voted for $\sigma_i$\footnote{The validator vote must have been included when the rewards are calculated and awarded to the validators on the auxiliary system. We propose to calculate and transfer rewards when the justified chain is finalised.}
+or zero otherwise.
+
 Gas fees will be awarded in the base token of the auxiliary chain.
 
 A smart contract on auxiliary manages the validator rewards.
-49\% of the rewards are paid out directly to the validator addresses.
+Maximally 49\% of the rewards are paid out directly to the validator addresses.
 The remaining 51\% are locked in until after the withdrawal period ends after a validator logged out.
 If the validator violates a slashing condition, the withheld 51\% will be slashed along with the validator's stake.
 More than half of the rewards are kept so that the paid out rewards never outweigh the potential loss in case of a violated slashing condition.
 
-In order for the auxiliary smart contract to be able to handle these rewards, the block proposers of auxiliary must deposit sufficient value for multiple future meta-blocks in said contract.
-If block proposers would fail to produce a sufficient deposit for validator rewards, validators would most likely switch to a different auxiliary chain.
+In order for the auxiliary smart contract to be able to handle these rewards, the block proposers of auxiliary must collectively deposit sufficient value for multiple future meta-blocks in the reward contract on the auxiliary system and keep replenishing this pre-deposit from the gas fees they earn from users through transaction fees.
+
+Block proposers have to be staked on the auxiliary system in order to be able to vote on changes to the gas price in a given dynasty.
+Validators for their turn must for multiple meta-block heights in advance commit to a minimum gas price.
+
+The gas price in a given dynasty voted on by the block proposers cannot be lower than the minimum gas price committed to by the validators.
+Block proposers can attract more validators to the meta-blockchain by raising their gas price.
 
 Users of the auxiliary system paid a gas fee to the block proposers when their transactions were included in an auxiliary block.
-They cannot be expected to pay another, later fee to the validators.
-However, the block proposers have an interest in finalized checkpoints.
-The chain is more attractive to users if blocks get regularly finalized, resulting in potentially more rewards for the proposers.
+Block proposers pay for a given dynasty a gas price $gp_d$ to the validators to verify and finalize the history of transactions.
+Both block proposers and validators can only access their rewards on the origin blockchain if the finalised history is also committed.
 
-The block proposers decide on the gas price for every checkpoint, but they may not go below a minimum gas price set by the validators.
-The validators vote on the minimum gas price every $n$ checkpoints, in that way stabilizing the minimum gas price for a foreseeable future.
-This allows the block proposers to deposit sufficient rewards.
-
-The initial minimum gas price $gm_0$ is set as part of the genesis block.
-Every $n$ checkpoints, the validators can vote to either increase the minimum gas price, decrease it, or leave it as is.
-Based on the relative weights of the votes, the minimum gas price will change within a set limit.
+In addition the gas target requires the validators to expend the cost of committing the finalised history on the origin blockchain, because failing to do so would incur loss on their stake.
 
 %\subsection{Attacks and Defenses}
 %
