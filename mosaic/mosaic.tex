@@ -496,6 +496,9 @@ Through this split-out supermajority count over the two subsets of $\mathcal{V}_
 	\label{fig:dynamic_validators}
 \end{figure}
 
+\section*{Conclusion}
+We have constructed Byzantine fault-tolerant consensus rules for an open, dynamic validator set to compose transactions executed on an auxiliary system asynchronously into an origin blockchain, e.g. Ethereum mainnet.
+Each commit on the origin blockchain by a supermajority of the validators can span an arbitrarily large measure of computation finalised on the auxiliary system. A working draft of additional logic, including the work on the gateway protocol, is appended to this document that will be included version 1 of this paper.
 
 \bibliographystyle{naturemag}
 \bibliography{mosaic.bib}
@@ -509,7 +512,7 @@ Through this split-out supermajority count over the two subsets of $\mathcal{V}_
 \newpage
 \begin{center}
 \rule{\textwidth}{.4pt}\par
-{\huge\bfseries Draft content \par}
+{\huge\bfseries Working Draft \par}
 \rule{\textwidth}{.4pt}\par
 \bigbreak
 {\Large ---proceed carefully---\par}
@@ -557,63 +560,50 @@ The initial minimum gas price $gm_0$ is set as part of the genesis block.
 Every $n$ checkpoints, the validators can vote to either increase the minimum gas price, decrease it, or leave it as is.
 Based on the relative weights of the votes, the minimum gas price will change within a set limit.
 
-\subsection{Attacks and Defenses}
-
-We defend against the two main attacks against proof of stake systems the same way Casper FFG\cite{casperffg} does:
-\begin{itemize}
-    \item We defend against \emph{long-range revision} by introducing a \emph{withdrawal delay} and a \emph{maximum source block age} for votes.
-    \item We defend against \emph{catastrophic crashes} by introducing an \emph{inactivity leak}.
-\end{itemize}
-However, there are a number of new attack vectors introduced by the concepts of a meta-blockchain and decoupled systems:
-\begin{itemize}
-    \item Proposing invalid meta-blocks to origin. E.g. from another auxiliary system.
-    \item Delaying kernel confirmation.
-    \item Reporting invalid blocks to the auxiliary system.
-    \item Validators produce votes to commit on origin without actually voting on auxiliary.
-    \item Validators stop finalizing.
-\end{itemize}
-
-\paragraph{Invalid meta-block proposals.}
-Say a supermajority of validators uses the same private key on two auxiliary chains $A_1$ and $A_2$.
-When these validators sign a supermajority vote that finalizes a checkpoint on auxiliary chain $A_1$, an adversary could present a transition object from $A_1$, including the votes to commit it, to the core contract of $A_2$ on origin.
-The $A_2$ core contract would deem the transition object and the signatures as valid.
-For that reason we introduced the kernel hash to the transition object.
-This binds every transition object to a kernel and transitively to a specific core contract.
-
-\paragraph{Kernel delay.}
-The set of validators could have an interest in delaying the confirmation of a new kernel, e.g. to prevent a new validator from joining the set of validators.
-However, the system is designed in a way that anyone, even the new validator that is not yet part of the set of validators, can do the Merkle proof to confirm a new kernel on auxiliary.
-All that is required for that is a finalized checkpoint of origin on auxiliary that includes the state root that includes the commit of the previous kernel.
-If the validators delay origin block finalization to prevent the kernel opening, they would lose stake as the result of the inactivity leak.
-
-\paragraph{Invalid block reports.}
-Block reporting to auxiliary is not limited to any set of specific addresses.
-An adversary could report origin blocks that do not actually exist on origin.
-There is no way for auxiliary to check the validity of these reports.
-However, validators would ignore these reports and not vote on them, the adversary is only burning gas fees.
-
-\paragraph{Belated vote production.}
-Say someone proposes a transition object to origin for which a supermajority vote by the validators does not exist.
-Validators may produce votes to commit that proposal.
-There are two cases then to consider:
-
-\begin{enumerate}
-    \item The produced votes never violate any slashing condition.
-    \item The produced votes violate a slashing condition eventually.
-\end{enumerate}
-
-In the first case, the commit on origin is in-line with what is actually observed on auxiliary.
-In the second case, at least $\sfrac{1}{3}$ of the validators' stake can be slashed.
-
-\paragraph{Finalization breakdown.}
-If validators decided to stop finalization, they would lose stake due to the inactivity leak.
-
-A blockchain relies on each full node replicating all transactions to obtain and verify independently the correctness of the current state. Full replication at the same time impedes scalability.
-
-% extend state space of origin
-Mosaic sets out to leverage the security and liveliness properties of the origin blockchain. Mosaic allows to create a new state space and compose it into the origin state space so that it suffices to verify the origin state space and the extended state space the node is 
-
-Mosaic is a framework to increase the transaction throughput of an origin blockchain (e.g. Ethereum) by finalising transactions off of the origin blockchain. finalized transactions can be committed asynchronously in bulk onto the origin blockchain. 
+%\subsection{Attacks and Defenses}
+%
+%We defend against the two main attacks against proof of stake systems the same way Casper FFG\cite{casperffg} does:
+%\begin{itemize}
+%    \item We defend against \emph{long-range revision} by introducing a \emph{withdrawal delay} and a \emph{maximum source block age} for votes.
+%    \item We defend against \emph{catastrophic crashes} by introducing an \emph{inactivity leak}.
+%\end{itemize}
+%However, there are a number of new attack vectors introduced by the concepts of a meta-blockchain and decoupled systems:
+%\begin{itemize}
+%    \item Delaying kernel confirmation.
+%    \item Reporting invalid blocks to the auxiliary system.
+%    \item Validators produce votes to commit on origin without actually voting on auxiliary.
+%    \item Validators stop finalizing.
+%\end{itemize}
+%
+%
+%\paragraph{Kernel delay.}
+%The set of validators could have an interest in delaying the confirmation of a new kernel, e.g. to prevent a new validator from joining the set of validators.
+%However, the system is designed in a way that anyone, even the new validator that is not yet part of the set of validators, can do the Merkle proof to confirm a new kernel on auxiliary.
+%All that is required for that is a finalized checkpoint of origin on auxiliary that includes the state root that includes the commit of the previous kernel.
+%If the validators delay origin block finalization to prevent the kernel opening, they would lose stake as the result of the inactivity leak.
+%
+%\paragraph{Invalid block reports.}
+%Block reporting to auxiliary is not limited to any set of specific addresses.
+%An adversary could report origin blocks that do not actually exist on origin.
+%There is no way for auxiliary to check the validity of these reports.
+%However, validators would ignore these reports and not vote on them, the adversary is only burning gas fees.
+%
+%\paragraph{Belated vote production.}
+%Say someone proposes a transition object to origin for which a supermajority vote by the validators does not exist.
+%Validators may produce votes to commit that proposal.
+%There are two cases then to consider:
+%
+%\begin{enumerate}
+%    \item The produced votes never violate any slashing condition.
+%    \item The produced votes violate a slashing condition eventually.
+%\end{enumerate}
+%
+%In the first case, the commit on origin is in-line with what is actually observed on auxiliary.
+%In the second case, at least $\sfrac{1}{3}$ of the validators' stake can be slashed.
+%
+%\paragraph{Finalization breakdown.}
+%If validators decided to stop finalization, they would lose stake due to the inactivity leak.
+%
 
 \begin{comment}
 \section{the dry stuff}
