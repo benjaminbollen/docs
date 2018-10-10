@@ -949,7 +949,7 @@ Casper votes on auxiliary can only be carried out up to three months into the pa
 That leaves one month headroom to blame auxiliary's adversaries on origin and get its deposit slashed.
 \end{comment}
 
-\section{Gateway}
+\section{Gateway}\label{gateway}
 
 Gateway protocol allows decentralized applications to move tokens between two homogeneous or heterogeneous blockchain systems. 
 This protocol can be used to move token(ERC20, later non-fungible tokens) between origin blockchain and auxiliary system supporting a specific meta-blockchain where transactions can be finalized faster, and at a lower transaction cost. 
@@ -969,14 +969,13 @@ Linking ensures that both contracts are set up to transfer the same token and us
 Gateway and Co-gateway contracts defines different message types i.e. linking, stake \& mint and redeem \& unstake. 
 Any facilitator can transfer messages between source and target blockchain by staking bounty as a security amount. 
 Facilitator is rewarded by message initiator along with the bounty on successful completion of message transfers. 
-\subsection{Message Bus}
+\subsection{Message Bus}\label{gateway:messagebus}
     
 The Message Bus is a messaging framework that allows to atomically communicate typed messages between two homogeneous or heterogeneous blockchain systems. 
 This communication is a two-phased commit on each blockchain to move a message between blockchains. 
 Message bus acts as a state machine where message state is changed from one state to another in response to interaction with message bus. 
 If message $M$ is intended to move from blockchain $A$ to blockchain $B$, then in this case the $A$ is termed as the source and $B$ is termed as target.
 The state of message $M$ is stored in outbox of source blockchain and in the inbox of target blockchain.
-
 \begin{figure}[htb]
     \centering
 	\includegraphics[width=\textwidth]{messagebus}
@@ -987,19 +986,18 @@ The state of message $M$ is stored in outbox of source blockchain and in the inb
 Similarly if the message is intended to move form blockchain $B$ to blockchain $A$, then the source will be $B$ and target will be $A$.
 Throughout the paper the terms source and target blockchain will be used.
 
-\subsection*{Message}
+\subsubsection{Message}\label{gateway:message}
 We introduce message $M$ consists of message type intent hash $i_t$ where $t$ defines type of message, nonce $n$, gas price $g_p$ , gas limit $g_l$ , sender $s$, hash lock $h_l$. 
 Nonce $n$ is the count of message moved from source blockchain to target blockchain by the sender $s$. 
-Gas price $g_p$ and gas limit $g_l$  is the price at which the reward is calculated for facilitation of message transfer, refer 4.8.  
-Hash lock $h_l$ is a hash that is set by the facilitator\footnote{ refer facilitator section}, refer section 4.2.4
-
+Gas price $g_p$ and gas limit $g_l$  is the price at which the reward is calculated for facilitation of message transfer, refer section \ref{gateway:reward}  
+Hash lock $h_l$ is a hash that is set by the facilitator, refer section \ref{gateway:progresshashlock} 
 \begin{align}
   M = (i, n, g_p, g_l, s, h_l) 
 \end{align}
 
-Message hash $m_h$ is an unique identifier of a message $M$. It can be calculated as the hash of message type hash\footnote{For more details of facilitator please refer section 4.5} $t$, intent hash $i$ , nonce $n$, gas price $g_p$ , gas limit $g_l$ ,sender $s$ and $K$ is $keccak256$ hashing function. 
+Message hash $m_h$ is an unique identifier of a message $M$. It can be calculated as the hash of message type hash $t$, intent hash $i$ , nonce $n$, gas price $g_p$ , gas limit $g_l$ ,sender $s$ and $K$ is $keccak256$ hashing function. 
 
-\subsection*{State machine} 
+\subsubsection{State machine}\label{gateway:statemachine} 
 Message bus acts as a state machine, the transition of message state is deterministic. 
 The possible states $S$ of the message can be Undeclared $S_u$ , Declared $S_d$, Progressed $S_p$, RevocationDeclared $S_{rd}$  and Revoked $S_r$. 
 \begin{figure}[htb]
@@ -1018,28 +1016,27 @@ This four steps are
 \item Progress inbox
 \end{enumerate}
 
-\subsection*{Declare}
+\subsubsection{Declare}\label{gateway:declare}
 This is the first step for the message transfer and is done on the source blockchain. 
 For message transfer the message initiator\footnote{some text for initiator} should signs the message hash $m_h$ of the message $M$. 
 The state of message in the outbox must be undeclared. 
 Message bus verifies the state of message and the signature of message initiator. 
 On successful declaration of message $M$ in outbox,  the message $M$ is state is changed to declared.
 
-\subsection*{Confirm}
+\subsubsection{Confirm}\label{gateway:confirm}
 This is the second step for the message transfer which is done on the target blockchain. 
 In this step the message bus confirms the declaration of message in the source chain using the merkle proof. 
 The declared message $M$ along with the merkle proof is presented to the target blockchain by the facilitator for verification. 
 On successful verification of proof the message state is declared in the inbox. 
 
-\subsection*{Progress outbox}
+\subsubsection{Progress outbox}\label{gateway:progressoutbox}
 Once the message $M$ is declared in both source and target blockchain. 
 A merkle proof specifying the state of message as declared in the inbox of target chain can be presented to the source blockchain. 
 On successful verification of merkle proof, the message state is progressed.
 
-\subsection*{Progress inbox}
+\subsubsection{Progress inbox}\label{gateway:progressinbox}
  Progress inbox can be done on target blockchain by presenting a merkle proof specifying the state of message on source blockchain as declared or  progressed. 
  If the current state of message in the inbox of the target chain is declared and the merkle proof is valid, then the message bus changes the state of message to progressed.
- 
  
 This complete the four steps of two phased commit transactions in both blockchains each. 
 
@@ -1050,7 +1047,7 @@ This complete the four steps of two phased commit transactions in both blockchai
 	\label{fig:progress_with_proof}
 \end{figure}
 
-\subsection*{Progress with HashLock} 
+\subsubsection{Progress with HashLock}\label{gateway:progresshashlock} 
 As merkle proof verification is costly process, so an alternative mechanism to complete progress inbox and progress outbox is progress with hash lock in both source and target blockchains. 
 While declaring the message $M$, an hashlock $h_l$ can be provided in the message. 
 We define hash lock $h_l$ as
@@ -1061,15 +1058,13 @@ where $K$ is hashing function like $keccak256$, $s$ is a unlock secret
 
 Hash lock is added while declaring and confirming message on source and target chain. 
 Progress with hash lock can be used by presenting unlock secret on both chains.
-
 \begin{figure}[htb]
     \centering
 	\includegraphics[width=\textwidth]{progress_with_hashlock}
 	\caption{\textbf{Progress with hash lock}}
 	\label{fig:progress_with_hashlock}
 \end{figure}
-
-\subsection*{Revocation} 
+\subsubsection{Revocation}\label{gateway:revocation}
 Any declared message $M$ can be revoked if its current state is not already progressed in any of the two blockchains. 
 In the source blockchain the only case to change the state to revocation declared is that current state in the outbox should be declared. 
 For the target blockchain if the current status of the message $M$ in inbox is declared then a merkle proof can be presented specifying the status as revocation declared in outbox of the source blockchain. 
@@ -1084,21 +1079,21 @@ If the status if message $M$ is already progressed in the inbox then state canno
 	\label{fig:revocation}
 \end{figure}
 
-On the source blockchain if the message state of message $M$ is revocation declared but the status of message in target blockchain is progressed, in this case the status on source blockchain can be changed only to progressed by presenting the merkle proof for message $M$ specifying the state as progressed in inbox of target chain .
 
+On the source blockchain if the message state of message $M$ is revocation declared but the status of message in target blockchain is progressed, in this case the status on source blockchain can be changed only to progressed by presenting the merkle proof for message $M$ specifying the state as progressed in inbox of target chain. refer figure \ref{fig:revocation}
 \begin{figure}[htb]
     \centering
 	\includegraphics[width=\textwidth]{revocation_progress}
 	\caption{\textbf{ Progress after revocation declared.}}
-	\label{fig:revocation_progress}
+	\label{fig:revocation}
 \end{figure}
 
-\subsection{Linking of Gateway and Co-Gateway}
+\subsection{Linking of Gateway and Co-Gateway}\label{gateway:linking}
 Gateway is defined on origin blockchain where as Co-gateway defined on auxiliary blockchain and can co-exists only in pair to be functional. 
 Both the contracts are inactive by default i.e both the contracts cannot transfer any messages except linking messages.
  
  Linking of Gateway and Co-gateway is a special type of message transfer which cryptographically verify uniformity of token and message bus on origin and auxiliary blockchain. 
- As explained in section 4.1, each message contains message type intent hash. 
+ As explained in section \ref{gateway:messagebus}, each message contains message type intent hash. 
  For linking messages, we define gateway linking intent hash $i_{gl}$ as a hash of gateway address $g_a$, co-gateway address $c_a$, message bus code hash $m_{ch}$, ERC20 token name $t_n$, token symbol $t_s$, token decimal $t_d$, nonce $n$, token address $t_a$ and $K$ is $keccak256$ hashing function.
  \begin{align}
 i_{gl}  =K(g_a, c_a, m_{ch}, t_n, t_s, t_d, n, t_a) 	
@@ -1107,28 +1102,28 @@ i_{gl}  =K(g_a, c_a, m_{ch}, t_n, t_s, t_d, n, t_a)
 Once the linking message is declared in gateway, it can be confirmed on co-gateway by merkle proof. 
 After completion of the progress the Gateway and Co-gateway are activated and can perform the other message transfers like stake \& mint or redeem \& unstake. 
 
-\subsection{Stake and Mint}
+\subsection{Stake and Mint}\label{gateway:stakemint}
 Gateway protocol supports transfer of stake and mint type typed message from origin to auxiliary chain. 
 Staking happens on origin chain which locks staker’s tokens into the escrow and miniting happens on auxiliary chain which creates new tokens at beneficiary address. 
 By combining meta-blockchain based layer 2 scaling solution with this message type, a token economy can be designed with the high transaction throughput and low gas cost on auxiliary chain.
 
 Staker needs to submit a signed message hash to facilitator to initiate message transfers. 
-As described in section 4.2, message hash generation needs message type specific intent hash which is staking intent hash $i_s$ in this scenario . We define staking intent $i_s$  as : 
+As described in section \ref{gateway:message}, message hash generation needs message type specific intent hash which is staking intent hash $i_s$ in this scenario . We define staking intent $i_s$  as : 
  \begin{align}
  	s = K(a_s,b_a,s_a,n_s,g_p,g_l,t_a )
  \end{align}
                                                        
-Where $K$ is $keccak256$ hashing function, $a_s$ is staking amount, $b_a$ is beneficiary address, $s_a$ is staker address, $n_s$ is staker nonce, $g_p$ and $g_l$ are gas price and gas limit respectively as described in section 4.8, $t_a$ is ERC20 staking token address. 
+Where $K$ is $keccak256$ hashing function, $a_s$ is staking amount, $b_a$ is beneficiary address, $s_a$ is staker address, $n_s$ is staker nonce, $g_p$ and $g_l$ are gas price and gas limit respectively as described in section \ref{gateway:reward}, $t_a$ is ERC20 staking token address. 
 
 Gateway along with message bus verifies staker’s signature generated by signing message hash and initiates message transfer.
-Facilitator must stake bounty to gateway during message declaration on source chain as described in section 4.7. 
+Facilitator must stake bounty to gateway during message declaration on source chain as described in section \ref{gateway:bounty} 
 
 Message declared on origin chain with staking intent hash is verified and confirmed on auxiliary chain with merkle proof. 
 Tokens are minted for beneficiary on auxiliary blockchain after successful progress. 
-On successful mint of token, reward is awarded to facilitator from the minted token refer 4.8 section reward.
+On successful mint of token, reward is awarded to facilitator from the minted token refer section \ref{gateway:reward}.
 
-\subsection{Redeem \& Unstake}
-\subsection{Bounty}
+\subsection{Redeem \& Unstake}\label{gateway:redeemunstake}
+\subsection{Bounty}\label{gateway:bounty}
  In Gateway protocol, facilitator pool is an open network of nodes which are responsible for message transfer between source and target chain. 
  Any node/machine can act as facilitator by staking bounty to gateway during message transfer. 
 
@@ -1138,12 +1133,12 @@ Facilitator must approve gateway for bounty amount before declaring message.
 Bounty enforces facilitator to progress on source chain. 
 It is returned back to facilitator who reveals unlock secret or progresses with the proof.
 
-If message initiator(staker or redeemer) decides to revoke message transfer, it has to pay penalty described in 4.7. 
+If message initiator(staker or redeemer) decides to revoke message transfer, it has to pay penalty described in section \ref{gateway:penalty}. 
 Both bounty and penalty are burned on progress revocation. 
 
-\subsection{Reward}
+\subsection{Reward}\label{gateway:reward}
 Gateway protocol has reward structure for facilitator for successful completion of message transfers. 
-Section 4.1 explains the four step process to transfer message from source to target blockchain. 
+Section \ref{gateway:messagebus} explains the four step process to transfer message from source to target blockchain. 
 Facilitator presents hash lock during message declaration on source blockchain. 
 When the correct unlock secret is presented on target blockchain during progress, facilitator is rewarded with reward $r$. 
 
@@ -1162,7 +1157,7 @@ $g_p$ and $g_l$ is decided by message initiator which determines maximum reward 
  	r_{max}  = g_p *  g_l
  \end{align}
 
-\subsection{Penalty}
+\subsection{Penalty}\label{gateway:penalty}
 Penalty is the amount charged to message initiator for revocation of message transfer. 
 Penalty is charged when initiator decides to revoke message after declaration and before progress.  
 In order to ensure a fair and honest process between the facilitator and the initiator, the penalty charge must always be greater than the bounty amount.  
@@ -1174,7 +1169,7 @@ Penalty P for message transfer revocation is:
                                            
 Where $n$ > 1  and $b_f$ is bounty staked by facilitator. 
 
-\subsection{Gateway deactivating}
+\subsection{Gateway deactivating}\label{gateway:deactivating}
 Gateway deactivating is an ability of Gateway and Co-gateway to restrict the movement of messages from source blockchain to target blockchain. 
 If Gateway is deactivated then no new stake and mint process can be initiated, but this does not restrict the redeem and unstake flow. 
 Users can choose to redeem the tokens even if the Gateway is deactivated. 
