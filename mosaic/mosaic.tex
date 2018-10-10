@@ -61,14 +61,15 @@ Validators are rewarded for the verification effort of the executed computation 
 There is no leader-selection or race condition for rewards in the construction of a meta-block.
 As a result of the collaborative reward mechanism the transaction fee market for execution on a meta-block is expected to trend towards the physical hardware cost of redundant computation.
 
-We present 
- 
-%A meta-blockchain has an open set of validators staked on Ethereum, and each block is committed by a super-majority vote. Mosaic introduces BFT consensus rules that allow validators to leverage more efficient auxiliary systems running in parallel for block production, while millions of transactions can be finalised before the header is asynchronously committed to Ethereum. Ethereum remains the sole source of truth by lockingtokens on Ethereum while minting a token representation on the auxiliary systems. Validators get rewarded collaboratively based on gas consumed thereby solving for the verifier's dilemma. As a result Mosaic can finalise thousands of transactions per second on Ethereum at a lower gas price. We have built an atomic gateway protocol that Ethereum DApps can deploy to leverage Mosaic to scale.
+We present an atomic messaging protocol to communicate between the origin blockchain and meta-blockchains running on top of it.
+We apply the messaging protocol explicitly to transfer ERC20 tokens from origin to the meta-blockchain.
+We detail how ownership of the tokens can be recovered without a time constraint on the origin blockchain if the meta-blockchain would halt due to consensus failure.
 
 You are invited to review critically all content and join discussions on \mbox{\url{discuss.openst.org}}.
-The code is open-source and work in progress at \url{github.com/openstfoundation/mosaic-contracts}.
+The code is open-source and under development at \url{github.com/openstfoundation/mosaic-contracts}.
 \end{abstract}
 
+\newpage
 %
 % Section
 %
@@ -582,15 +583,7 @@ We redefine that a supermajority link over the validator set $\mathcal{V}_{\math
 %If validators decided to stop finalization, they would lose stake due to the inactivity leak.
 %
 
-%
-% Section
-%
-\section{A mosaic of cores}
 
-summary:
-By constructing asynchronous BFT consensus rules to compose a heterogeneous auxiliary blockchain into the origin blockchain, we leverage the security of the origin blockchain to asynchronously finalize the transactions on the auxiliary blockchain.
-As there are no time constraints or time-outs in the Mosaic consensus rules, the limited processing capacity of the origin blockchain does not undercut the ability to compose many auxiliary systems into the same origin blockchain.
-This enables Mosaic to run many meta-blockchains in parallel, additively improving the total transaction capacity, but keeping a bound on the cost imposed on the origin blockchain.
 %% 
 %A blockchain relies on each full node replicating all transactions to obtain and verify independently the correctness of the current state. Full replication at the same time impedes scalability.
 %
@@ -949,6 +942,7 @@ Casper votes on auxiliary can only be carried out up to three months into the pa
 That leaves one month headroom to blame auxiliary's adversaries on origin and get its deposit slashed.
 \end{comment}
 
+\newpage
 \section{Gateway}
 
 Gateway protocol allows decentralized applications to move tokens between two homogeneous or heterogeneous blockchain systems. 
@@ -1183,6 +1177,17 @@ If both the Gateway and Co-gateway is deactivated then this will cause the Gatew
 
 \subsection{Chain halting}
                                                             
+
+%
+% Section
+%
+\section{A mosaic of cores}
+
+summary:
+By constructing asynchronous BFT consensus rules to compose a heterogeneous auxiliary blockchain into the origin blockchain, we leverage the security of the origin blockchain to asynchronously finalize the transactions on the auxiliary blockchain.
+As there are no time constraints or time-outs in the Mosaic consensus rules, the limited processing capacity of the origin blockchain does not undercut the ability to compose many auxiliary systems into the same origin blockchain.
+This enables Mosaic to run many meta-blockchains in parallel, additively improving the total transaction capacity, but keeping a bound on the cost imposed on the origin blockchain.
+
 %
 % Section
 %
