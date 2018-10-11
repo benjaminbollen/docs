@@ -1080,19 +1080,19 @@ Where $p^s_{q_d}$ represents merkle proof $p$ for message status $q_d$ on source
 
 \subsubsection{Progress inbox}\label{gateway:progressinbox}
 
-We define state transition function \emph{progress inbox message} on source chain which changes message state from declared $q_d$ to progressed $q_p$, if an valid merkle proof $p^t_{q_d}$ is presented stating message declaration $q_d$ or message progressed $q_p$ on source chain $s$.
+We define state transition function \emph{progress inbox message} on source chain which changes message state from declared $q_d$ to progressed $q_p$, if an valid merkle proof $p^s_{q}$ is presented stating message declaration $q_d$ or message progressed $q_p$ on source chain $s$.
  Once progressed state $q_p$ is achieved, message transfer can’t be revoked. Refer figure \ref{fig:progress_with_proof}. 
 
 \begin{equation*}
-T_p(M,p^s_{q_p})=\begin{cases}
-q_d \rightarrow q_p & \text{if $V$($p^s_{q_p}$) == true},\\
+T_p(M,p^s_{q})=\begin{cases}
+q_d \rightarrow q_p & \text{if $V$($p^s_{q}$) == true},\\
 q_d& \text{otherwise}.
 \end{cases}
 \end{equation*}
 \begin{align*}
 \end{align*}
 
-Where $p^s_{q_d}$ represents merkle proof $p$ for message status $q_d$ on source chain $s$ and $V$ is merkle proof verification function.
+Where $p^s_{q}$ represents merkle proof $p$ for message status $q_d$ or $q_p$ on source chain $s$  and $V$ is merkle proof verification function.
 
 \begin{figure}[htb]
     \centering
@@ -1123,7 +1123,6 @@ q_d& \text{otherwise}.
 
 where $K$ is hashing function like $keccak256$, $k_s$ is a unlock secret 
 
-Hash lock is added while declaring and confirming message on source and target chain. 
 Progress with hash lock can be used by presenting unlock secret on both chains.
 
 \begin{figure}[htb]
@@ -1134,23 +1133,32 @@ Progress with hash lock can be used by presenting unlock secret on both chains.
 \end{figure}
 \subsubsection{Revocation}\label{gateway:revocation}
 
-We define state transition function \emph{revocation declaration} $T_{rd}$ on both source and target chain which stops message transfer process. 
-Only message initiator can declare revocation message $q_{rd}$  on source chain if message is not progressed on source by presenting merkle proof $p^t_{q_d}$.
- Refer figure \ref{fig:revocation}
+We define state transition function \emph{revocation declaration} $T_{rd}$ on source blockchain which stops message transfer process. Revocation declaration $q_{rd}$ is done if message status is declared ${q_d}$.  
+Only message initiator can declare revocation message $q_{rd}$  on source chain.
 
 \begin{equation*}
-T_{rd}(M,p^t_{q_d})=\begin{cases}
-q_d \rightarrow q_{rd} & \text{if $V$($p^t_{q_d}$) == true},\\
+T_{rd}(M)=\begin{cases}
+q_d \rightarrow q_{rd} & \text{if state transition is done by message initiator},\\
 q_d& \text{otherwise}.
 \end{cases}
 \end{equation*}
 \begin{align*}
 \end{align*}
-Where $p^t_{q_d}$ represents merkle proof $p$ for message status $q_d$ on target chain $t$, $V$ is merkle proof verification function and $K$ is hashing function $keccak256$.
 
-\emph{Revocation declaration} $T_{rd}$ of target chain is similar to source chain except the message status is directly changed to revoked $q_r$, if message is not already progressed.
+Message can directly be revoked on target chain without revocation declaration by presenting merkle proof specifying status revocation declaration $q_{rd}$ on source chain. If message is not declared ${q_d}$ on target chain before revocation then it should be first declared ${q_d}$.
+ Refer figure \ref{fig:revocation}.
 
-With \emph{revocation progress} $T_r$ state transition function,  message revocation can completed. Revocation progress $q_rp$ on source blockchain is only achieved, if state of message M on target blockchain is revoked $q_r$.
+\begin{equation*}
+T_{r}(M,p^s_{q_{rd}})=\begin{cases}
+q_d \rightarrow q_{r} & \text{if $V$($p^s_{q_{rd}}$) == true},\\
+q_d& \text{otherwise}.
+\end{cases}
+\end{equation*}
+\begin{align*}
+\end{align*}
+Where $p^s_{q_{rd}}$ represents merkle proof $p$ for message status $q_{rd}$ on source chain $t$, $V$ is merkle proof verification function and $K$ is hashing function $keccak256$.
+
+With \emph{revoked} $T_r$ state transition function,  message revocation can completed on source blockchain. Revoked status $q_r$ on source blockchain is only achieved, if state of message M on target blockchain is revoked $q_r$.
 
 \begin{equation*}
 T_{r}(M,p^t_{q_r})=\begin{cases}
@@ -1216,6 +1224,22 @@ Tokens are minted for beneficiary on auxiliary blockchain after successful progr
 On successful mint of token, reward is awarded to facilitator from the minted token refer section \ref{gateway:reward}.
 
 \subsection{Redeem \& Unstake}\label{gateway:redeemunstake}
+
+Gateway protocol allows unstake of the tokens by moving the tokens back from auxiliary chain to origin chain. 
+The tokens from redeemer address $s_a$ in auxiliary chain is moved to beneficiary address $b_a$ in the origin chain. 
+This is done with the transfer of redeem \& unstake typed message $M$ through the message bus.
+
+To create a message $M$, we use the redemption intent hash $\tilde{i}_r$ as:
+ \begin{align}
+ \tilde{i}_r = K(a_r,b_a,s_a,n_s,g_p,g_l,t_a )    
+ \end{align}
+
+Where $K$ is \emph{keccak256} hashing function, $a_r$ is staking amount, $b_a$ is beneficiary address, $s_a$ is redeemer address, $n_s$ is redeemer nonce, $g_p$ and $g_l$ are gas price and gas limit respectively as described in section \ref{gateway:reward}, $t_a$ is ERC20 staking token address. 
+
+On Message $M$ declaration on the auxiliary chain, $a_r$ amount of redeemer's token is moved to escrow in auxiliary chain. Message $M$ is verified and confirmed on origin chain with merkle proof.
+
+On successful progress of message in the auxiliary chain, the $a_r$ amount of tokens from the escrow are burnt.Whereas on the successful progress of message in the origin chain, the $a_r$ amount of tokens are transferred from the staked pool of tokens to the beneficiary address.
+
 \subsection{Bounty}\label{gateway:bounty}
  In Gateway protocol, facilitator pool is an open network of nodes which are responsible for message transfer between source and target chain. 
  Any node/machine can act as facilitator by staking bounty to gateway during message transfer. 
@@ -1263,9 +1287,10 @@ Penalty P for message transfer revocation is:
 Where $n > 1$  and $b_f$ is bounty staked by facilitator. 
 
 \subsection{Gateway deactivating}\label{gateway:deactivating}
-Gateway deactivating is an ability of Gateway and Co-gateway to restrict the movement of messages from source blockchain to target blockchain. 
-If Gateway is deactivated then no new stake and mint process can be initiated, but this does not restrict the redeem and unstake flow. 
-Users can choose to redeem the tokens even if the gateway is deactivated.
+The transfers of message from Gateway to Co-gateway can be restricted by deactivating the Gateway.
+No new message can be transferred where as existing message can still be transferred.
+This does not restricts the message transfer from Co-gateway to Gateway. 
+The tokens can be still redeemed with gateway deactivating.
 
 \subsection{Chain halting}
                                                             
