@@ -303,7 +303,11 @@ We highlight that this is not a maximum gas limit, because it cannot be guarante
 
 To show that validators can be held accountable, assume the finalized checkpoint $s_d$ has been committed which surpassed the gas target and has dynasty number $d$.
 Now assume there exists a finalized checkpoint $s_{d'}$ which also has surpassed the gas target but has a lower dynasty number $d' < d$, but was not committed before $s_d$.
-Any honest node can present the $s_{d'}$ and the core contract can assert the gas target had been consumed at a lower dynasty number than what is committed and reward the challenger.
+Any honest node can present the $s_{d'}$ including the seal and the core contract can assert the gas target had been consumed at a lower dynasty number than what is committed and reward the challenger.\footnote{
+    It could happen that the gas target is met and finalized on auxiliary before the new kernel is confirmed.
+    However, the first valid finalized checkpoint to be committed on origin is still the first finalized checkpoint after the kernel is confirmed.
+    All finalizations before the confirmation of kernel $K_i$ are not valid proposals, as the seal includes the transition object $T^A_{i-1}$.
+}
 
 \paragraph{committing a meta-block} Given a committed meta-block $B_{n-1}$ at height $n-1$ a proposal for a meta-block $B_{n}(K_{n}, T^A_{n}, \cdot)$ at height $n$ is a valid proposal if validity assertions for the transition object $T^A_n$ hold.  These validity assertions require that the dynasty number and the gas consumed are strictly increasing compared to the transition object committed $T^A_{n-1}$. The transition object $T^A_n$ must reference the correct kernel $\tilde{K}_n$. It must be checked that the latest finalized observation of origin is within the history of the current state. Furthermore a brief challenge period exists where the transition object can be contested on the grounds that it contains a prior observation of origin that contradicts the current history of origin, as explained above in section (\ref{observing_origin}).
 
