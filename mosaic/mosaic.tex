@@ -1007,10 +1007,14 @@ Hash lock $h_l$ is a hash that is set by the facilitator, refer section \ref{gat
 \end{align}
 
 Message hash $m_h$ is an unique identifier of a message $M$. It can be calculated as the hash of message type hash $t$, intent hash $i$ , nonce $n$, gas price $g_p$ , gas limit $g_l$ ,sender $s$ and $K$ is $keccak256$ hashing function. 
+     
+     \begin{align}
+     	\tilde{m}_h = K(t, i, n, g_p, g_l, s) 
+     \end{align} 
 
 \subsubsection{State machine}\label{gateway:statemachine} 
 Message bus acts as a state machine, the transition of message state is deterministic. 
-The possible states $S$ of the message can be Undeclared $S_u$ , Declared $S_d$, Progressed $S_p$, RevocationDeclared $S_{rd}$  and Revoked $S_r$. 
+The possible states $q$ of the message can be Undeclared $q_u$ , Declared $q_d$, Progressed $q_p$, RevocationDeclared $q_{rd}$  and Revoked $q_r$. 
 \begin{figure}[htb]
     \centering
 	\includegraphics[width=\textwidth]{state_diagram}
@@ -1028,28 +1032,67 @@ This four steps are
 \end{enumerate}
 
 \subsubsection{Declare}\label{gateway:declare}
-This is the first step for the message transfer and is done on the source blockchain. 
-For message transfer the message initiator\footnote{some text for initiator} should signs the message hash $m_h$ of the message $M$. 
-The state of message in the outbox must be undeclared. 
-Message bus verifies the state of message and the signature of message initiator. 
-On successful declaration of message $M$ in outbox,  the message $M$ is state is changed to declared.
+
+We define state transition function \emph{declare message} $T_d$ on source blockchain which changes message state from undeclared $q_u$ to declared $q_d$, if signature $\langle \tilde{m}_h \rangle_s$ signed by message initiator $s$ is valid.
+
+\begin{equation*}
+T_d(M,\langle \tilde{m}_h \rangle_s)=\begin{cases}
+q_u \rightarrow q_d & \text{if $\langle \tilde{m}_h \rangle_s$ is valid},\\
+q_u& \text{otherwise}.
+\end{cases}
+\end{equation*}
+
+Where $\langle \tilde{m}_h \rangle_s$ is signed message hash.
+
+Declaration of message transfer happens in outbox of source blockchain on successful execution of state transition function declare.
 
 \subsubsection{Confirm}\label{gateway:confirm}
-This is the second step for the message transfer which is done on the target blockchain. 
-In this step the message bus confirms the declaration of message in the source chain using the merkle proof. 
-The declared message $M$ along with the merkle proof is presented to the target blockchain by the facilitator for verification. 
-On successful verification of proof the message state is declared in the inbox. 
+
+We define state transition function \emph{confirm message} $T_c$ on target chain which changes message state from undeclared $q_u$ to declared $q_d$ if an valid merkle proof $p^s_{q_d}$ is presented stating message declaration on source chain.
+
+\begin{equation*}
+T_c(M,p^s_{q_d})=\begin{cases}
+q_u \rightarrow q_d & \text{if $V$($p^s_{q_d}$) == true},\\
+q_u& \text{otherwise}.
+\end{cases}
+\end{equation*}
+\begin{align*}
+\end{align*}
+Where $p^s_{q_d}$ represents merkle proof $p$ for message status $q_d$ on source chain $s$ and $V$ is merkle proof verification function.
 
 \subsubsection{Progress outbox}\label{gateway:progressoutbox}
-Once the message $M$ is declared in both source and target blockchain. 
-A merkle proof specifying the state of message as declared in the inbox of target chain can be presented to the source blockchain. 
-On successful verification of merkle proof, the message state is progressed.
+
+We define state transition function \emph{progress outbox message} $T_p$ on source chain which changes message state from declared $q_d$ to progressed $q_p$, if an valid merkle proof $p^t_{q_d}$ is presented stating message declaration $q_d$ or message progressed $q_p$ on target chain $t$. 
+Refer figure \ref{fig:progress_with_proof}. 
+
+Once progressed state $q_p$ is achieved, message transfer can’t be revoked. 
+
+\begin{equation*}
+T_p(M,p^t_{q_d})=\begin{cases}
+q_d \rightarrow q_p & \text{if $V$($p^t_{q_d}$) == true},\\
+q_d& \text{otherwise}.
+\end{cases}
+\end{equation*}
+\begin{align*}
+\end{align*}
+
+Where $p^s_{q_d}$ represents merkle proof $p$ for message status $q_d$ on source chain $s$ and $V$ is merkle proof verification function.
 
 \subsubsection{Progress inbox}\label{gateway:progressinbox}
- Progress inbox can be done on target blockchain by presenting a merkle proof specifying the state of message on source blockchain as declared or  progressed. 
- If the current state of message in the inbox of the target chain is declared and the merkle proof is valid, then the message bus changes the state of message to progressed.
- 
-This complete the four steps of two phased commit transactions in both blockchains each. 
+
+We define state transition function \emph{progress inbox message} on source chain which changes message state from declared $q_d$ to progressed $q_p$, if an valid merkle proof $p^t_{q_d}$ is presented stating message declaration $q_d$ or message progressed $q_p$ on source chain $s$.
+ Once progressed state $q_p$ is achieved, message transfer can’t be revoked. Refer figure \ref{fig:progress_with_proof}. 
+
+\begin{equation*}
+T_p(M,p^s_{q_p})=\begin{cases}
+q_d \rightarrow q_p & \text{if $V$($p^s_{q_p}$) == true},\\
+q_d& \text{otherwise}.
+\end{cases}
+\end{equation*}
+\begin{align*}
+\end{align*}
+
+Where $p^s_{q_d}$ represents merkle proof $p$ for message status $q_d$ on source chain $s$ and $V$ is merkle proof verification function.
 
 \begin{figure}[htb]
     \centering
@@ -1059,16 +1102,30 @@ This complete the four steps of two phased commit transactions in both blockchai
 \end{figure}
 
 \subsubsection{Progress with HashLock}\label{gateway:progresshashlock} 
-As merkle proof verification is costly process, so an alternative mechanism to complete progress inbox and progress outbox is progress with hash lock in both source and target blockchains. 
-While declaring the message $M$, an hashlock $h_l$ can be provided in the message. 
-We define hash lock $h_l$ as
+
+Progress outbox  and progress inbox is a costly operation in terms of gas consumption as it involves merkle proof verification. 
+So an alternative mechanism to complete progress outbox and progress inbox is \emph{progress with hash lock} $T_{phl}$  in both source and target blockchains. 
+While declaring the message M, an hashlock $h_l$ can be provided in the message. We define hash lock $h_l$ as
+
 \begin{align}
 	h_l = K(s)
 \end{align}
-where $K$ is hashing function like $keccak256$, $s$ is a unlock secret 
+
+\begin{equation*}
+T_{phl}(M,k_s)=\begin{cases}
+q_d \rightarrow q_p & \text{if $K$($k_s$) == $\tilde{h}_l$},\\
+q_d& \text{otherwise}.
+\end{cases}
+\end{equation*}
+\begin{align*}
+\text{where $K$ is hashing function $keccak256$}
+\end{align*}
+
+where $K$ is hashing function like $keccak256$, $k_s$ is a unlock secret 
 
 Hash lock is added while declaring and confirming message on source and target chain. 
 Progress with hash lock can be used by presenting unlock secret on both chains.
+
 \begin{figure}[htb]
     \centering
 	\includegraphics[width=\textwidth]{progress_with_hashlock}
@@ -1076,12 +1133,38 @@ Progress with hash lock can be used by presenting unlock secret on both chains.
 	\label{fig:progress_with_hashlock}
 \end{figure}
 \subsubsection{Revocation}\label{gateway:revocation}
-Any declared message $M$ can be revoked if its current state is not already progressed in any of the two blockchains. 
-In the source blockchain the only case to change the state to revocation declared is that current state in the outbox should be declared. 
-For the target blockchain if the current status of the message $M$ in inbox is declared then a merkle proof can be presented specifying the status as revocation declared in outbox of the source blockchain. 
-If the merkle proof is valid then the status can be changed to revoked in the inbox of target blockchain. 
-Incase the message $M$ is not declared in the inbox of target blockchain then it needs to be declared first. 
-If the status if message $M$ is already progressed in the inbox then state cannot be changed. 
+
+We define state transition function \emph{revocation declaration} $T_{rd}$ on both source and target chain which stops message transfer process. 
+Only message initiator can declare revocation message $q_{rd}$  on source chain if message is not progressed on source by presenting merkle proof $p^t_{q_d}$.
+ Refer figure \ref{fig:revocation}
+
+\begin{equation*}
+T_{rd}(M,p^t_{q_d})=\begin{cases}
+q_d \rightarrow q_{rd} & \text{if $V$($p^t_{q_d}$) == true},\\
+q_d& \text{otherwise}.
+\end{cases}
+\end{equation*}
+\begin{align*}
+\end{align*}
+Where $p^t_{q_d}$ represents merkle proof $p$ for message status $q_d$ on target chain $t$, $V$ is merkle proof verification function and $K$ is hashing function $keccak256$.
+
+\emph{Revocation declaration} $T_{rd}$ of target chain is similar to source chain except the message status is directly changed to revoked $q_r$, if message is not already progressed.
+
+With \emph{revocation progress} $T_r$ state transition function,  message revocation can completed. Revocation progress $q_rp$ on source blockchain is only achieved, if state of message M on target blockchain is revoked $q_r$.
+
+\begin{equation*}
+T_{r}(M,p^t_{q_r})=\begin{cases}
+q_{rd} \rightarrow q_r & \text{if $V$($p^t_{q_r}$) == true},\\
+q_d& \text{otherwise}.
+\end{cases}
+\end{equation*}
+\begin{align*}
+\end{align*}
+
+Where $p^t_{q_r}$ represents merkle proof $p$ for message status $q_r$ on target chain $t$, $V$ is merkle proof verification function and $K$ is hashing function $keccak256$.
+
+ 
+On the source blockchain if the state of message is revocation declared $q_{rd}$ where as the status of message in target blockchain is progressed ${q_p}$, in this case the status on source blockchain can be changed only to progressed ${q_p}$ by presenting the merkle proof specifying the state as progressed ${q_p}$ in inbox of target chain .
 
 \begin{figure}[htb]
     \centering
@@ -1091,7 +1174,6 @@ If the status if message $M$ is already progressed in the inbox then state canno
 \end{figure}
 
 
-On the source blockchain if the message state of message $M$ is revocation declared but the status of message in target blockchain is progressed, in this case the status on source blockchain can be changed only to progressed by presenting the merkle proof for message $M$ specifying the state as progressed in inbox of target chain. refer figure \ref{fig:revocation}
 \begin{figure}[htb]
     \centering
 	\includegraphics[width=\textwidth]{revocation_progress}
