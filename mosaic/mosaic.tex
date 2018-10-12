@@ -994,7 +994,7 @@ The state of message $M$ is stored in outbox of source blockchain and in the inb
 	\label{fig:messagebus}
 \end{figure}
 
-Similarly if the message is intended to move form blockchain $B$ to blockchain $A$, then the source will be $B$ and target will be $A$.
+Similarly if the message is intended to move from blockchain $B$ to blockchain $A$, then the source will be $B$ and target will be $A$.
 Throughout the paper the terms source and target blockchain will be used.
 
 \subsubsection{Message}\label{gateway:message}
@@ -1123,7 +1123,7 @@ q_d& \text{otherwise}.
 
 where $K$ is hashing function like $keccak256$, $k_s$ is a unlock secret 
 
-Progress with hash lock can be used by presenting unlock secret on both chains.
+Progress with hash lock can be used by presenting unlock secret on both chains. However, in some scenarios progress with hash lock can't be used. Refer section \ref{gateway:revocation}.
 
 \begin{figure}[htb]
     \centering
@@ -1138,7 +1138,7 @@ Only message initiator can declare revocation message $q_{rd}$  on source chain.
 
 \begin{equation*}
 T_{rd}(M)=\begin{cases}
-q_d \rightarrow q_{rd} & \text{if state transition is done by message initiator},\\
+q_d \rightarrow q_{rd} & \text{if revocation declaration is done by message initiator},\\
 q_d& \text{otherwise}.
 \end{cases}
 \end{equation*}
@@ -1172,7 +1172,7 @@ q_d& \text{otherwise}.
 Where $p^t_{q_r}$ represents merkle proof $p$ for message status $q_r$ on target chain $t$, $V$ is merkle proof verification function and $K$ is hashing function $keccak256$.
 
  
-On the source blockchain if the state of message is revocation declared $q_{rd}$ where as the status of message in target blockchain is progressed ${q_p}$, in this case the status on source blockchain can be changed only to progressed ${q_p}$ by presenting the merkle proof specifying the state as progressed ${q_p}$ in inbox of target chain .
+On the source blockchain if the state of message is revocation declared $q_{rd}$ where as the status of message in target blockchain is progressed ${q_p}$, in this case the status on source blockchain can be changed only to progressed ${q_p}$ by state transition function \emph{progress outbox} explained in section \ref{gateway:progressoutbox}.
 
 \begin{figure}[htb]
     \centering
