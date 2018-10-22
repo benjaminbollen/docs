@@ -305,36 +305,6 @@ Under the security model assuming a $\texttt{+}\sfrac{2}{3}$ supermajority of th
 
 Before continuing we summarize that the proposal mechanism to commit a meta-block is asynchronous, requires no leadership-selection and is proven to be Byzantine fault-tolerant under the security model of an honest supermajority.
 
-\subsection{Beyond an honest supermajority}
-
-While the origin blockchain protects assets from being double-spent, users in a meta-blockchain could see their funds stolen if more than a supermajority of the open validator set would collude to violate the transition rules $t_A$. 
-
-We identify at least three active research topics which can allow to push the security model radically further in an efficient way; namely that (up to) a \emph{single} honest observer can hold all validators accountable when a proposal for committing a meta-block to the origin blockchain would violate the state transition rules $t_A$.
-It is outside the scope of the current work to explore in-depth, but they are worth summarising below as future work paths.
-
-\paragraph{observer network} In \textit{A Guide to 99\% Fault Tolerant Consensus}\cite{honestobserver} V. Buterin recaptures an existing algorithm by L. Lamport (1982) to describe how a \emph{latency-dependent} network of observers can be retrofitted on top of a \emph{threshold-dependent} consensus algorithm - in casu our here work as derived from Casper FFG - to introduce a \emph{strong-finality} upon the finalized history constructed by the Mosaic validators arbitrarily pushing up the fault-tolerance at the cost of requiring more observers and a longer time to eventually commit (a strongly finalized proposal).
-
-\paragraph{truebit} A second worthwhile path is to apply the \textit{TrueBit}\cite{truebit} protocol to challenge a state transition $T^A$ proposed by a subset of the validators $\mathcal{V}_{\mathcal{B}_i}$.
-The validators $\{v\}$ who have signed vote messages $\langle\tilde{T}^A, s, t, h_s, h_t\rangle_v$ can be seen as the (collective) \emph{solvers} of the off-(of-origin-)chain computation to transition the state $B_{n-1}$ to the proposed solution $s$ given the set of transactions specified by the accumulated transaction root $r_{h_s}$.
-The computation at hand is the execution of the virtual machine that implements the state transition rules $t_A$.
-
-If less than $\sfrac{1}{3}$ of the validator weight loses the verification game to a challenger, their stake can be taken as the reward for the challenger, on top of the shared interest of all participants in the meta-blockchain for only correct proposals to be committed to the origin chain - removing the need for a jackpot and a \emph{forced-error}.
-The verification game can be seen as an extension to the slashing conditions strengthening the accountable safety of the meta-blockchain to hold a minority of the validators accountable for violating the state transition rules $t_A$.
-This is made possible because the validator stake has been externalized on the origin blockchain with an independent (assumed correct) consensus mechanism.
-
-If more than $\sfrac{2}{3}$ of the validator weight signed the vote message which was challenged and lost the verification game, their stake is the reward for the challenger, and the meta-blockchain must be declared halted by the core contract.
-
-\paragraph{argument of knowledge} A third strategy can be constructed by requiring any of the challenged validators of a proposal $T^A$ to present an \emph{argument of knowledge}, eg. using \mbox{zkSNARKs} generated after being challenged, to cryptographically prove that the block $s$ has been obtained by correctly applying the state transition rules $t_A$ recursively on each parent block building up from the committed block found in $B_{n-1}$.
-
-The costs both in time and expense to generate this proof by a validator scale at first approximation linearly with the gas consumed in the proposed meta-block $B_n$.
-The transition object $T^A$ to commit this meta-block tracks the gas consumed, so the core contract can require that the challenger puts forward a sufficient stake to substantiate her claim.
-
-% TODO: research state of art on hardware requirements
-There are open considerations regarding the (economic) feasibility of requiring all validators to be able to generate such a proof on commodity hardware.
-The task of generating these proofs could be designated to a specialized node, but an incentive problem arises when it is economically unattractive to run such a node considering it is unlikely that a proposal would be challenged.
-
-We have gone beyond the assumption of an honest supermajority of validators by considering three strategies discussed in the field to radically improve the security model; up to the point where a single honest observer can cost-effectively challenge the validator set on the origin blockchain.
-
 \subsection{Dynamic set of validators}
 
 The set of validators for the meta-blockchain $\mathcal{B}$ must be dynamic to allow new validators to join and for validators to safely exit from their responsibilities.
@@ -467,6 +437,36 @@ Through this split-out supermajority count over the two subsets of $\mathcal{V}_
 		The validator does its last (first) round in the rear (forward) validator set of $\mathcal{V}_{\mathcal{B}_{i+1}}$ ($\mathcal{V}_{\mathcal{B}_{r,i+1}}$ or $\mathcal{V}_{\mathcal{B}_{f,i+1}}$ respectively).}
 	\label{fig:dynamic_validators}
 \end{figure}
+
+\subsection{Beyond an honest supermajority}
+
+While the origin blockchain protects assets from being double-spent, users in a meta-blockchain could see their funds stolen if more than a supermajority of the open validator set would collude to violate the transition rules $t_A$. 
+
+We identify at least three active research topics which can allow to push the security model radically further in an efficient way; namely that (up to) a \emph{single} honest observer can hold all validators accountable when a proposal for committing a meta-block to the origin blockchain would violate the state transition rules $t_A$.
+It is outside the scope of the current work to explore in-depth, but they are worth summarising below as future work paths.
+
+\paragraph{observer network} In \textit{A Guide to 99\% Fault Tolerant Consensus}\cite{honestobserver} V. Buterin recaptures an existing algorithm by L. Lamport (1982) to describe how a \emph{latency-dependent} network of observers can be retrofitted on top of a \emph{threshold-dependent} consensus algorithm - in casu our here work as derived from Casper FFG - to introduce a \emph{strong-finality} upon the finalized history constructed by the Mosaic validators arbitrarily pushing up the fault-tolerance at the cost of requiring more observers and a longer time to eventually commit (a strongly finalized proposal).
+
+\paragraph{truebit} A second worthwhile path is to apply the \textit{TrueBit}\cite{truebit} protocol to challenge a state transition $T^A$ proposed by a subset of the validators $\mathcal{V}_{\mathcal{B}_i}$.
+The validators $\{v\}$ who have signed vote messages $\langle\tilde{T}^A, s, t, h_s, h_t\rangle_v$ can be seen as the (collective) \emph{solvers} of the off-(of-origin-)chain computation to transition the state $B_{n-1}$ to the proposed solution $s$ given the set of transactions specified by the accumulated transaction root $r_{h_s}$.
+The computation at hand is the execution of the virtual machine that implements the state transition rules $t_A$.
+
+If less than $\sfrac{1}{3}$ of the validator weight loses the verification game to a challenger, their stake can be taken as the reward for the challenger, on top of the shared interest of all participants in the meta-blockchain for only correct proposals to be committed to the origin chain - removing the need for a jackpot and a \emph{forced-error}.
+The verification game can be seen as an extension to the slashing conditions strengthening the accountable safety of the meta-blockchain to hold a minority of the validators accountable for violating the state transition rules $t_A$.
+This is made possible because the validator stake has been externalized on the origin blockchain with an independent (assumed correct) consensus mechanism.
+
+If more than $\sfrac{2}{3}$ of the validator weight signed the vote message which was challenged and lost the verification game, their stake is the reward for the challenger, and the meta-blockchain must be declared halted by the core contract.
+
+\paragraph{argument of knowledge} A third strategy can be constructed by requiring any of the challenged validators of a proposal $T^A$ to present an \emph{argument of knowledge}, eg. using \mbox{zkSNARKs} generated after being challenged, to cryptographically prove that the block $s$ has been obtained by correctly applying the state transition rules $t_A$ recursively on each parent block building up from the committed block found in $B_{n-1}$.
+
+The costs both in time and expense to generate this proof by a validator scale at first approximation linearly with the gas consumed in the proposed meta-block $B_n$.
+The transition object $T^A$ to commit this meta-block tracks the gas consumed, so the core contract can require that the challenger puts forward a sufficient stake to substantiate her claim.
+
+% TODO: research state of art on hardware requirements
+There are open considerations regarding the (economic) feasibility of requiring all validators to be able to generate such a proof on commodity hardware.
+The task of generating these proofs could be designated to a specialized node, but an incentive problem arises when it is economically unattractive to run such a node considering it is unlikely that a proposal would be challenged.
+
+We have gone beyond the assumption of an honest supermajority of validators by considering three strategies discussed in the field to radically improve the security model; up to the point where a single honest observer can cost-effectively challenge the validator set on the origin blockchain.
 
 %
 % Section
@@ -932,6 +932,7 @@ By constructing asynchronous BFT consensus rules to compose a heterogeneous auxi
 As there are no time constraints or time-outs in the Mosaic consensus rules, the limited processing capacity of the origin blockchain does not undercut the ability to compose many auxiliary systems into the same origin blockchain.
 This enables Mosaic to run many meta-blockchains in parallel, additively improving the total transaction capacity, but keeping a bound on the cost imposed on the origin blockchain.
 
+\subsection{On data withholding attacks}
 %
 % Section
 %
